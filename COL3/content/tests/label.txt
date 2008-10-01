@@ -1,0 +1,59 @@
+===================
+Label Creation Test
+===================
+
+This is to test label creation, specifically to make sure that labels inherit
+all the metadata from the workspace in which they were created
+
+Some preliminaries....
+
+    >>> from Products.COL3.content import label
+    >>> from Testing.makerequest import makerequest
+    >>> def prepWorkspaceAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     workspace = app.plone.workspaces['workspace'].unrestrictedTraverse('++skin++col') 
+    ...     return workspace, workspace.REQUEST
+    >>> self.setRoles(['Member','Community Member'])
+
+Now let's create a workspace which holds the documents folder and set its 
+metadata values.
+
+    >>> app.plone.workspaces.invokeFactory('Workspace', 'workspace') and None
+    >>> self.login() # aquire the Workspace Manager group and role
+    >>> metadata_dict = {'language':'bi',
+    ...                  'country':'ARM',
+    ...                  'biogeographic_realm':'Palearctic',
+    ...                  'habitat':'Benthic',
+    ...                  'conservation':'education',
+    ...                  'directthreat':'biological',
+    ...                  'organization':'ngo',
+    ...                  'monitoring':'anecdote',
+    ...                  'license':'a-nc',
+    ...                  'description':'workspace description'}
+    >>> ws = app.plone.workspaces['workspace']
+    >>> ws.update(**metadata_dict)
+
+Now lets create a label in the workspace, and make sure that it picks up the metadata
+we added to the workspace above, the labeller instance we create must be created
+within the context of the documents folder as this is where label objects are stored
+
+    >>> metadatafields = set('''country biogeographic_realm habitat conservation
+    ...                         conservation directthreat organization monitoring
+    ...                         description license language'''.split())
+    >>> labeller = label.Labeller(ws.documents)
+    >>> label = labeller.createLabel('mylabel')
+    >>> label_obj = ws.documents[label.id]
+    >>> for field in label_obj.Schema().fields():
+    ...     if field.__name__ in metadatafields:
+    ...         accessor = field.getAccessor(ws)
+    ...         value = accessor()
+    ...         print field.__name__ +' - '+str(value)
+    description - workspace description
+    language - bi
+    country - ARM
+    biogeographic_realm - Palearctic
+    habitat - ('Benthic',)
+    conservation - ('education',)
+    directthreat - ('biological',)
+    organization - ngo
+    monitoring - ('anecdote',)

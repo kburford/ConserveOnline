@@ -1,0 +1,69 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="col3"
+    >
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceCalendar"
+        class=".workspace.CalendarListingPage"
+        name="listing.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+      for="Products.ATContentTypes.interface.event.IATEvent"
+      name="view-event.html"
+      layer="..skins.interfaces.ICOL3Skin"
+    />
+
+    <browser:page
+        for="Products.ATContentTypes.interface.event.IATEvent"
+        class=".workspace.EventView"
+        name="view-event.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceCalendar"
+        class=".workspace.MonthlyCalendarPage"
+        name="monthly.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+	<browser:defaultView
+        for="Products.COL3.interfaces.workspace.IWorkspaceCalendar"
+        name="monthly.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceCalendar"
+        class=".calendar.EventAddPage"
+        name="add-event.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.AddPortalContent"
+    />
+
+    <browser:page
+        for="Products.ATContentTypes.interface.event.IATEvent"
+        class=".calendar.EventEditPage"
+        name="edit.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.ModifyPortalContent"
+    />
+
+	<browser:page
+        for="Products.ATContentTypes.interface.event.IATEvent"
+        class=".calendar.EventDeletePage"
+        name="delete.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ManageWorkspace"
+    />
+
+</configure>

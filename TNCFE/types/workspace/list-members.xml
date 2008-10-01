@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="list-members.html" section="workspaces" title="Members" type="workspace"/>
+    <batch total="7" start="1" end="7">
+        <pages>
+            <page current="current" href="#">1</page>
+        </pages>
+        <cols>
+            <col id="lastname" href="/server/url/to/sort/column" dir="asc">Last name</col>
+            <col id="firstname" href="/server/url/to/sort/column">First name</col>
+            <col id="email" href="/server/url/to/sort/column">Email</col>
+            <col id="organization" href="/server/url/to/sort/column">Organization</col>
+        </cols>
+        <items>
+            <item href="/server/url/to/matched/resource">
+                <lastname>Everitt</lastname>
+                <firstname>Paul</firstname>
+                <email>address@host.com</email>
+                <organization>TNC</organization>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <lastname>Invisiblelonglastnameperson</lastname>
+                <firstname>Man</firstname>
+                <email>address@host.com</email>
+                <organization>TNC</organization>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <lastname>Runyan</lastname>
+                <firstname>Alan</firstname>
+                <email>address@host.com</email>
+                <organization>TNC</organization>
+            </item>
+        </items>
+    </batch>
+    <workspace href="http://dev.tnc.enfoldsystems.com:84/workspaces/qwertyu/">
+        <title>qwerty11</title>
+        <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+        <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+        <private>false</private>
+        <section>members</section>
+    </workspace>
+    <user href="http://dev.tnc.enfoldsystems.com:84/portal_memberdata/admin">
+        <username>admin</username>
+        <title>John Test</title>
+        <lastlogin>2007-08-31T06:28:08-05:00</lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/workspaces/">Workspaces</entry>
+        <entry href="/workspaces/california-birds/">California Birds</entry>
+        <entry>List Members</entry>
+    </breadcrumbs>
+    <resource href="http://dev.tnc.enfoldsystems.com:84/workspaces/qwertyu"
+        uuid="baf84efa7e21e9258e6cba2e97a631ad">
+        <type title="workspace">workspace</type>
+        <description>asdasd</description>
+        <title>qwerty11</title>
+        <size>1</size>
+        <is_private>false</is_private>
+        <id>qwertyu</id>
+        <creation_date>2007-08-20T17:46:33-05:00</creation_date>
+        <modification_date>2007-08-20T17:46:37-05:00</modification_date>
+        <author href="http://conserveonline.org/">Paul Everitt</author>
+    </resource>
+</response>

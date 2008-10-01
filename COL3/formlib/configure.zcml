@@ -1,0 +1,158 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:five="http://namespaces.zope.org/five"
+           xmlns:browser="http://namespaces.zope.org/browser">
+
+  <!-- xml widgets -->
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for="zope.schema.interfaces.ITextLine"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLTextWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for="zope.schema.interfaces.IPassword"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLPasswordWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for="zope.schema.interfaces.IASCIILine"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLASCIIWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for="zope.schema.interfaces.IBool"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLCheckBoxWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.EmailField"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLASCIIWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.CaptchaCondition"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLCaptchaWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for="zope.schema.interfaces.IText"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLTextAreaWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.RichText"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLEditorWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.TextLinesTuple"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLLinesTupleWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.ZDateTime"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLZDateTimeWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.ZDate"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLZDateWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.SubdomainField"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLSubdomainWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.File"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLFileUploadWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.VocabularyChoice"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLSelectWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.ChoiceSet"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLMultiCheckBoxWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for="zope.schema.interfaces.IChoice"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLRadioWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.Labels"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLLabelsWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.Authors"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLAuthorsWidget"
+      permission="zope.Public"
+      />
+
+  <view
+      type="..skins.interfaces.ICOL3Skin"
+      for=".schema.Keywords"
+      provides="Products.COL3.interfaces.formlib.IXMLWidget"
+      factory=".widgets.XMLKeywordsWidget"
+      permission="zope.Public"
+      />
+
+</configure>

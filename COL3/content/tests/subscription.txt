@@ -1,0 +1,23 @@
+=================================
+Quick Test of Subscription Object
+=================================
+
+First, some preparations
+
+ >>> from Testing.makerequest import makerequest
+ >>> self.setRoles(['Member','Community Member'])
+ >>> self.login()
+ 
+Now let's try to create a subscription object
+
+ >>> app.plone.subscriptions.invokeFactory('COLSubscription', 'subscription_memberid') and None
+ >>> app.plone.subscriptions['subscription_memberid'].id
+ 'subscription_memberid'
+ 
+The initial state of a 'subscription' is "published"
+
+ >>> subscription_obj = app.plone.subscriptions['subscription_memberid']
+ >>> portal.portal_workflow.getCatalogVariablesFor(subscription_obj)
+ {'review_state': 'published'}
+ 
+ 

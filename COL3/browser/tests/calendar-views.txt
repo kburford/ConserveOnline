@@ -1,0 +1,162 @@
+-*- doctest -*-
+
+===================
+Calendar View Tests
+===================
+
+This is to test the calendar monhtly and listing views.  Right now in the fragments
+produced the add menus and events are stub data.
+
+    >>> from elementtree.ElementTree import tostring
+    >>> import re
+    >>> tzmatch = re.compile(r'[+-]\d\d:\d\d$')
+
+Test the monthly calendar view fragment
+
+    >>> from Products.COL3.browser.workspace import MonthlyCalendarViewFragment
+    >>> app.REQUEST['ym'] = '200705'
+    >>> monthlycalendarviewfragment = MonthlyCalendarViewFragment(app, app.REQUEST)
+    >>> elem = monthlycalendarviewfragment.asElement()
+    >>> tostring(elem) #doctest:+XMLDATA 
+    <view name="monthly.html" section="workspaces" title="May 2007" type="calendar" />
+    
+Test the breadcrumbs fragment    
+
+    >>> from Products.COL3.browser.common import BreadcrumbsFragment
+    >>> breadcrumbsfragment = BreadcrumbsFragment(self.portal.workspaces, app.REQUEST)
+    >>> crumbs = breadcrumbsfragment.asElement()
+    >>> print tostring(crumbs) #doctest:+XMLDATA
+    <breadcrumbs>
+       <entry href="http://nohost/plone">Home</entry>
+       <base>http://nohost/plone/workspaces/</base>
+       <entry>workspaces</entry>
+    </breadcrumbs>
+
+Test code to retrieve events in a specific date range
+
+    >>> portal = self.portal
+    >>> self.setRoles(['Member','Community Member'])
+    >>> portal.workspaces.invokeFactory("Workspace", "bjsws") and None
+    >>> portal.workspaces.bjsws.invokeFactory('Folder', 'calendar1')
+    'calendar1'
+    >>> from DateTime import DateTime
+    >>> from datetime import datetime
+    >>> from datetime import timedelta
+    >>> dt = [DateTime(2008, 5, 2), 
+    ...       DateTime(2008, 5, 5), 
+    ...       DateTime(2008, 5, 9), 
+    ...	      DateTime(2008, 5, 10)]
+    >>> calendarfolder = portal.workspaces.bjsws.calendar1
+    >>> for i in range(4):
+    ...     ev = calendarfolder.invokeFactory('Event',
+    ...                                        id='BJSEvent'+str(i))
+    ...     event = portal.workspaces.bjsws.calendar1[ev]
+    ...     event.setTitle(ev)
+    ...     event.setStartDate(dt[i].strftime('%Y/%m/%d'))
+    ...     event.setEndDate(dt[i].strftime('%Y/%m/%d'))
+    ...     event.reindexObject()
+    ...     print event.Title()
+    ...     print event.startDate
+    BJSEvent0
+    2008/05/02
+    BJSEvent1
+    2008/05/05
+    BJSEvent2
+    2008/05/09
+    BJSEvent3
+    2008/05/10
+    >>> end = datetime(2008, 5, 1)
+    >>> start = datetime(2008, 5, 31)
+    >>> ctool = self.portal.portal_catalog
+    >>> query1 = ctool(portal_type='Event',
+    ...                start={'query': start, 'range': 'max'},
+    ...                end={'query': end, 'range': 'min'})
+    >>> len(query1)
+    4
+    >>> start = datetime(2008, 5, 1)
+    >>> import calendar
+    >>> end = datetime(2008, 5, calendar.monthrange(2008, 5)[1])
+    >>> query2 = ctool(portal_type='Event',
+    ...                start={'query': start, 'range': 'min'},
+    ...                end={'query': end, 'range': 'max'})
+    >>> len(query2)
+    4
+   
+Test the monthly calendar fragment
+    
+    >>> from Products.COL3.browser.workspace import MonthlyCalendarFragment
+    >>> app.REQUEST['ym'] = '200805'
+    >>> calendarfolder = portal.workspaces.bjsws.calendar1
+    >>> monthlycalendarfragment = MonthlyCalendarFragment(calendarfolder, app.REQUEST)
+    >>> elem = monthlycalendarfragment.asElement()
+
+We need to clean up some timezone differences:
+
+    >>> for subelem in (elem.findall('events/event/startDate') + 
+    ...                 elem.findall('events/event/endDate')):
+    ...     subelem.text = re.sub(tzmatch, '-05:00', subelem.text)
+    >>> print tostring(elem) #doctest:+XMLDATA
+    <calendar current="2008-05-01">
+       <calendarlinks>
+		    <prevyearlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200712">2007</prevyearlink>
+		    <nextyearlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200901">2009</nextyearlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200801">Jan</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200802">Feb</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200803">Mar</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200804">Apr</calendarlink>
+		    <calendarlink current="current"
+		        href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200806">May</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200806">Jun</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200807">Jul</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200808">Aug</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200809">Sep</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200810">Oct</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200811">Nov</calendarlink>
+		    <calendarlink href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200812">Dec</calendarlink>
+	   </calendarlinks>
+       <navigation>
+          <next href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200806">2008-06-01</next>
+          <previous href="http://nohost/plone/workspaces/bjsws/calendar1/monthly.html?ym=200804">2008-04-01</previous>
+       </navigation>
+       <events>
+         <event href="http://nohost/plone/workspaces/bjsws/calendar1/BJSEvent0">
+             <title>BJSEvent0</title>
+             <startDate>2008-05-02T00:00:00-05:00</startDate>
+             <endDate>2008-05-02T00:00:00-05:00</endDate>
+         </event>
+         <event href="http://nohost/plone/workspaces/bjsws/calendar1/BJSEvent1">
+             <title>BJSEvent1</title>
+             <startDate>2008-05-05T00:00:00-05:00</startDate>
+             <endDate>2008-05-05T00:00:00-05:00</endDate>
+         </event>
+         <event href="http://nohost/plone/workspaces/bjsws/calendar1/BJSEvent2">
+             <title>BJSEvent2</title>
+             <startDate>2008-05-09T00:00:00-05:00</startDate>
+             <endDate>2008-05-09T00:00:00-05:00</endDate>
+         </event>
+         <event href="http://nohost/plone/workspaces/bjsws/calendar1/BJSEvent3">
+             <title>BJSEvent3</title>
+             <startDate>2008-05-10T00:00:00-05:00</startDate>
+             <endDate>2008-05-10T00:00:00-05:00</endDate>
+         </event>
+       </events>
+    </calendar>
+    >>> events = elem.findall('events/event')
+    >>> len(events)
+    4
+    >>> for event in events:
+    ...     print event.find('title').text
+    BJSEvent0
+    BJSEvent1
+    BJSEvent2
+    BJSEvent3
+    >>> for event in events:
+    ...     print event.attrib['href']
+    http://nohost/plone/workspaces/bjsws/calendar1/BJSEvent0
+    http://nohost/plone/workspaces/bjsws/calendar1/BJSEvent1
+    http://nohost/plone/workspaces/bjsws/calendar1/BJSEvent2
+    http://nohost/plone/workspaces/bjsws/calendar1/BJSEvent3
+    >>> print elem.attrib['current']
+    2008-05-01
+    
+    

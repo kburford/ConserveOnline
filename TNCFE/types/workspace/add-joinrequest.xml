@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+	<view name="add-joinrequest.html" type="workspace" title="Request to Join Workspace"
+		section="workspaces"/>
+	<formcontroller
+		action="http://bjs.enfoldsystems.com/workspaces/workspace.2007-09-10.2931237593/add-joinrequest.html?xslt_disable=1">
+		<field name="form.reason" required="required" widget="textarea">
+			<error>Some error</error>
+			<label>Join A Workspace</label>
+			<description>The reason for wanting to join a group</description>
+			<value xml:space="preserve"/>
+		</field>
+		<submit name="form.actions.save">Save</submit>
+		<submit name="form.actions.cancel">Cancel</submit>
+	</formcontroller>
+	<profile>		
+		<about href="edit-namedescription.html">
+			<firstname>Brit</firstname>
+			<lastname>Minor</lastname>
+			<country>USA</country>
+			<background>Researcher</background>
+			<organization>--</organization>
+			<joined>2006-06-01</joined>
+			<email>bminor@example.com</email>
+		</about>
+		<bio href="edit-bio.html">
+			<div class="tinyFix" xmlns="http://www.w3.org/1999/xhtml">
+				<ul>
+					<li>item 1</li>
+					<li>item 2</li>
+					<li>item 3</li>
+				</ul>
+				<ol>
+					<li>ordered item 1</li>
+					<li>ordered item 2</li>
+					<li>ordered item 3</li>
+				</ol>
+				<h1>header 1</h1>
+				<h2>header 2</h2>
+				<h3>header 3</h3>
+				<h4>header 4</h4>
+				<h5>header 5</h5>
+				<h6>header 6</h6>          
+			</div>
+		</bio>
+	</profile>
+	<workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+		<title>Work Space 1</title>
+		<logo src="../static/images/logo1.jpg">Title for the Image</logo>
+		<icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+		<private>false</private>
+		<section>home</section>
+	</workspace>
+	<breadcrumbs>
+		<entry href="/">Home</entry>
+		<entry href="/workspaces/">Workspaces</entry>
+		<entry href="/workspaces/ws1/">Work Space 1</entry>
+		<entry href="/workspaces/ws1/joinrequest/"> Join Request</entry>
+	</breadcrumbs>
+</response>

@@ -1,0 +1,12 @@
+==========================================
+Members can reset their forgotten password
+==========================================
+
+Let's start with a test that fails to see if the testing system works
+
+    >>> print '<my-xml-document> <with some="tags"> </my-xml-document>' # doctest: +NORMALIZE_WHITESPACE
+    <my-xml-document>
+        <with some="tags">
+    </my-xml-document>
+
+That's all folks

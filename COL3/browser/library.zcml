@@ -1,0 +1,160 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="col3"
+    >
+
+   <browser:page
+        for="*"
+        class=".libraryredirect.LibraryRedirect"
+        name="coldocs"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+   <browser:page
+        for="*"
+        class=".libraryredirect.LibraryRedirect"
+        name="docs"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+   <!-- browsing views -->
+   <browser:page
+        for="..interfaces.library.IDocumentLibrary"
+        class=".library.LibraryViewAllPage"
+        name="byall.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="..interfaces.library.IDocumentLibrary"
+    	name="bysearchterms.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+    <browser:page
+        for="..interfaces.library.IDocumentLibrary"
+        class=".library.LibraryBySearchtermsPage"
+        name="bysearchterms.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="..interfaces.library.IDocumentLibrary"
+        class=".library.LibraryWithSearchtermPage"
+        name="withsearchterm-library.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="..interfaces.library.IDocumentLibrary"
+        class=".library.LibraryByAuthorPage"
+        name="byauthor.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="..interfaces.library.IDocumentLibrary"
+        class=".library.LibraryWithAuthorPage"
+        name="withauthor-library.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <!-- library file views -->
+    <browser:page
+        for="..interfaces.library.IDocumentLibrary"
+        class=".library.LibraryByRecentlyAddedPage"
+        name="byrecentadded.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="..interfaces.library.IDocumentLibrary"
+        class=".library.LibraryWithRecentlyAddedPage"
+        name="withrecent-library.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="..interfaces.library.IDocumentLibrary"
+        class=".library.LibraryFileAddPage"
+        name="add-libraryfile.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.AddPortalContent"
+    />
+
+    <browser:page
+        for="..interfaces.file.IFile"
+        class=".library.WorkspaceLibraryFileAddPage"
+        name="add.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <browser:page
+        for="..interfaces.file.IFile"
+        class=".library.WorkspaceLibraryFileUpdatePage"
+        name="update.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <browser:page
+        for="..interfaces.library.ILibraryFile"
+        class=".library.LibraryFileEditPage"
+        name="edit.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.ModifyPortalContent"
+    />
+
+    <browser:page
+        for="..interfaces.library.ILibraryFile"
+        class=".library.LibraryFileViewPage"
+        name="view.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+   <browser:page
+        for="..interfaces.library.ILibraryFile"
+        class=".library.ViewLibraryRecommendationsPage"
+        name="view-recommendations.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="..interfaces.library.ILibraryFile"
+        class=".recommendation.RecommendationPage"
+        name="recommendation.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <browser:page
+        for="..interfaces.library.ILibraryFile"
+        class=".recommendation.RecommendationDeletePage"
+        name="delete-recommendation.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ManageWorkspace"
+    />
+
+    <browser:page
+        for="..interfaces.library.ILibraryFile"
+        class=".recommendation.RecommendationReportPage"
+        name="report-recommendation.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+</configure>

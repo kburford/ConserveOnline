@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="edit.html" type="page" title="Edit Keyword: California Condor" section="workspaces"/>
+    <formcontroller action=".">
+        <field name="form.title" widget="text" required="required">
+            <label>Title</label>
+            <description>Provide a descriptive name for this keyword.</description>
+            <value>California Condor</value>
+        </field>
+        <field name="form.description" widget="textarea" required="required">
+            <label>Description</label>
+            <value>
+                <div xmlns="http://www.w3.org/1999/xhtml">
+                    <p>A keyword description.</p>
+                </div>
+            </value>
+            <description>This is the keyword's description and will be displayed with the keyword.</description>
+        </field>
+        <field name="form.body" widget="editor">
+            <label>Content</label>
+            <value>
+                <div xmlns="http://www.w3.org/1999/xhtml">
+                    <h1>Some Content</h1>
+                    <p>
+                        <img src="../static/images/imgWorkgroupDetail.gif" alt="sample image"/>
+                    </p>
+                    <p>Existing page content.</p>
+                </div>
+            </value>
+        </field>
+        <field name="form.footer" widget="editor">
+            <label>Footer</label>
+            <description>Any text you provide here will appear below the list of documents that have
+                this keyword.</description>
+            <value>
+                <div xmlns="http://www.w3.org/1999/xhtml">
+                    <p>Some <b>footer</b> text goes in here.</p>
+                    <p>This is <i>Some Text</i>.</p>
+                </div>
+            </value>
+        </field>
+        <field name="form.language" widget="selection" required="required">
+            <label>Language</label>
+            <value vocabulary="languages">en</value>
+        </field>
+        <field name="form.country" widget="selection" required="required">
+            <label>Country</label>
+            <value vocabulary="countries">BEL</value>
+        </field>
+        <field name="form.biogeographic_realm" widget="selection" required="required">
+            <label>Biogeographic realm</label>
+            <value vocabulary="biogeographic_realms">australasia</value>
+        </field>
+        <field name="form.habitat" widget="checkboxgroup">
+            <label>Habitat type</label>
+            <value vocabulary="habitats"/>
+            <description>Check all that apply.</description>
+        </field>
+        <field name="form.conservation" widget="checkboxgroup">
+            <label>Conservation action</label>
+            <value vocabulary="conservation"/>
+            <description>Check all that apply.</description>
+        </field>
+        <field name="form.directthreat" widget="checkboxgroup">
+            <label>Direct threat</label>
+            <value vocabulary="directthreat"/>
+            <description>Check all that apply.</description>
+        </field>
+        <field name="form.organization" widget="text">
+            <label>Organization</label>
+            <description>Examples: The Nature Conservancy, World Wildlife Fund, IUCN.</description>
+        </field>
+        <field name="form.monitoring" widget="checkboxgroup">
+            <label>Monitoring type</label>
+            <value vocabulary="monitoring"/>
+            <description>The methods used to determine whether the conservation actions described in
+                this document are succeeding. Check all that apply.</description>
+        </field>
+        <field name="form.keywords" widget="text">
+            <label>Other Search Terms</label>
+            <description>Examples: biodiversity, freshwater, Natural Heritage Programs, panthera
+                leo.</description>
+        </field>
+        <submit name="submit">Save</submit>
+        <submit name="cancel">Cancel</submit>
+    </formcontroller>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/workspaces/">Workspaces</entry>
+        <entry href="/workspaces/california-birds/">California Birds</entry>
+        <entry>Edit Keyword: California Condor</entry>
+    </breadcrumbs>
+    <workspace href="http://full.url.com/to/instance" hasfolders="hasfolders">
+        <title>Work Space 1</title>
+        <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+        <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+        <private>false</private>
+        <section>documents</section>
+    </workspace>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+</response>

@@ -1,0 +1,162 @@
+Test to test the edit preferences forms
+
+Needed imports and definitions
+
+ >>> from Products.COL3.browser.user import UserEditNameDescViewFragment
+ >>> from Products.COL3.browser.user import UserEditNameDescForm
+ >>> from Products.COL3.browser import tests as tests_package
+ >>> from Products.CMFCore.utils import getToolByName
+ >>> from elementtree.ElementTree import tostring as ettostring
+ >>> from Testing.makerequest import makerequest
+ >>> from lxml.etree import XML, tostring as lxtostring
+ >>> from Products.COL3.tests.xml_validator import XMLValidator, wrapFragmentWithTNCResponse
+ >>> validator = XMLValidator()
+ >>> import os.path
+ >>> from StringIO import StringIO
+ >>> def tostring(elem):
+ ...     return lxtostring(XML(ettostring(elem)), pretty_print=True)
+ >>> def prepPortalAndRequest(app=app):
+ ...     app = makerequest(app.aq_base)
+ ...     portal = app.plone.unrestrictedTraverse('++skin++col') 
+ ...     return portal, portal.REQUEST
+
+This is the test for the user profile view, first we add a member
+
+ >>> from Products.CMFCore.utils import getToolByName
+ >>> from elementtree.ElementTree import tostring
+ >>> pmem = getToolByName(self.portal, 'portal_membership')
+ >>> pmem.addMember('bjstest', '12345', ['Manager'], [])
+ >>> newprops = {'description':'I have a long history of freaking out!!!',
+ ...             'organization':'Enfold Systems',
+ ...             'email':'jjehosophat@foo.com',
+ ...             'country':'USA',
+ ...             'firstname':'Jumpin',
+ ...             'lastname':'Jehosophat',
+ ...             'organizationtype':'commercial',
+ ...             'background':'other',}
+
+ >>> me = pmem.getMemberById('bjstest')
+ >>> me.setMemberProperties(newprops)
+ >>> self.login(me.id)
+
+Let's make sure we get the properties set above
+
+ >>> me = pmem.getMemberById('bjstest')
+ 
+Now lets take a look at the view fragment
+
+ >>> editnamedescfrag = UserEditNameDescViewFragment(self.portal, app.REQUEST)
+ >>> print tostring(editnamedescfrag.asElement()) # doctest: +XMLDATA
+ <view name="edit.html" section="people"
+       title="Edit Profile: Jumpin Jehosophat" type="profile" />
+
+Now on to testing the form fragment for this
+
+    >>> ctx = self.portal.unrestrictedTraverse("++skin++col")
+    >>> editNameDescFormFragment = UserEditNameDescForm(ctx, app.REQUEST).asElement()
+    >>> xml = tostring(editNameDescFormFragment)
+
+XML should validate against tnc.rng schema.  Need to wrap xml fragment in <response>.
+    >>> validator.validateString(wrapFragmentWithTNCResponse(xml)) # doctest: -REPORT_NDIFF
+
+    >>> print tostring(editNameDescFormFragment) # doctest: +XMLDATA
+    <formcontroller action="http://nohost">
+        <field name="form.firstname" required="required" widget="text">
+            <label>First name</label>
+            <value xml:space="preserve">Jumpin</value>
+        </field>
+        <field name="form.lastname" required="required" widget="text">
+            <label>Last name</label>
+            <value xml:space="preserve">Jehosophat</value>
+        </field>
+        <field name="form.country" required="required" widget="selection">
+            <label>Region/Country</label>
+            <value vocabulary="countries" xml:space="preserve">USA</value>
+        </field>
+        <field name="form.organization" widget="text">
+            <label>Organization</label>
+            <value xml:space="preserve">Enfold Systems</value>
+        </field>
+        <field name="form.organizationtype" widget="selection">
+            <label>Type of Organization</label>
+            <description>Select your organization type.</description>
+            <value vocabulary="organizationtypes" xml:space="preserve">commercial</value>
+        </field>
+        <field name="form.background" widget="selection">
+            <label>Your background</label>
+            <value vocabulary="backgrounds" xml:space="preserve">other</value>
+        </field>
+        <field name="form.email" required="required" widget="text">
+            <label>Email address</label>
+            <description>Email address is required for login. We do not spam your email address.</description>
+            <value xml:space="preserve">jjehosophat@foo.com</value>
+        </field>
+        <field name="form.old_password" widget="password">
+            <label>Password</label>
+            <description>To change your password, type your old password here..</description>
+        </field>
+        <field name="form.password" widget="password">
+            <label>New Password</label>
+            <description>To change your password, type your new password here (letters and numbers only). Leave blank if you do not want to change your password.</description>
+        </field>
+        <field name="form.confirm_password" widget="password">
+            <label>Retype new password</label>
+        </field>
+        <field name="form.portrait" widget="file">
+            <label>Portrait</label>
+            <description>To add or change the portrait: click the "Browse" button; select a picture of yourself. Recommended image size is 75 pixels wide by 100 pixels tall.</description>
+        </field>
+        <field name="form.description" widget="editor">
+             <label>Biography</label>
+             <description>Enter the full text of your biography above.</description>
+             <value xml:space="preserve"><html:div class="tinyFix" xmlns:html="http://www.w3.org/1999/xhtml">
+               I have a long history of freaking out!!!
+             </html:div></value>
+        </field>
+        <submit name="form.actions.save">Save</submit>
+        <submit name="form.actions.cancel">Cancel</submit>
+    </formcontroller>
+
+Let's check some user preferences:
+
+    >>> me.getProperty('fullname')
+    'Jumpin Jehosophat'
+
+The Portrait for this user should be the default portrait:
+
+    >>> portal.portal_membership.getPersonalPortrait().absolute_url()
+    'http://nohost/plone/defaultUser.gif'
+
+Now let's change the user carachteristics:
+
+    >>> portraitpath = os.path.join(os.path.dirname(tests_package.__file__),
+    ...                             'notDefaultUser.gif')
+    >>> portraitfile = StringIO(open(portraitpath,'rb').read())
+    >>> portraitfile.filename = 'notDefaultUser.gif' # pretend it's a file upload
+    >>> portal, request = prepPortalAndRequest()
+    >>> request.form['form.firstname'] = u'Leonardo'
+    >>> request.form['form.lastname'] = u'Almeida'
+    >>> request.form['form.country'] = u'BRA'
+    >>> request.form['form.organization'] = u'Enfold Systems'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'leo@example.com'
+    >>> request.form['form.password'] = u''
+    >>> request.form['form.confirm_password'] = u''
+    >>> request.form['form.portrait'] = portraitfile
+    >>> request.form['form.actions.save'] = u'Save'
+    >>> print(tostring(UserEditNameDescForm(portal, request).asElement()))
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/view-profile.html?userid=bjstest
+
+Let's check the information has changed accordingly:
+
+    >>> me = pmem.getMemberById('bjstest')
+    >>> me.getProperty('fullname')
+    'Leonardo Almeida'
+
+And the portrait should no longer be the default one
+
+    >>> portal.portal_membership.getPersonalPortrait().absolute_url()
+    'http://foo/plone/portal_memberdata/portraits/bjstest'

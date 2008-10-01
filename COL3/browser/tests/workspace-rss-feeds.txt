@@ -1,0 +1,98 @@
+===================
+Workspace RSS Feeds
+===================
+
+Each workspace should provide a set of RSS feeds.
+
+First, let's import some stuff:
+
+    >>> from Products.COL3.browser.rss import All
+    >>> from Products.COL3.browser.rss import Events
+    >>> from Products.COL3.browser.rss import FilesPages
+    >>> from Products.COL3.browser.rss import Discussions
+
+Now, let's create a workspace:
+
+    >>> self.setRoles(['Member', 'Community Member'])
+    >>> _ = app.plone.workspaces.invokeFactory('Workspace', 'ws')
+    >>> ws = app.plone.workspaces['ws']
+
+We need to add some content to the workspace:
+
+    >>> _ = ws.documents.invokeFactory('COLPage', 'page1')
+    >>> _ = ws.documents.invokeFactory('COLPage', 'page2')
+    >>> _ = ws.documents.invokeFactory('COLFile', 'file')
+
+    >>> _ = ws.calendar.invokeFactory('Event', 'event', title='Event',
+    ...                               description='Event description.')
+
+    >>> _ = ws.discussion.invokeFactory('PloneboardConversation', 'post')
+    >>> _ = ws.discussion.post.invokeFactory('PloneboardComment', 'reply')
+
+Check that each view is returning the expected number of items:
+
+    >>> view = FilesPages(ws, None)
+    >>> len(view.results())
+    3
+
+    >>> view = Events(ws, None)
+    >>> len(view.results())
+    1
+
+    >>> view = Discussions(ws, None)
+    >>> len(view.results())
+    2
+
+    >>> view = All(ws, None)
+    >>> len(view.results())
+    6
+
+Make sure the RSS feed views are available in the workspace:
+
+    >>> view = ws.restrictedTraverse('@@feed-files-pages.xml')
+    >>> print view() # doctest: +ELLIPSIS
+    <?xml version="1.0"?>
+    ...
+
+    >>> view = ws.restrictedTraverse('@@feed-discussions.xml')
+    >>> print view() # doctest: +ELLIPSIS
+    <?xml version="1.0"?>
+    ...
+
+For the events, let's also inspect part of the feed inner content:
+
+    >>> view = ws.restrictedTraverse('@@feed-events.xml')
+    >>> print view() # doctest: +ELLIPSIS
+    <?xml version="1.0"?>
+    ...
+    <item rdf:about="http://nohost/plone/workspaces/ws/calendar/event">
+        <title>Event</title>
+        <link>http://nohost/plone/workspaces/ws/calendar/event</link>
+        <description>Event description.</description>
+        <dc:creator>test_user_1_</dc:creator>
+        <dc:date>...</dc:date>
+        <dc:type>Event</dc:type>
+    </item>
+    ...
+
+And for the feed that returns all, let's check that the last created
+items are being displayed first, as we need them ordered by reverse
+creation date. Also make sure it works when viewed by anonymous users:
+
+    >>> self.logout()
+    >>> view = ws.restrictedTraverse('@@feed-all.xml')
+    >>> print view() # doctest: +ELLIPSIS
+    <?xml version="1.0"?>
+    ...
+    <item rdf:about="http://nohost/plone/workspaces/ws/discussion/post/reply">
+    ...
+    <item rdf:about="http://nohost/plone/workspaces/ws/discussion/post">
+    ...
+    <item rdf:about="http://nohost/plone/workspaces/ws/calendar/event">
+    ...
+    <item rdf:about="http://nohost/plone/workspaces/ws/documents/file">
+    ...
+    <item rdf:about="http://nohost/plone/workspaces/ws/documents/page2">
+    ...
+    <item rdf:about="http://nohost/plone/workspaces/ws/documents/page1">
+    ...

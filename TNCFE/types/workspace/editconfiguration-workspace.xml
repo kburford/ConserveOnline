@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="edit-configuration.html" type="workspace" title="Edit Configuration"
+        section="workspaces"/>
+    <formcontroller action="blah">
+        <field name="form.title" required="required" widget="text">
+            <label>Workspace Name</label>
+            <description>Examples: Colorado Federal Public Lands Strategy, Western State Trust
+            Lands, Kenya's Biodiversity Mapping Project.</description>
+            <value>California Birds</value>
+        </field>
+        <field name="form.description" required="required" widget="textarea">
+            <label>Purpose</label>
+            <description>This description will appear on the home page of your
+            workspace.</description>
+            <value>A description about California birds goes here.</value>
+        </field>
+        <field name="form.logo" widget="file">
+            <label>Logo</label>
+            <description>A 400px wide by 200px tall image in PNG format to identify your workspace.</description>
+        </field>
+        <field name="form.icon" widget="file">
+            <label>Icon</label>
+            <description>Optionally upload a 32x32 icon in PNG format or let the system scale your logo for use as an icon.</description>
+        </field>
+        <field name="form.remove_logo" widget="radiogroup">
+            <label>Remove Logo?</label>
+            <description>Remove the uploaded logo and return the icon to the default.</description>
+            <value>
+                <option selected="1" value="no">No, keep using my images.</option>
+                <option value="yes">Yes, discard my images and return to defaults.</option>
+            </value>
+        </field>
+        <field name="form.body" widget="editor">
+            <label>Content</label>
+        </field>
+        <field name="form.is_private" required="required" widget="radiogroup">
+            <label>Is the workspace public or private?</label>
+            <value>
+                <option selected="1" value="yes">Public, everyone can see content not made private.</option>
+                <option value="no">Private, only workspace members can see content.</option>
+            </value>
+        </field>
+        <submit name="form.actions.save">Save</submit>
+        <submit name="form.actions.cancel">Cancel</submit>
+    </formcontroller>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/workspaces/">Workspaces</entry>
+        <entry href="/workspaces/california-birds/">California Birds</entry>
+        <entry>Edit Configuration</entry>
+    </breadcrumbs>
+    <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+        <title>Workspace 1</title>
+        <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+        <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+        <private>true</private>
+        <section>setup</section>
+        <joinlink href="/url/to/join">Join this Workspace >></joinlink>
+        <editconfigurl>http://url.to.configuration</editconfigurl>
+        <editpropsurl>http://url.to.properties</editpropsurl>
+    </workspace>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>true</isadmin>
+    </user>
+</response>

@@ -1,0 +1,33 @@
+
+* z3c.etree:
+
+   # svn co svn://svn.zope.org/repos/main/z3c.etree/trunk z3c.etree
+   # cd z3c.etree
+   # python setup.py develop
+
+* lxml (/path/to/zope/python/bin/easy_install lxml)
+
+* elementtidy (/path/to/zope/python/bin/easy_install elementtidy)
+
+* qPloneCaptcha (version maintained by Enfold)
+
+   # cd /opt/Plone-3.0/zeocluster/Products
+   # svn co https://svn.enfoldsystems.com/clients/TNC/COL%203.0/code/qPloneCaptchas
+
+* PloneBoard (SVN version for now, will have at least a branch, if not a release, when this project finishes)
+
+   # cd /opt/Plone-3.0/zeocluster/Products
+   # svn co https://svn.plone.org/svn/collective/Ploneboard/trunk Ploneboard
+
+* zope 3 exception views patch ("exception-views.patch" file in this directory)
+
+   # From outside the "lib" directory of your software home:
+   # patch -p0 < exception-views.patch
+
+* enfold.gsa
+
+   # svn co https://svn.enfoldsystems.com/public/enfold.gsa/trunk enfold.gsa
+   # cd enfold.gsa
+   # python setup.py develop
+
+   Don't forget to read and apply the instructions on COL3/gsa-zope.conf to actually enable gsa indexing

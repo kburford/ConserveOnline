@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="withsearchterm.html" type="library" title="Browse Library Matching Search Term - Some Search Term"
+        section="library"/>
+    <batch total="929" start="21" end="40">
+        <pages>
+            <page current="current" href="#">1</page>
+            <page href="#">2</page>
+            <page href="#">3</page>
+        </pages>
+        <cols>
+            <col id="title" href="/server/url/to/sort/column" dir="asc">Title</col>
+            <col id="mimetype" href="/server/url/to/sort/column">Format</col>
+            <col id="size" href="/server/url/to/sort/column">Size</col>
+            <col id="date" href="/server/url/to/sort/column">Date</col>
+        </cols>
+        <items>
+            <item href="/server/url/to/matched/resource">
+                <title>California Condor Observations - 2006</title>
+                <mimetype id="doc">DOC</mimetype>
+                <size>20</size>
+                <date>2007-04-11T09:11:30+00:00</date>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <title>California Resources</title>
+                <mimetype id="pdf">PDF</mimetype>
+                <size>2000</size>
+                <date>2007-04-11T09:11:30+00:00</date>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <title>Field Guid</title>
+                <mimetype id="xls">XLS</mimetype>
+                <size>350</size>
+                <date>2007-04-11T09:11:30+00:00</date>
+            </item>
+        </items>
+    </batch>
+    <menus>
+        <addmenu>
+            <entry href="add.html">Add File</entry>
+        </addmenu>
+    </menus>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/library/">Library</entry>
+        <entry>Browse Library Matching Search Term - Some Search Term</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>true</isadmin>
+    </user>
+</response>

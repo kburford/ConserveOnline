@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="view-workspace.html" type="workspace" title="California Birds" section="workspaces"/>
+  <workspacekeywords>
+    <keyword href="http://conservonline.org/workspaces/myspace/abhl">
+      <title>Keyword One</title>
+      <description>Some plain text, no HTML markup.</description>
+      <count>27</count>
+    </keyword>
+    <keyword href="http://conservonline.org/workspaces/myspace/abhl">
+      <title>Keyword One</title>
+      <description>Some plain text, no HTML markup.</description>
+      <count>27</count>
+    </keyword>
+    <keyword href="http://conservonline.org/workspaces/myspace/abhl">
+      <title>Keyword One</title>
+      <description>Some plain text, no HTML markup.</description>
+      <count>27</count>
+    </keyword>
+    <keyword href="http://conservonline.org/workspaces/myspace/abhl">
+      <title>Keyword One</title>
+      <description>Some plain text, no HTML markup.</description>
+      <count>27</count>
+    </keyword>
+    <keyword href="http://conservonline.org/workspaces/myspace/abhl">
+      <title>Keyword One</title>
+      <description>Some plain text, no HTML markup.</description>
+      <count>27</count>
+    </keyword>
+  </workspacekeywords>
+  <resource href="/complete/path" uuid="643524525235">
+    <content>
+      <div class="tinyFix" xmlns="http://www.w3.org/1999/xhtml">
+        <p>Lorem ipsum sit amet, consectetuer adipiscing elit. <b>Nam dapibus bibendum justo. Fusce
+            vel sem.</b> In hac habitasse platea dictumst. Integer aliquam. Nullam dapibus, mi et
+          consequat volutpat, arcu arcu vulputate leo, id ornare ipsum purus ut erat. Phasellus
+          libero. Mauris porttitor lobortis lectus. Curabitur pede nunc, consequat interdum,
+          molestie non, venenatis ac, est. Cras lectus. Quisque in nulla eu orci pellentesque
+          posuere. Nam euismod feugiat diam. Maecenas convallis, augue eget faucibus tincidunt,
+          massa purus sodales mi, ut tempus augue massa ac orci. Quisque sapien. Donec vel massa
+          venenatis neque consequat interdum. Maecenas sollicitudin mi ac velit. Aliquam interdum
+          congue nisl. Aliquam lacus risus, porttitor at, pellentesque non, pretium in, quam. Nunc
+          dapibus, orci dictum fringilla cursus, lectus ipsum malesuada ante, at imperdiet libero
+          orci vitae risus. In hac habitasse platea dictumst.</p>
+        <div style="float: right">
+          <img src="../static/images/boxLeftImage1.gif" alt="sample image"/>
+        </div>
+        <p>In vitae eros. Praesent ligula. Suspendisse blandit commodo leo. Sed ligula orci,
+          vehicula a, facilisis id, venenatis id, nulla. Maecenas vehicula. Aenean dapibus, arcu ut
+          ornare accumsan, tortor quam tincidunt metus, in accumsan nunc mauris vitae nunc.
+          Curabitur pharetra mi non pede. Morbi turpis enim, molestie id, accumsan at, lacinia non,
+          lectus. Integer nec massa semper metus porta congue. Duis augue neque, dapibus ut,
+          ullamcorper eu, euismod ut, risus. Donec mollis erat at tellus. Sed euismod dui ac neque.
+          Donec metus. Quisque elementum viverra diam. Ut dapibus lorem ac nunc. Integer at mi nec
+          neque pharetra rutrum.</p>
+      </div>
+    </content>
+    <id>california-birds</id>
+    <author href="/profile/paul">Paul EVeritt</author>
+    <size>1</size>
+    <title>California Birds</title>
+    <type title="Workspace">Workspace</type>
+    <description>Some text about the workspace, no HTML.</description>
+    <creation_date>2007-08-20T13:52:23-05:00</creation_date>
+    <modification_date>2007-08-20T13:52:23-05:00</modification_date>
+    <document_type>
+      <item>ecoregionalplans</item>
+      <item>datasets</item>
+      <item>casestudies</item>
+    </document_type>
+    <abstract> Abstract or description of the document, such as the abstract that might appear at
+      the beginning of a journal article, goes here. This allows people to see what the document is
+      about before they download it. </abstract>
+    <language>fr</language>
+    <dateauthored>2006-11-08T08:38:30</dateauthored>
+    <country>USA</country>
+    <biogeographic_realm>oceania</biogeographic_realm>
+    <habitat>
+      <item>desert</item>
+      <item>forest</item>
+    </habitat>
+    <conservation>
+      <item>landwatermanagement</item>
+    </conservation>
+    <directthreat>
+      <item>residcommdev</item>
+    </directthreat>
+    <organization>Enfold Systems</organization>
+    <monitoring>
+      <item>preposttestobs</item>
+    </monitoring>
+    <keywords>
+      <item>biodiversity</item>
+      <item>freshwater</item>
+    </keywords>
+    <license>a-nc</license>
+  </resource>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces">Workspaces</entry>
+    <entry>California Birds</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>California Birds</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>true</private>
+    <section>home</section>
+    <joinlink href="/url/to/join">Join this Workspace >></joinlink>
+    <editconfigurl>http://url.to.configuration</editconfigurl>
+    <editpropsurl>http://url.to.properties</editpropsurl>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>true</isadmin>
+  </user>
+</response>

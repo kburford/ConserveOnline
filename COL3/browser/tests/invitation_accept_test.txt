@@ -1,0 +1,123 @@
+These are tests for the accept invitation functionality.  A user is sent a link to an accept
+invitation page for a workspace and they can either Accept which adds them to the workspace
+and redirects them to their profile page, Reject which removes the invitation, emails the work
+space manager and returns the user to their profile page, or Cancel which simply returns the 
+user to their profile page without taking any action
+
+First, some preparations:
+
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> from elementtree.ElementTree import tostring
+    >>> from Products.COL3.browser.user import AcceptInvitationViewFragment
+    >>> from Products.COL3.interfaces.workspace import IWorkspace
+    >>> from Products.COL3.interfaces.workspace import IWorkspaceMemberManagement
+    >>> self.setRoles(['Member','Community Member'])
+    >>> self.login()
+
+Let's add a user to invite
+
+    >>> properties = dict(username='user1',
+    ...                   fullname='New User1',
+    ...                   email="user1@example.com",
+    ...                   type_of_organization="Comercial",
+    ...                   organization="Enfold Systems",
+    ...                   country="Brazil",
+    ...                  )
+    >>> registration_tool = getToolByName(app.plone, 'portal_registration')
+    >>> registration_tool.addMember('user1',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()               
+    ...                            ) and None
+
+    >>> properties = dict(username='user2',
+    ...                   fullname='New User2',
+    ...                   email="user2@example.com",
+    ...                   type_of_organization="Comercial",
+    ...                   organization="Enfold Systems",
+    ...                   country="Brazil",
+    ...                  )
+    >>> registration_tool = getToolByName(app.plone, 'portal_registration')
+    >>> registration_tool.addMember('user2',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()               
+    ...                            ) and None
+
+Now let's create a workspace to invite members to.
+
+    >>> member = app.plone.portal_membership.getMemberById('user1')
+    >>> member.getId()
+    'user1'
+    >>> member.getProperty('email')
+    'user1@example.com'
+    >>> app.plone.workspaces.invokeFactory('Workspace', 'bjsws1') and None
+    >>> self.login() # aquire the Workspace Manager group and role
+    >>> invitetool = getToolByName(self.portal, 'workspace_invitations')
+    >>> ws = app.plone.workspaces['bjsws1']
+    >>> mgrmember = app.plone.portal_membership.getMemberById('user2')
+    >>> IWorkspaceMemberManagement(ws).addManager(mgrmember)
+    >>> inviteids = invitetool.inviteToWorkspace(ws, [member.get('email'),])
+    >>> len(inviteids)
+    1
+    >>> self.login('user1')
+    >>> app.REQUEST['id'] = inviteids[0]
+    >>> acceptviewfrag = AcceptInvitationViewFragment(ws, app.REQUEST)
+    >>> tostring(acceptviewfrag.asElement()) #doctest:+XMLDATA +ELLIPSIS
+    '<view name="accept-invitation.html" section="people" title="Invitation to Join Workspace" type="people"><accept href="http://nohost/plone/workspaces/bjsws1/accept-invitation.html?id=2007-08-31_17-15-30.010000-sFTSFq&amp;mode=accept" /><reject href="http://nohost/plone/workspaces/bjsws1/accept-invitation.html?id=2007-08-31_17-15-30.010000-sFTSFq&amp;mode=reject" /><cancel href="http://nohost/plone/workspaces/bjsws1/accept-invitation.html?id=2007-08-31_17-15-30.010000-sFTSFq&amp;mode=cancel"/></view>'
+
+Let's make sure the invitation is actually there
+
+    >>> ws.id
+    'bjsws1'
+    >>> invitations = invitetool.getInvitationsForWorkspace(ws)
+    >>> len([r for r in invitations])
+    1
+
+Now lets set the mode on the request so that the invitation is cancelled
+
+    >>> app.REQUEST['id'] = inviteids[0]
+    >>> app.REQUEST['mode'] = 'cancel'
+    >>> acceptviewfrag = AcceptInvitationViewFragment(ws, app.REQUEST)
+    >>> acceptviewfrag.asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://nohost/plone/view-profile.html?userid=user1
+
+Now lets set the mode on the request so that the invitation is rejected
+
+    >>> app.REQUEST['id'] = inviteids[0]
+    >>> app.REQUEST['mode'] = 'reject'
+    >>> acceptviewfrag = AcceptInvitationViewFragment(ws, app.REQUEST)
+    >>> acceptviewfrag.asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://nohost/plone/view-profile.html?userid=user1
+
+After rejecting the invitation it shouldn't exists anymore
+
+    >>> invitations = invitetool.getInvitationsForWorkspace(ws)
+    >>> len([r for r in invitations])
+    0
+   
+Now let's send another invitaion, accept it, and the group should have a new member
+
+    >>> memberlist = IWorkspaceMemberManagement(ws).listAllMemberIds()
+    >>> len(memberlist)
+    2
+    >>> inviteids = invitetool.inviteToWorkspace(ws, [member.get('email'),])
+    >>> len(inviteids)
+    1
+    >>> app.REQUEST['id'] = inviteids[0]
+    >>> app.REQUEST['mode'] = 'accept'
+    >>> acceptviewfrag = AcceptInvitationViewFragment(ws, app.REQUEST)
+    >>> acceptviewfrag.asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://nohost/plone/view-profile.html?userid=user1
+    >>> memberlist = IWorkspaceMemberManagement(ws).listAllMemberIds()
+    >>> len(memberlist)
+    3
+    >>> [member for member in memberlist]
+    ['test_user_1_', 'user1', 'user2']
+    >>> invitations = invitetool.getInvitationsForWorkspace(ws)
+    >>> len([r for r in invitations])
+    0

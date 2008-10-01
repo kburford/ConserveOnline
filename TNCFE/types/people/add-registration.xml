@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<!-- 
+
+This is /register.html which is what you get by clicking 
+"register" link on the home page (or whatever).
+-->
+<response>
+  <view name="add-registration.html" type="registration" title="Register" section="people"/>
+  <formcontroller action=".">
+    <field name="form.firstname" widget="text" required="required">
+      <label>First name</label>
+    </field>
+    <field name="form.lastname" widget="text" required="required">
+      <label>Last name</label>
+    </field>
+    <field name="form.country" widget="selection" required="required">
+      <label>Country</label>
+      <value vocabulary="countries"/>
+    </field>
+    <field name="form.organization" widget="text">
+      <label>Organization</label>
+    </field>
+    <field name="form.organizationtype" widget="selection">
+      <label>Organization type</label>
+      <value vocabulary="organizationtypes"/>
+    </field>
+    <field name="form.background" widget="selection">
+      <label>Your background</label>
+      <value vocabulary="backgrounds"/>
+    </field>
+    <field name="form.email" widget="text" required="required">
+      <label>Email address</label>
+      <description>Email address is required for login. We do not spam your email
+      address.</description>
+    </field>
+    <field name="form.username" widget="text" required="required">
+      <label>Username</label>
+      <description>Usernames are case SENSITIVE so be careful with your choice.</description>
+    </field>
+    <field name="form.newpassword" widget="password" required="required">
+      <label>Password</label>
+      <description>Case sensitive, minimum 8 characters, needs to be different from the username.</description>
+    </field>
+    <field name="form.confirmpassword" widget="password">
+      <label>Retype password</label>
+      <description>Make sure the passwords are identical.</description>
+    </field>
+    <field name="form.verificationcode" widget="text" required="required">
+      <label>Enter the verification code to the right</label>
+      <description>This prevents automated spam programs from completing the form.</description>
+    </field>
+    <field name="form.termsandconditions" widget="checkbox" required="required">
+      <label>I agree to the above terms and conditions</label>
+    </field>
+    <submit name="submit">Save</submit>
+    <submit name="cancel">Cancel</submit>
+  </formcontroller>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry>Register</entry>
+  </breadcrumbs>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+  </user>
+</response>

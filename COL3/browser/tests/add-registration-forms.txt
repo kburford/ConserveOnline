@@ -1,0 +1,369 @@
+=============================
+Adding Registration forms
+=============================
+
+Here we exercise the views and forms for adding a user to the portal
+
+First, some preparations:
+
+    >>> import sys
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring as ettostring
+    >>> from lxml.etree import XML, tostring as lxtostring
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> from Products.COL3.interfaces.workspace import IWorkspace
+    >>> from Products.COL3.interfaces import IWorkspaceMemberManagement
+    >>> from Products.COL3.tests.xml_validator import XMLValidator
+    >>> validator = XMLValidator()
+    >>> def tostring(elem):
+    ...     return lxtostring(XML(ettostring(elem)), pretty_print=True)
+    >>> def prepPortalAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     portal = app.plone.unrestrictedTraverse('++skin++col') 
+    ...     return portal, portal.REQUEST
+    >>> portal, request = prepPortalAndRequest()
+    >>> def getCaptchaSolution(hashkey, captcha_key=app.plone.captcha_key):
+    ...     from Products.qPloneCaptchas.utils import decrypt, getWord, parseKey
+    ...     return getWord(int(parseKey(decrypt(captcha_key, hashkey))['key']))
+    >>> def removeHashKeyFromFormcontroller(formcontroller_tag):
+    ...     captcha_tag = formcontroller_tag.find('field/value/captcha')
+    ...     hashkey = captcha_tag.attrib['hashkey']
+    ...     captcha_tag.attrib['hashkey'] = '...'
+    ...     captcha_tag.attrib['href'] = captcha_tag.attrib['href'].replace(hashkey,
+    ...                                                                     '...')
+    ...     return hashkey
+
+There are basically two similar ways to add a user to a portal. One is by
+visiting the "register" link on the homepage, the other is by clicking on the
+URL for accepting an invitation to a workspace when you're not registered. 
+
+Registering directly
+====================
+
+One way to register by visiting the "register.html" page of the portal.
+
+    >>> registerPage = portal.restrictedTraverse("@@register.html")
+
+Visiting it if already authenticated should redirect the user to the homepage:
+
+    >>> registerPageXML = registerPage.getResponse()
+    Traceback (most recent call last):
+    ...
+    Redirect: http://foo/plone
+
+It renders normaly for Anonymous users:
+
+    >>> self.logout()
+    >>> portal.portal_membership.getAuthenticatedMember().getUserName()
+    'Anonymous User'
+    >>> portal, request = prepPortalAndRequest()
+    >>> registerPage = portal.restrictedTraverse("@@register.html")
+    >>> registerPageXML = registerPage.getResponse()
+
+XML should validate against tnc.rng schema.
+    >>> validator.validateString(tostring(registerPageXML)) # doctest: -REPORT_NDIFF
+
+This page contains a view element to match against the expected XSLT in the
+frontend.
+
+    >>> print tostring(registerPageXML[0]) # doctest: +XMLDATA
+    <view name="add-registration.html" type="registration" title="Register"
+        section="people" />
+
+The view tag above is empty since we're registering directly.
+
+The page also contains a <formcontroller /> element with the registration form.
+This form contains a captcha field, with a hashkey and image data that change
+with every invocation, so we'll take the hashkey out before printing the tag:
+
+    >>> registerPageXMLFormcontroller = registerPageXML[1] 
+    >>> hashKey = removeHashKeyFromFormcontroller(registerPageXMLFormcontroller) 
+    >>> print tostring(registerPageXMLFormcontroller) # doctest: +XMLDATA
+    <formcontroller action="http://foo">
+        <field name="form.firstname" required="required" widget="text">
+            <label>First name</label>
+        </field>
+        <field name="form.lastname" required="required" widget="text">
+            <label>Last name</label>
+        </field>
+        <field name="form.country" required="required" widget="selection">
+            <label>Region/Country</label>
+            <value vocabulary="countries" xml:space="preserve">USA</value>
+        </field>
+        <field name="form.organization" widget="text">
+            <label>Organization</label>
+        </field>
+        <field name="form.organizationtype" widget="selection">
+            <label>Type of Organization</label>
+            <description>Select your organization type.</description>
+            <value vocabulary="organizationtypes" xml:space="preserve">other</value>
+        </field>
+        <field name="form.background" widget="selection">
+            <label>Your background</label>
+            <value vocabulary="backgrounds" xml:space="preserve">other</value>
+        </field>
+        <field name="form.email" required="required" widget="text">
+            <label>Email address</label>
+            <description>Email address is required for login. We do not spam your email address.</description>
+        </field>
+        <field name="form.username" required="required" widget="text">
+            <label>Username</label>
+            <description>Usernames are case SENSITIVE so be careful with your choice.</description>
+        </field>
+        <field name="form.password" required="required" widget="password">
+            <label>Password</label>
+            <description>Minimum 8 characters, needs to be different from the username.</description>
+        </field>
+        <field name="form.confirm" required="required" widget="password">
+            <label>Re-enter the password</label>
+            <description>Make sure the passwords are identical.</description>
+        </field>
+        <field name="form.captcha" required="required" widget="captcha">
+            <label>Enter the verification code</label>
+            <description>This prevents automated spam programs from completing the form.</description>
+            <value>
+                <captcha hashkey="..." href="http://nohost/plone/getCaptchaImage/..."/>
+            </value>
+        </field>
+        <field name="form.termsandconditions" required="required" widget="checkbox">
+            <label>Terms of Use</label>
+            <description>Do you agree with the ConserveOnline Terms of Use?</description>
+        </field>
+        <submit name="form.actions.register">Register</submit>
+        <submit name="form.actions.cancel">Cancel</submit>
+    </formcontroller>
+
+This fragment is generated by the AddRegistrationFormFragment fragment, so
+they'll look the same modulo the hashkey
+
+    >>> from Products.COL3.browser.user import AddRegistrationFormFragment
+    >>> registrationFormFragment = AddRegistrationFormFragment(portal,
+    ...                                                        request).asElement()
+    >>> hashKey2 = removeHashKeyFromFormcontroller(registrationFormFragment)
+    >>> tostring(registrationFormFragment) == tostring(registerPageXMLFormcontroller)
+    True
+    >>> hashKey == hashKey2
+    False
+
+All the form control and profile creation is actually done by the fragment
+class above. Canceling should take us back to the portal, regardless of
+validation:
+
+    >>> portal, request = prepPortalAndRequest()
+    >>> request.form['form.actions.cancel'] = u'Cancel'
+    >>> AddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone
+
+Mismatching the password and confirmation should re-render the form, reporting
+this error on the respective fields, showing the invariants work:
+
+    >>> portal, request = prepPortalAndRequest()
+    >>> request.form['form.firstname'] = u'Leonardo'
+    >>> request.form['form.lastname'] = u'Almeida'
+    >>> request.form['form.country'] = u'BRA'
+    >>> request.form['form.organization'] = u'Enfold Systems'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'leo@example.com'
+    >>> request.form['form.username'] = u'foo'
+    >>> request.form['form.password'] = u'12345678'
+    >>> request.form['form.confirm'] = u'123456789'
+    >>> request.form['form.captcha.hashkey'] = unicode(hashKey)
+    >>> request.form['form.captcha'] = u''
+    >>> request.form['form.termsandconditions.used'] = u''
+    >>> request.form['form.termsandconditions'] = u'on'
+    >>> request.form['form.actions.register'] = u'Register'
+    >>> formcontroller_tag = AddRegistrationFormFragment(portal, request).asElement()
+    >>> [(tag.attrib['name'], tag.find('error').text)
+    ...  for tag in formcontroller_tag.findall("field")
+    ...  if tag.find('error') is not None]
+    [('form.password', u'Password and password confirmation do not match.'),
+        ('form.confirm', u'Password and password confirmation do not match.'),
+        ('form.captcha', u'Incorrect verification code. Please re-enter.')]
+
+Now let's create a user:
+
+    >>> portal, request = prepPortalAndRequest()
+    >>> request.form['form.firstname'] = u'Leonardo'
+    >>> request.form['form.lastname'] = u'Almeida'
+    >>> request.form['form.country'] = u'BRA'
+    >>> request.form['form.organization'] = u'Enfold Systems'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'leo@example.com'
+    >>> request.form['form.username'] = u'leo'
+    >>> request.form['form.password'] = u'12345678'
+    >>> request.form['form.confirm'] = u'12345678'
+    >>> request.form['form.termsandconditions.used'] = u''
+    >>> request.form['form.termsandconditions'] = u'on'
+    >>> request.form['form.captcha.hashkey'] = hashKey
+    >>> request.form['form.captcha'] = getCaptchaSolution(hashKey)
+    >>> request.form['form.actions.register'] = u'Register'
+    >>> AddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/view-profile.html?userid=leo
+
+The user should already exist and, moreover, it should be logged in:
+
+    >>> am = portal.portal_membership.getAuthenticatedMember()
+    >>> am.getUserName()
+    'leo'
+    >>> am.getProperty('fullname')
+    'Leonardo Almeida'
+    >>> am.getProperty('country')
+    'BRA'
+    >>> am.getProperty('email')
+    'leo@example.com'
+
+Registering by workspace invitation
+===================================
+
+A workspace manager might invite a user to a workspace. This will generate
+an e-mail with the url of a special registration screen that allows the user
+to simultaneously register herself and accept the invitation
+
+Let's use the user created above to create a workspace and invite someone to
+test the registration:
+
+    >>> portal, request = prepPortalAndRequest()
+    >>> portal.workspaces.invokeFactory("Workspace", "workspace") and None
+    >>> workspace = app.plone.workspaces['workspace']
+    >>> workspace.update(title="My Workspace")
+    >>> invtool = getToolByName(self.portal, 'workspace_invitations')
+    >>> self.login('leo') # aquire workspace-granted roles
+    >>> inviteids = invtool.inviteToWorkspace(workspace, ['alan@example.com'])
+    >>> invId = inviteids[0]
+
+The URL for registration in this case is slightly different:
+
+    >>> registerPage = portal.restrictedTraverse("@@register-invite.html")
+
+This URL expects the invitation id to be present in the query string (we can't
+count on it being present in the request directly because a POST removes all
+query-string variables from the request, leaving only the POST variables.If
+the user is logged in, he's redirected to the "accept invitation" page for
+logged in users:
+
+    >>> request['QUERY_STRING'] = "invitationid="+invId
+    >>> registerPage.getResponse()
+    Traceback (most recent call last):
+    ...
+    Redirect: http://foo/plone/accept-invitation.html?id=...
+    >>> url = sys.exc_info()[1].args[0]
+    >>> url.endswith("?id=" + invId) or url
+    True
+
+Otherwise the page contains a view detailing the invitation:
+
+    >>> self.logout()
+    >>> registerPage = portal.restrictedTraverse("@@register-invite.html")
+    >>> registerPageXML = registerPage.getResponse()
+    >>> validator.validateString(tostring(registerPageXML)) # doctest: -REPORT_NDIFF
+    >>> print tostring(registerPageXML.find('view'))
+    <view name="add-registration.html" section="people" title="Register" 
+        type="registration">
+    <invitation id="...">
+        <workspace href="http://foo/plone/workspaces/workspace"
+            title="My Workspace"/>
+        <inviter>Leonardo Almeida</inviter>
+    </invitation>
+    </view>
+
+The page also contains a formcontroller element that is much like the
+formcontroller element for the simple add registration above.
+
+    >>> formcontroller_tag = registerPageXML.find('formcontroller')
+
+The two notable differences are that the formcontroller/@action attribute
+contains the appropriate query string for the invitation:
+
+    >>> formcontroller_tag.attrib['action'].endswith("?invitationid=" +
+    ...                                              invId)  
+    True
+
+And that the buttons present 3 options instead of the 2 above:
+
+    >>> print "\n".join(map(tostring, formcontroller_tag.findall('submit')))
+    <submit name="form.actions.register">Register</submit>
+    <submit name="form.actions.reject">Reject</submit>
+    <submit name="form.actions.cancel">Cancel</submit>
+
+This fragment is generated by the InvitationAddRegistrationFormFragment
+fragment.  
+
+    >>> from Products.COL3.browser.user import InvitationAddRegistrationFormFragment
+    >>> registrationFormFragment = InvitationAddRegistrationFormFragment(portal,
+    ...                                                                  request).asElement()
+    >>> haskKey = removeHashKeyFromFormcontroller(registrationFormFragment)
+    >>> hashKey2 = removeHashKeyFromFormcontroller(formcontroller_tag)
+    >>> tostring(registrationFormFragment) == tostring(formcontroller_tag)
+    True
+
+Cancelling this form will simply redirect the user to the portal without
+any further validation:
+
+    >>> request.form['form.actions.cancel'] = u'Cancel'
+    >>> InvitationAddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone
+
+Rejecting this form will have a similar effect, except that it also throws
+away the invitation (XXX, implement status msg):
+
+    >>> invtool[invId]
+    <Invitation at /plone/workspace_invitations/...>
+    >>> request.form['form.actions.reject'] = u'Reject'
+    >>> InvitationAddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone
+    >>> invtool[invId]
+    Traceback (most recent call last):
+    ...
+    KeyError: ...
+
+Let's send the invite again to be able to accept it:
+
+    >>> portal, request = prepPortalAndRequest()
+    >>> workspace = app.plone.workspaces['workspace']
+    >>> self.login('leo')
+    >>> inviteids = invtool.inviteToWorkspace(workspace, ['alan@example.com'])
+    >>> self.logout()
+    >>> invId = inviteids[0]
+    >>> request['QUERY_STRING'] = "invitationid="+invId
+
+Now let's fill the form with the new user information and register:
+
+    >>> request.form['form.firstname'] = u'Alan'
+    >>> request.form['form.lastname'] = u'Runyan'
+    >>> request.form['form.country'] = u'USA'
+    >>> request.form['form.organization'] = u'Enfold Systems'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'alan@example.com'
+    >>> request.form['form.username'] = u'runyaga'
+    >>> request.form['form.password'] = u'12345678'
+    >>> request.form['form.confirm'] = u'12345678'
+    >>> request.form['form.captcha.hashkey'] = hashKey2
+    >>> request.form['form.captcha'] = getCaptchaSolution(hashKey2)
+    >>> request.form['form.termsandconditions.used'] = u''
+    >>> request.form['form.termsandconditions'] = u'on'
+    >>> request.form['form.actions.register'] = u'Register'
+    >>> InvitationAddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/view-profile.html?userid=runyaga
+
+The new user been registered and logged in, and also added as a member to
+the workspace.
+
+    >>> portal.portal_membership.getAuthenticatedMember().getUserName()
+    'runyaga'
+    >>> portal.portal_membership.getAuthenticatedMember().getProperty('fullname')
+    'Alan Runyan'
+    >>> sorted(IWorkspaceMemberManagement(workspace).listAllMemberIds())
+    ['leo', 'runyaga']

@@ -1,0 +1,157 @@
+================
+Invitations Tool
+================
+
+ConserveOnline users can be invited to workspaces. Most of the heavy-lifting
+of the invitation work is done by the Invitation tool, which keeps track of
+which invitations are active and to what workspace it is related.
+
+Some preparations:
+
+    >>> import re
+    >>> from DateTime.DateTime import DateTime
+    >>> from Products.COL3.interfaces import IInvitationManager
+    >>> from zope.component import getUtility
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> portal = self.portal
+    >>> pm = app.plone.portal_membership
+    >>> me = pm.getAuthenticatedMember()
+    >>> me.setProperties(fullname="Test User", email="test@example.com")
+    >>> self.setRoles(['Member','Community Member'])
+    >>> mailhost = portal.MailHost    
+
+First of all, let's test the COL3 product setup has properly installed the
+invitation tool:
+
+    >>> invtool = getToolByName(app.plone, 'workspace_invitations')
+
+And now let's create a workspace to handle its invitations:
+
+    >>> app.plone.workspaces.invokeFactory('Workspace', 'ws') and None
+    >>> ws = app.plone.workspaces['ws']
+    >>> ws.update(title="My nifty workspace")
+    >>> del mailhost.sent[:]
+
+And a community member to invite to it:
+
+    >>> pm.addMember('bjstest', '12345', ['Member','Community Member'], [])
+    >>> member = pm.getMemberById('bjstest')
+    >>> newprops = {'description':'I have a long history of freaking out!!!',
+    ...             'organization':'Enfold Systems',
+    ...             'email':'jjehosophat@foo.com',
+    ...             'country':'USA',
+    ...             'firstname':'Jumpin',
+    ...             'lastname':'Jehosophat',
+    ...             'organizationtype':'commercial',
+    ...             'background':'other',}
+    >>> member.setMemberProperties(newprops)
+
+
+Obviusly, a newly created workspace will have no outstanding invitations at
+first.
+
+    >>> list(invtool.getInvitationsForWorkspace(ws))
+    []
+
+The invitations are handled in bulk. Each invitation request is just the
+e-mail of the invited person.
+
+    >>> emails = ["sidnei@example.com",
+    ...           "leo@example.com",
+    ...           "jjehosophat@foo.com",
+    ...          ]
+    >>> beforeSending = DateTime()
+    >>> invkeys = invtool.inviteToWorkspace(ws, emails)
+    >>> afterSending = DateTime()
+    >>> len(invkeys)
+    3
+    >>> invkeys[0] != invkeys[1] != invkeys[2]
+    True
+
+Now we should have some invitations associated with our workspace
+
+    >>> ws_invitations = list(invtool.getInvitationsForWorkspace(ws))
+    >>> set(inv.getId() for inv in ws_invitations) == set(invkeys)
+    True
+
+These invitations should have a "lastSent" property set to the DateTime() of
+the initial invitation:
+
+    >>> [beforeSending <= inv.lastSent <= afterSending
+    ...  for inv in ws_invitations]
+    [True, True, True] 
+
+The above results in e-mails being sent to each recipient, containing a
+different URL to be visited by each one of them. The url will have the key
+embedded in it. Our test Mailhost instance has been instrumented to capture
+all the e-mails that were sent, instead of actually sending them.
+
+    >>> len(mailhost.sent)
+    3
+    >>> args, kw = mailhost.sent[0]
+
+Sender and recipient of each message should be, respectively, the authenticated
+member doing the sending and the invited e-mail (we'll look only at the first
+and last one).
+
+    >>> (mfrom0, mto0, message0), keywords = mailhost.sent[0]
+    >>> mfrom0, list(mto0)
+    ('test@example.com', ['sidnei@example.com'])
+    >>> (mfrom2, mto2, message2), keywords = mailhost.sent[2]
+    >>> mfrom2, list(mto2)
+    ('test@example.com', ['jjehosophat@foo.com'])
+
+The title of the workspace and a url for joining the workspace should also be
+present in the message. The url will contain the invitation id and should be
+different for the first and last e-mails, since the first not yet a community
+member while the last has already been registered. 
+
+    >>> "My nifty workspace" in str(message0)
+    True
+    >>> "My nifty workspace" in str(message2)
+    True
+    >>> pattern = r"http://\S*" + re.escape(invkeys[0])
+    >>> url0 = re.search(pattern, str(message0), re.MULTILINE).group()
+    >>> print url0
+    http://nohost/plone/plone/register-invite.html?invitationid=...
+
+Notice the URL above is different than the URL below, since the first is for
+an e-mail that is not yet registered in COL3 while the next is for a user that
+is already registered:
+    
+    >>> pattern = r"http://\S*" + re.escape(invkeys[2])
+    >>> url2 = re.search(pattern, str(message2), re.MULTILINE).group()
+    >>> print url2
+    http://nohost/plone/plone/accept-invitation.html?id=...
+ 
+The invitation tool makes it possible to check all outstanding invitations
+for a specific e-mail, so that we can alert logged-in users of their
+invitations.
+
+    >>> sidInvitations = invtool.getInvitationsForEmail('sidnei@example.com')
+
+This next line makes sure there's only one id.
+
+    >>> sidInvitationId, = [i.getId() for i in sidInvitations]
+    >>> sidInvitationId == invkeys[0]
+    True 
+
+The tool also allows the canceling of invitations, which is useful when the
+workspace manager wants to cancel them or when the user itself wants to reject
+them. It returns the list of IDs for which invitations didn't exist and could
+not be canceled:
+
+    >>> invtool.cancelInvitationsById([sidInvitationId, 'foobar'])
+    ['foobar']
+    >>> list(invtool.getInvitationsForEmail('sidnei@example.com'))
+    []
+
+(XXX show that invitations can be resent)
+
+(XXX satisfy one invitation and show user is now ws member)
+
+(XXX deny another invitation and show only one outstanding invitation is left for
+the workspace)
+
+(XXX delete the workspace and show no outstanding invitations left for the
+remaining e-mail)

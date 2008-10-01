@@ -1,0 +1,450 @@
+Testing all the byXXXX and with-XXXX views for the library.
+
+First, some imports and prep code
+
+    >>> import os
+    >>> from elementtree.ElementTree import tostring
+    >>> from plone.app.blob.tests import makeFileUpload
+    >>> from Testing.makerequest import makerequest
+    >>> from Products.COL3.browser.tests import __file__ as testdir
+    >>> from Products.COL3.tests.xml_validator import XMLValidator
+    >>> validator = XMLValidator()
+    >>> from Products.COL3.browser.library import LibraryViewAllBatchFragment
+    >>> from Products.COL3.browser.library import LibraryByAuthorBatchFragment
+    >>> from Products.COL3.browser.library import LibraryWithAuthorBatchFragment
+    >>> from Products.COL3.browser.library import LibraryBySearchtermsBatchFragment
+    >>> from Products.COL3.browser.library import LibraryWithSearchtermBatchFragment
+    >>> from Products.COL3.browser.library import LibraryByRecentlyAddedBatchFragment
+    >>> from Products.COL3.browser.library import LibraryWithRecentlyAddedBatchFragment
+    >>> def prepLibraryAndRequest(app=app):
+    ...     try:
+    ...         app = makerequest(app.aq_base)
+    ...         library = app.plone['library'].unrestrictedTraverse('++skin++col')
+    ...         return library, library.REQUEST
+    ...     except:
+    ...         raise
+    >>> testdir = os.path.dirname(testdir)
+    >>> testfile = os.path.join(testdir, 'test.pdf')
+    >>> self.setRoles(['Manager','Member','Community Member'])
+
+Now, create some files in the library
+
+    >>> lib, request = prepLibraryAndRequest()
+    >>> uploadFile = makeFileUpload(file(testfile, 'rb').read(), testfile)
+    >>> self.login()
+    >>> request.form['form.file'] = uploadFile
+    >>> request.form['form.title'] = u'The File Title'
+    >>> request.form['form.authors'] = 'Petersen, Stinky'
+    >>> request.form['form.document_type'] = 'ecoregionalplans'
+    >>> request.form['form.description'] = 'Mountainous expanses of molehills exploded into sugar-coated dwarves (abstract enough?)'
+    >>> request.form['form.language'] = 'en'
+    >>> request.form['form.dateauthored'] = '2008-12-31'
+    >>> request.form['form.country'] = 'USA'
+    >>> request.form['form.biogeographic_realm'] = 'afrotropic'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'external'
+    >>> request.form['form.directthreat'] = 'pollution'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.monitoring'] = 'comparison'
+    >>> request.form['form.keywords'] = 'keyword1'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.createdoi'] = 'no'
+    >>> request.form['form.actions.add'] = 'Save'
+    >>> from elementtree.ElementTree import tostring
+    >>> lib.restrictedTraverse('@@add-libraryfile.html').getResponse()
+    Traceback (most recent call last):
+     ...
+    SafeRedirect: http://foo/plone/library/the-file-title/@@view.html
+    >>> thefile = lib['the-file-title']
+    >>> print thefile.Title()
+    The File Title
+
+    >>> lib, request = prepLibraryAndRequest()
+    >>> uploadFile = makeFileUpload(file(testfile, 'rb').read(), testfile)
+    >>> self.login()
+    >>> request.form['form.file'] = uploadFile
+    >>> request.form['form.title'] = u'The File Title Too'
+    >>> request.form['form.authors'] = 'Magoo, Mister'
+    >>> request.form['form.document_type'] = 'ecoregionalplans'
+    >>> request.form['form.description'] = 'Mountainous expanses of molehills exploded into sugar-coated dwarves (abstract enough?)'
+    >>> request.form['form.language'] = 'en'
+    >>> request.form['form.dateauthored'] = '2008-12-31'
+    >>> request.form['form.country'] = 'USA'
+    >>> request.form['form.biogeographic_realm'] = 'afrotropic'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'external'
+    >>> request.form['form.directthreat'] = 'pollution'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.monitoring'] = 'comparison'
+    >>> request.form['form.keywords'] = 'keyword2'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.createdoi'] = 'no'
+    >>> request.form['form.actions.add'] = 'Save'
+    >>> from elementtree.ElementTree import tostring
+    >>> lib.restrictedTraverse('@@add-libraryfile.html').getResponse()
+    Traceback (most recent call last):
+     ...
+    SafeRedirect: http://foo/plone/library/the-file-title-too/@@view.html
+    >>> thefile = lib['the-file-title-too']
+    >>> print thefile.Title()
+    The File Title Too
+
+Make sure that the specialized keywords and authors method return the
+expected values:
+
+    >>> thefile.getWorkspaceKeywords()
+    ()
+
+    >>> thefile.getLibraryKeywords()
+    ('keyword2',)
+
+    >>> thefile.getLibraryAuthors()
+    ('Magoo, Mister',)
+
+Now we'll view the various batch fragments to make sure the batches are returned correctly
+
+The view all batch for the library
+
+    >>> viewallfrag = LibraryViewAllBatchFragment(lib, request)
+    >>> fragment = viewallfrag.asElement()
+
+    >>> datenodes = fragment.findall('items/item/date')
+    >>> for node in datenodes:
+    ...     node.text = ''
+    >>> print tostring(fragment) #doctest: +XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+    <col dir="desc" href="http://foo?start:int=0&amp;sort_on=title&amp;sort_order=desc" id="title">Title</col>
+        <col href="http://foo?start:int=0&amp;sort_on=mimetype&amp;sort_order=asc" id="mimetype"
+            >Format</col>
+        <col href="http://foo?start:int=0&amp;sort_on=size&amp;sort_order=asc" id="size">Size</col>
+        <col href="http://foo?start:int=0&amp;sort_on=date&amp;sort_order=asc" id="date">Date Contributed</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://foo?start:int=0&amp;sort_on=title">1</page>
+    </pages>
+    <letters>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=A">A</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=B">B</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=C">C</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=D">D</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=E">E</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=F">F</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=G">G</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=H">H</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=I">I</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=J">J</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=K">K</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=L">L</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=M">M</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=N">N</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=O">O</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=P">P</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=Q">Q</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=R">R</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=S">S</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=T">T</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=U">U</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=V">V</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=W">W</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=X">X</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=Y">Y</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=title&amp;startswith=Z">Z</letter>
+    </letters>
+    <pagesize>
+        <size href="http://foo?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+        <size current="current" href="http://foo?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+        <size href="http://foo?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+        <size href="http://foo?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://foo/plone/library/the-file-title/view.html">
+            <title>The File Title</title>
+            <mimetype>pdf</mimetype>
+            <date></date>
+            <size>1</size>
+        </item>
+        <item href="http://foo/plone/library/the-file-title-too/view.html">
+            <title>The File Title Too</title>
+            <mimetype>pdf</mimetype>
+            <date></date>
+            <size>1</size>
+        </item>
+    </items>
+    </batch>
+
+The view by searchterms batch from the library
+
+    >>> request['sort_on'] = 'searchterm'
+    >>> frag = LibraryBySearchtermsBatchFragment(lib, request).asElement()
+
+    >>> print tostring(frag) #doctest: +XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+        <col dir="desc" href="http://foo?start:int=0&amp;sort_on=searchterm&amp;sort_order=desc"
+            id="searchterm">Name</col>
+        <col href="http://foo?start:int=0&amp;sort_on=count&amp;sort_order=asc" id="count">Count</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://foo?start:int=0&amp;sort_on=searchterm">1</page>
+    </pages>
+    <letters>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=A">A</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=B">B</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=C">C</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=D">D</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=E">E</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=F">F</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=G">G</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=H">H</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=I">I</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=J">J</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=K">K</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=L">L</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=M">M</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=N">N</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=O">O</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=P">P</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=Q">Q</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=R">R</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=S">S</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=T">T</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=U">U</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=V">V</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=W">W</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=X">X</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=Y">Y</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=searchterm&amp;startswith=Z">Z</letter>
+    </letters>
+    <pagesize>
+        <size href="http://foo?start:int=0&amp;sort_on=searchterm&amp;sze=10">10</size>
+        <size current="current" href="http://foo?start:int=0&amp;sort_on=searchterm&amp;sze=20">20</size>
+        <size href="http://foo?start:int=0&amp;sort_on=searchterm&amp;sze=50">50</size>
+        <size href="http://foo?start:int=0&amp;sort_on=searchterm&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://foo/plone/library/withsearchterm-library.html?searchterm=keyword1">
+            <count>1</count>
+            <searchterm>keyword1</searchterm>
+        </item>
+        <item href="http://foo/plone/library/withsearchterm-library.html?searchterm=keyword2">
+            <count>1</count>
+            <searchterm>keyword2</searchterm>
+        </item>
+    </items>
+    </batch>
+
+
+The view "with" keyword batch
+
+    >>> request['sort_on'] = 'title'
+    >>> request['searchterm'] = 'keyword1'
+    >>> frag = LibraryWithSearchtermBatchFragment(lib, request).asElement()
+
+    >>> print tostring(frag) #doctest:+XMLDATA
+    <batch end="1" start="1" total="1">
+       <cols>
+       <col dir="desc" href="http://foo?start:int=0&amp;sort_on=title&amp;sort_order=desc" id="title">Title</col>
+           <col href="http://foo?start:int=0&amp;sort_on=mimetype&amp;sort_order=asc" id="mimetype">Format</col>
+           <col href="http://foo?start:int=0&amp;sort_on=size&amp;sort_order=asc" id="size">Size</col>
+           <col href="http://foo?start:int=0&amp;sort_on=date&amp;sort_order=asc" id="date">Date Contributed</col>
+        </cols>
+        <pages>
+        <page current="current" href="http://foo?start:int=0&amp;sort_on=title">1</page>
+        </pages>
+        <pagesize>
+            <size href="http://foo?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+            <size current="current" href="http://foo?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+            <size href="http://foo?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+            <size href="http://foo?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+        </pagesize>
+        <items>
+            <item href="http://foo/plone/library/the-file-title/view.html">
+               <title>The File Title</title>
+               <mimetype>pdf</mimetype>
+               <date>2008-12-31T00:00:00-05:00</date>
+               <size>1</size>
+            </item>
+        </items>
+        </batch>
+
+
+The view by author batch from the library.  The author list is transformed by urllib:quote_plus(), so ", " becomes %2C+
+
+    >>> request['sort_on'] = 'name'
+    >>> frag = LibraryByAuthorBatchFragment(lib, request).asElement()
+
+    >>> print tostring(frag) #doctest: +XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+        <col dir="desc" href="http://foo?start:int=0&amp;sort_on=name&amp;sort_order=desc" id="name">Name</col>
+        <col href="http://foo?start:int=0&amp;sort_on=count&amp;sort_order=asc" id="count">Count</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://foo?start:int=0&amp;sort_on=name">1</page>
+    </pages>
+    <letters>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=A">A</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=B">B</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=C">C</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=D">D</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=E">E</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=F">F</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=G">G</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=H">H</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=I">I</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=J">J</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=K">K</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=L">L</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=M">M</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=N">N</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=O">O</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=P">P</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=Q">Q</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=R">R</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=S">S</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=T">T</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=U">U</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=V">V</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=W">W</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=X">X</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=Y">Y</letter>
+        <letter href="http://foo?start:int=0&amp;sort_on=name&amp;startswith=Z">Z</letter>
+    </letters>
+    <pagesize>
+        <size href="http://foo?start:int=0&amp;sort_on=name&amp;sze=10">10</size>
+        <size current="current" href="http://foo?start:int=0&amp;sort_on=name&amp;sze=20">20</size>
+        <size href="http://foo?start:int=0&amp;sort_on=name&amp;sze=50">50</size>
+        <size href="http://foo?start:int=0&amp;sort_on=name&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://foo/plone/library/withauthor-library.html?author=Magoo%2C+Mister">
+            <count>1</count>
+            <name>Magoo, Mister</name>
+        </item>
+        <item href="http://foo/plone/library/withauthor-library.html?author=Petersen%2C+Stinky">
+            <count>1</count>
+            <name>Petersen, Stinky</name>
+        </item>
+    </items>
+    </batch>
+
+
+The view "with" author batch
+
+    >>> request['sort_on'] = 'title'
+    >>> request['author'] = 'Petersen, Stinky'
+    >>> frag = LibraryWithAuthorBatchFragment(lib, request).asElement()
+
+    >>> frag.find('items/item/date').text = ''
+    >>> print tostring(frag) #doctest: +XMLDATA
+    <batch end="1" start="1" total="1">
+    <cols>
+        <col dir="desc" href="http://foo?start:int=0&amp;sort_on=title&amp;sort_order=desc" id="title">Title</col>
+        <col href="http://foo?start:int=0&amp;sort_on=mimetype&amp;sort_order=asc" id="mimetype"
+            >Format</col>
+        <col href="http://foo?start:int=0&amp;sort_on=size&amp;sort_order=asc" id="size">Size</col>
+        <col href="http://foo?start:int=0&amp;sort_on=date&amp;sort_order=asc" id="date">Date Contributed</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://foo?start:int=0&amp;sort_on=title">1</page>
+    </pages>
+    <pagesize>
+        <size href="http://foo?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+        <size current="current" href="http://foo?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+        <size href="http://foo?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+        <size href="http://foo?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://foo/plone/library/the-file-title/view.html">
+            <title>The File Title</title>
+            <mimetype>pdf</mimetype>
+            <date/>
+            <size>1</size>
+        </item>
+    </items>
+    </batch>
+
+
+The view "with" recent batch
+
+    >>> request['sort_on'] = ''
+    >>> frag = LibraryByRecentlyAddedBatchFragment(lib, request).asElement()
+    >>> print tostring(frag) #doctest: +XMLDATA
+    <batch end="5" start="1" total="5">
+    <cols>
+        <col href="http://foo?start:int=0&amp;sort_on=when&amp;sort_order=" id="when">When</col>
+        <col href="http://foo?start:int=0&amp;sort_on=count&amp;sort_order=" id="count">Count</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://foo?start:int=0&amp;sort_on=">1</page>
+    </pages>
+    <pagesize>
+        <size href="http://foo?start:int=0&amp;sort_on=&amp;sze=10">10</size>
+        <size current="current" href="http://foo?start:int=0&amp;sort_on=&amp;sze=20">20</size>
+        <size href="http://foo?start:int=0&amp;sort_on=&amp;sze=50">50</size>
+        <size href="http://foo?start:int=0&amp;sort_on=&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://foo/plone/library/withrecent-library.html?offset=0">
+            <count>2</count>
+            <when>Today</when>
+        </item>
+        <item href="http://foo/plone/library/withrecent-library.html?offset=7">
+            <count>2</count>
+            <when>Past 7 Days</when>
+        </item>
+        <item href="http://foo/plone/library/withrecent-library.html?offset=30">
+            <count>2</count>
+            <when>Past 30 Days</when>
+        </item>
+        <item href="http://foo/plone/library/withrecent-library.html?offset=90">
+            <count>2</count>
+            <when>Past 90 Days</when>
+        </item>
+        <item href="http://foo/plone/library/withrecent-library.html?offset=180">
+            <count>2</count>
+            <when>Past 180 Days</when>
+        </item>
+    </items>
+    </batch>
+
+
+The view "with" recent batch
+
+    >>> request['offset'] = '180'
+    >>> frag = LibraryWithRecentlyAddedBatchFragment(lib, request).asElement()
+
+    >>> print tostring(frag) #doctest: +XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+        <col href="http://foo?start:int=0&amp;sort_on=title&amp;sort_order=asc" id="title">Title</col>
+        <col href="http://foo?start:int=0&amp;sort_on=mimetype&amp;sort_order=asc" id="mimetype"
+            >Format</col>
+        <col href="http://foo?start:int=0&amp;sort_on=size&amp;sort_order=asc" id="size">Size</col>
+        <col href="http://foo?start:int=0&amp;sort_on=date&amp;sort_order=asc" id="date">Date Contributed</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://foo?start:int=0&amp;sort_on=">1</page>
+    </pages>
+    <pagesize>
+        <size href="http://foo?start:int=0&amp;sort_on=&amp;sze=10">10</size>
+        <size current="current" href="http://foo?start:int=0&amp;sort_on=&amp;sze=20">20</size>
+        <size href="http://foo?start:int=0&amp;sort_on=&amp;sze=50">50</size>
+        <size href="http://foo?start:int=0&amp;sort_on=&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://foo/plone/library/the-file-title/view.html">
+            <title>The File Title</title>
+            <mimetype>pdf</mimetype>
+            <date>2008-12-31T00:00:00-05:00</date>
+            <size>1</size>
+        </item>
+        <item href="http://foo/plone/library/the-file-title-too/view.html">
+            <title>The File Title Too</title>
+            <mimetype>pdf</mimetype>
+            <date>2008-12-31T00:00:00-05:00</date>
+            <size>1</size>
+        </item>
+    </items>
+    </batch>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="add.html" type="workspace" section="workspaces" title="Create a Workspace"/>
+    <formcontroller action="blah">
+        <field name="form.title" required="required" widget="text">
+            <label>Workspace Name</label>
+            <description>Examples: Colorado Federal Public Lands Strategy, Western State Trust
+                Lands, Kenya's Biodiversity Mapping Project.</description>
+        </field>
+        <field name="form.id" required="required" widget="text">
+            <label>Web Site Address (up to 25 characters)</label>
+            <description>A shorter name is better for your web site address. Example: If your
+                workspace is called Colorado Federal Public Lands, your web site address might be
+                "copubliclands". The full URL for the workspace would then be
+                http://conserveonline.org/workspaces/copubliclands.</description>
+        </field>
+        <field name="form.description" required="required" widget="textarea">
+            <label>What is the purpose, goal, or mission statement for your workspace? (up to 250
+                characters)</label>
+            <description>This description will appear on the home page of your
+            workspace.</description>
+        </field>
+        <field name="form.country" widget="selection" required="required">
+            <label>Country</label>
+            <value vocabulary="countries">BEL</value>
+        </field>
+        <field name="form.biogeographic_realm" widget="selection" required="required">
+            <label>Biogeographic realm</label>
+            <value vocabulary="biogeographic_realms">australasia</value>
+        </field>
+        <field name="form.habitat" widget="checkboxgroup">
+            <label>Habitat type</label>
+            <value vocabulary="habitats"/>
+            <description>Check all that apply.</description>
+        </field>
+        <field name="form.conservation" widget="checkboxgroup">
+            <label>Conservation action</label>
+            <value vocabulary="conservation"/>
+            <description>Check all that apply.</description>
+        </field>
+        <field name="form.directthreat" widget="checkboxgroup">
+            <label>Direct threat</label>
+            <value vocabulary="directthreat"/>
+            <description>Check all that apply.</description>
+        </field>
+        <field name="form.monitoring" widget="checkboxgroup">
+            <label>Monitoring type</label>
+            <description>The methods used to determine whether the conservation actions described in
+                this document are succeeding. Check all that apply.</description>
+            <value vocabulary="monitoring"/>
+        </field>
+        <field name="form.organization" widget="text">
+            <label>Organization</label>
+            <description>Examples: The Nature Conservancy, World Wildlife Fund, IUCN.</description>
+        </field>
+        <field name="form.keywords" widget="text">
+            <label>Other Search Terms</label>
+            <description>Examples: biodiversity, freshwater, Natural Heritage Programs, panthera.
+                leo.</description>
+        </field>
+        <field name="form.license" widget="selection">
+            <label>License</label>
+            <description>The default license, from the Creative Commons license set, for 
+            content in this workspace.</description>
+            <value vocabulary="licenses">a-nc</value>
+        </field>
+        <field name="form.is_private" required="required" widget="radiogroup">
+            <label>Is the workspace public or private?</label>
+            <value>
+                <option selected="1" value="yes">Public, everyone can see content not made private.</option>
+                <option value="no">Private, only workspace members can see content.</option>
+            </value>
+        </field>
+        <submit name="form.actions.save">Next</submit>
+        <submit name="form.actions.cancel">Cancel</submit>
+    </formcontroller>
+    <user href="http://dev.tnc.enfoldsystems.com:84/view-profile.html?userid=admin">
+        <username>admin</username>
+        <title/>
+        <lastlogin>2007-09-27T00:14:52-05:00</lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/workspaces/">Workspaces</entry>
+        <entry>Create a Workspace</entry>
+    </breadcrumbs>
+    <resource href="http://dev.tnc.enfoldsystems.com:84/workspaces"
+        uuid="bd066b6780e26a036cc4ccec4483255b">
+        <type title="workspaces Container">workspaces Container</type>
+        <creation_date>2007-08-20T13:51:54-05:00</creation_date>
+        <modification_date>2007-08-20T13:51:54-05:00</modification_date>
+        <size>1</size>
+        <is_private>false</is_private>
+        <id>workspaces</id>
+        <title>Workspaces</title>
+        <author href="admin">admin</author>
+    </resource>
+</response>

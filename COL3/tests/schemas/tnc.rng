@@ -1,0 +1,1237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0"
+  xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0"
+  datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <ref name="response.element"/>
+  </start>
+
+  <!-- 
+  
+  Most important part: the response
+  
+  -->
+  <define name="response.element">
+    <element name="response">
+      <a:documentation>The response represents the XML document returned by Plone and contains the
+        primary information needed for rendering HTML.</a:documentation>
+      <interleave>
+        <optional>
+          <element name="messages">
+            <a:documentation>An optional portal_status_message in the URL</a:documentation>
+            <oneOrMore>
+              <element name="message">
+                <text/>
+              </element>
+            </oneOrMore>
+          </element>
+        </optional>
+        <ref name="view.element"/>
+        <ref name="breadcrumbs.element"/>
+        <optional>
+          <ref name="profile.element"/>
+        </optional>
+        <optional>
+          <ref name="batch.element"/>
+        </optional>
+        <optional>
+          <ref name="calendar.element"/>
+        </optional>
+        <optional>
+          <ref name="discussion.element"/>
+        </optional>
+        <optional>
+          <ref name="colhome.element"/>
+        </optional>
+        <optional>
+          <ref name="workspacekeywords.element"/>
+        </optional>
+        <optional>
+          <ref name="keywords.element"/>
+        </optional>
+        <optional>
+          <ref name="currentkeywords.element"/>
+        </optional>
+        <optional>
+          <ref name="menus.element"/>
+        </optional>
+        <optional>
+          <ref name="formcontroller.element"/>
+        </optional>
+        <optional>
+          <ref name="workspace.element"/>
+        </optional>
+        <optional>
+          <ref name="resource.element"/>
+        </optional>
+        <optional>
+          <ref name="portlets.element"/>
+        </optional>
+        <optional>
+          <ref name="user.element"/>
+        </optional>
+        <optional>
+          <ref name="loginbox.element"/>
+        </optional>
+        <optional>
+          <ref name="ratings.element"/>
+        </optional>
+      </interleave>
+    </element>
+  </define>
+  <!-- 
+    
+    Children of response
+    
+  -->
+
+  <define name="currentkeywords.element">
+    <element name="currentkeywords">
+      <a:documentation>Contains a list of labels that apply to the current page or file.</a:documentation>
+      <oneOrMore>
+        <element name="item">
+          <optional>
+            <ref name="href.attr"/>
+          </optional>
+          <text/>
+        </element>
+      </oneOrMore>
+    </element>
+  </define>
+
+  <define name="view.element">
+    <element name="view">
+      <a:documentation> Contains XML content unique to this screen. As such, anything can go in
+        here.</a:documentation>
+      <attribute name="type">
+        <a:documentation>The type attribute is a label assigned statically for the underlying
+          Archetype, factory, or interface. Also used to form the left half of the screen
+        id.</a:documentation>
+      </attribute>
+      <attribute name="name">
+        <a:documentation>The viewname corresponds to the @name attribute on the ZCML directive that
+          generated this view. This value usually appears at the end of the URL.</a:documentation>
+      </attribute>
+      <attribute name="title">
+        <a:documentation> A string or XPath expression used to display the HTML title and page
+          heading. </a:documentation>
+      </attribute>
+      <attribute name="section">
+        <a:documentation>The identifier for the section of the site (global tab) that this screen
+          appears in.</a:documentation>
+      </attribute>
+      <optional>
+        <attribute name="currenturl">
+          <a:documentation>For generic error pages, the url that engendered the error.</a:documentation>
+          <data type="anyURI"/>
+        </attribute>
+      </optional>
+      <zeroOrMore>
+        <ref name="anyElement"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="breadcrumbs.element">
+    <element name="breadcrumbs">
+      <zeroOrMore>
+        <element name="entry">
+          <optional>
+            <ref name="href.attr"/>
+          </optional>
+          <text/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <!-- Bleh, it's too bad the breadcrumbs were chosen as the 
+        place to put the <base>, and that is doesn't follow the 
+        @href pattern -->
+        <element name="base">
+          <data type="anyURI"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="entry">
+          <optional>
+            <ref name="href.attr"/>
+          </optional>
+          <text/>
+        </element>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="batch.element">
+    <element name="batch">
+      <attribute name="total">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="start">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="end">
+        <data type="integer"/>
+      </attribute>
+      <interleave>
+        <optional>
+          <element name="letters">
+            <oneOrMore>
+              <element name="letter">
+                <ref name="href.attr"/>
+                <optional>
+                  <attribute name="current">
+                    <value>current</value>
+                  </attribute>
+                </optional>
+                <text/>
+              </element>
+            </oneOrMore>
+          </element>
+        </optional>
+        <optional>
+          <element name="pages">
+            <oneOrMore>
+              <element name="page">
+                <ref name="href.attr"/>
+                <optional>
+                  <attribute name="current">
+                    <value>current</value>
+                  </attribute>
+                </optional>
+                <text/>
+              </element>
+            </oneOrMore>
+          </element>
+        </optional>
+        <optional>
+          <element name="cols">
+            <oneOrMore>
+              <element name="col">
+                <ref name="id.attr"/>
+                <ref name="href.attr"/>
+                <optional>
+                  <attribute name="dir">
+                    <choice>
+                      <value>asc</value>
+                      <value>desc</value>
+                    </choice>
+                  </attribute>
+                </optional>
+                <text/>
+              </element>
+            </oneOrMore>
+          </element>
+        </optional>
+        <optional>
+          <element name="pagesize">
+            <oneOrMore>
+              <element name="size">
+                <ref name="href.attr"/>
+                <optional>
+                  <attribute name="current">
+                    <value>current</value>
+                  </attribute>
+                </optional>
+                <text/>
+              </element>
+            </oneOrMore>
+          </element>
+        </optional>
+        <optional>
+          <element name="navigation">
+            <oneOrMore>
+              <element name="next">
+                <ref name="href.attr"/>
+                <text/>
+              </element>
+            </oneOrMore>
+          </element>
+        </optional>
+        <element name="items">
+          <oneOrMore>
+            <choice>
+              <element name="item">
+                <ref name="href.attr"/>
+                <oneOrMore>
+                  <ref name="anyElement"/>
+                </oneOrMore>
+              </element>
+              <ref name="topic.element"/>
+            </choice>
+          </oneOrMore>
+        </element>
+      </interleave>
+    </element>
+  </define>
+  <define name="calendar.element">
+    <element name="calendar">
+      <a:documentation>Listing of events in a month with navigation forward and backwards in time.
+        Used for both monthly view and listing view.</a:documentation>
+      <attribute name="current">
+        <data type="date"/>
+      </attribute>
+      <element name="navigation">
+        <interleave>
+          <element name="next">
+            <ref name="href.attr"/>
+            <data type="date"/>
+          </element>
+          <element name="previous">
+            <ref name="href.attr"/>
+            <data type="date"/>
+          </element>
+        </interleave>
+      </element>
+      <optional>
+        <element name="events">
+          <a:documentation>Listing of events in a month. Do not supply this element if there are no
+            events.</a:documentation>
+          <oneOrMore>
+            <element name="event">
+              <ref name="href.attr"/>
+              <ref name="title.element"/>
+              <ref name="startDate.element"/>
+              <ref name="endDate.element"/>
+            </element>
+          </oneOrMore>
+        </element>
+      </optional>
+    </element>
+  </define>
+  <define name="labels.element">
+    <a:documentation>A listing of all the labels in a workspace</a:documentation>
+    <element name="labels">
+      <oneOrMore>
+        <element name="item">
+          <text/>
+        </element>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="discussion.element">
+    <element name="discussion">
+      <element name="mostpopular">
+        <oneOrMore>
+          <ref name="topic.element"/>
+        </oneOrMore>
+      </element>
+      <ref name="batch.element"/>
+    </element>
+  </define>
+  <define name="topic.element">
+    <element name="topic">
+      <ref name="href.attr"/>
+      <ref name="title.element"/>
+      <ref name="author.element"/>
+      <element name="replies">
+        <data type="integer"/>
+      </element>
+      <element name="lastcomment">
+        <ref name="created.element"/>
+        <ref name="author.element"/>
+      </element>
+    </element>
+  </define>
+  <define name="menus.element">
+    <element name="menus">
+      <a:documentation>(Optional) Any add/activity/utility menus for this screen.</a:documentation>
+      <interleave>
+        <optional>
+          <element name="addmenu">
+            <oneOrMore>
+              <ref name="entry.element"/>
+            </oneOrMore>
+          </element>
+        </optional>
+        <optional>
+          <element name="actionmenu">
+            <oneOrMore>
+              <ref name="entry.element"/>
+            </oneOrMore>
+          </element>
+        </optional>
+        <optional>
+          <element name="utilitymenu">
+            <optional>
+              <attribute name="label">
+                <a:documentation>(Optional) A utilitymenu can have a label added in front as a
+                  prefix before all the entries are displayed.</a:documentation>
+              </attribute>
+            </optional>
+            <oneOrMore>
+              <ref name="entry.element"/>
+            </oneOrMore>
+          </element>
+        </optional>
+      </interleave>
+    </element>
+  </define>
+  <define name="entry.element">
+    <element name="entry">
+      <ref name="href.attr"/>
+      <optional>
+        <attribute name="current">
+          <a:documentation>(Optional) Indicate that this utility menu entry is currently being
+            displayed.</a:documentation>
+        </attribute>
+      </optional>
+      <text/>
+    </element>
+  </define>
+  <define name="formcontroller.element">
+    <element name="formcontroller">
+      <a:documentation> The form controller encodes the form definition and form values in an
+        abstract way. </a:documentation>
+      <attribute name="action">
+        <a:documentation>The URL this form will be submitted to for processing.</a:documentation>
+      </attribute>
+      <optional>
+        <ref name="error.element"/>
+      </optional>
+      <oneOrMore>
+        <ref name="field.element"/>
+      </oneOrMore>
+      <oneOrMore>
+        <element name="submit">
+          <a:documentation>Forms can have multiple submit buttons that perform different variations
+            within the action. This element controls the label and value on each of the submission
+            buttons.</a:documentation>
+          <attribute name="name">
+            <a:documentation>The name is encoded into the formdata and is used by the back end to
+              know which button was clicked. This is usually "submit".</a:documentation>
+          </attribute>
+          <text/>
+        </element>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="field.element">
+    <element name="field">
+      <a:documentation>Each field on the form is an element with field definitions, values, and
+        messages.</a:documentation>
+      <attribute name="name">
+        <a:documentation>The name of the field gets encoded into the HTML widget and forms the basis
+          for the submission in the formdata.</a:documentation>
+      </attribute>
+      <ref name="widget.choices"/>
+      <optional>
+        <attribute name="required">
+          <a:documentation>If a field is required, it will be be present as an attribute that has a
+            value equal to the attribute name. If a field is optional, this "required" attribute is
+            simply not present. The FE will only look to see the presence of the attribute, not the
+            value.</a:documentation>
+          <choice>
+            <value>required</value>
+          </choice>
+        </attribute>
+      </optional>
+      <interleave>
+        <element name="label">
+          <a:documentation>A human-readable label for the field.</a:documentation>
+          <text/>
+        </element>
+        <optional>
+          <element name="description">
+            <a:documentation>Help text for the field.</a:documentation>
+            <text/>
+          </element>
+        </optional>
+        <optional>
+          <ref name="value.element"/>
+        </optional>
+        <optional>
+          <ref name="error.element"/>
+        </optional>
+      </interleave>
+    </element>
+  </define>
+  <define name="profile.element">
+    <element name="profile">
+
+      <element name="about">
+        <ref name="href.attr"/>
+        <interleave>
+          <element name="firstname">
+            <text/>
+          </element>
+          <element name="lastname">
+            <text/>
+          </element>
+          <optional>
+            <element name="portrait">
+              <attribute name="href">
+                <text/>
+              </attribute>
+            </element>
+          </optional>
+          <element name="password">
+            <text/>
+          </element>
+          <element name="country">
+            <text/>
+          </element>
+          <element name="background">
+            <text/>
+          </element>
+          <element name="organization">
+            <text/>
+          </element>
+          <element name="joined">
+            <data type="dateTime"/>
+          </element>
+          <optional>
+            <element name="email">
+              <text/>
+            </element>
+          </optional>
+          <element name="organizationtype">
+            <text/>
+          </element>
+        </interleave>
+      </element>
+
+      <element name="bio">
+        <ref name="href.attr"/>
+        <element name="html:div">
+          <attribute name="class">
+            <text/>
+          </attribute>
+          <zeroOrMore>
+            <ref name="anyElement"/>
+          </zeroOrMore>
+        </element>
+      </element>
+
+    </element>
+  </define>
+  <define name="workspace.element">
+    <element name="workspace">
+      <a:documentation>All screens in a workspace require some minimum information about the
+        workspace for the common UI elements. For example, the name of the workspace and a logo.</a:documentation>
+      <ref name="href.attr"/>
+      <optional>
+        <attribute name="hasfolders">
+          <value>hasfolders</value>
+        </attribute>
+      </optional>
+      <interleave>
+        <ref name="title.element"/>
+        <optional>
+          <ref name="logo.element"/>
+        </optional>
+        <optional>
+          <ref name="icon.element"/>
+        </optional>
+        <a:documentation>Is this workspace marked as private, meaning, only members can see any of
+          its content?</a:documentation>
+        <element name="private">
+          <data type="boolean"/>
+        </element>
+        <element name="section">
+          <choice>
+            <value>members</value>
+            <value>calendar</value>
+            <value>discussion</value>
+            <value>documents</value>
+            <value>home</value>
+            <value>setup</value>
+          </choice>
+        </element>
+        <optional>
+          <element name="joinlink">
+            <a:documentation>If you are logged-in and not a member of the workspace, provide the
+              link that allows joining the workspace.</a:documentation>
+            <attribute name="href">
+              <data type="anyURI"/>
+            </attribute>
+            <text/>
+          </element>
+        </optional>
+        <optional>
+          <element name="editconfigurl">
+            <a:documentation>If you are the workspace manager, provide a link to the Edit
+              Configuration screen.</a:documentation>
+            <data type="anyURI"/>
+          </element>
+        </optional>
+        <optional>
+          <element name="editpropsurl">
+            <a:documentation>If you are the workspace manager, provide a link to the Edit Properties
+              screen.</a:documentation>
+            <data type="anyURI"/>
+          </element>
+        </optional>
+      </interleave>
+    </element>
+  </define>
+
+  <define name="user.element">
+    <element name="user">
+      <a:documentation>Information about the user of the current request needed for UI purposes.</a:documentation>
+      <ref name="href.attr"/>
+      <element name="username">
+        <text/>
+      </element>
+      <ref name="title.element"/>
+      <optional>
+        <ref name="email.element"/>
+      </optional>
+      <optional>
+        <ref name="emailsuffix.element"/>
+      </optional>
+      <element name="lastlogin">
+        <a:documentation>ISO date for the time the user last logged-in.</a:documentation>
+        <data type="dateTime"/>
+      </element>
+      <element name="isadmin">
+        <data type="boolean"/>
+      </element>
+    </element>
+  </define>
+  <define name="loginbox.element">
+    <element name="loginbox">
+      <a:documentation>When there is no user element, give a place to hold the login portlet
+        information if there was an invalid login.</a:documentation>
+      <attribute name="action">
+        <data type="anyURI"/>
+      </attribute>
+      <attribute name="username"/>
+    </element>
+  </define>
+  <define name="ratings.element">
+    <element name="ratings">
+      <a:documentation>Holds the information about the number of recommendations
+        and the current recommendation average score.</a:documentation>
+      <interleave>
+        <optional>
+          <element name="count">
+            <a:documentation>The number of existing recommendations.</a:documentation>
+            <data type="integer"/>
+          </element>
+          <element name="score">
+            <a:documentation>The current score average of the recommendations.</a:documentation>
+            <data type="integer"/>
+          </element>
+        </optional>
+      </interleave>
+    </element>
+  </define>
+  <define name="workspacekeywords.element">
+    <element name="workspacekeywords">
+      <oneOrMore>
+        <element name="keyword">
+          <interleave>
+            <ref name="href.attr"/>
+            <ref name="title.element"/>
+            <ref name="description.element"/>
+            <element name="count">
+              <text/>
+            </element>
+            <text/>
+          </interleave>
+        </element>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="colhome.element">
+    <element name="colhome">
+      <interleave>
+        <zeroOrMore>
+          <element name="sideimage">
+            <ref name="href.attr"/>
+            <element name="img">
+              <ref name="href.attr"/>
+              <attribute name="title"/>
+            </element>
+          </element>
+        </zeroOrMore>
+        <element name="feature">
+          <ref name="href.attr"/>
+          <element name="img">
+            <ref name="href.attr"/>
+            <attribute name="title"/>
+          </element>
+          <ref name="text.element"/>
+        </element>
+      </interleave>
+    </element>
+  </define>
+
+  <!---
+    
+    Everything to do with <resource>
+    
+  -->
+  <define name="resource.element">
+    <element name="resource">
+      <ref name="uuid.attr"/>
+      <ref name="href.attr"/>
+      <interleave>
+        <ref name="id.element"/>
+        <ref name="type.element"/>
+        <ref name="author.element"/>
+        <ref name="creation_date.element"/>
+        <ref name="modification_date.element"/>
+        <ref name="size.element"/>
+        <ref name="subject.element"/>
+
+        <!-- Now custom stuff -->
+        <!-- Had to make this optional, not all resources returned have a title, the library folder for instance doesn't-->
+        <optional>
+          <ref name="title.element"/>
+        </optional>
+        <optional>
+          <ref name="license.element"/>
+        </optional>
+        <optional>
+          <ref name="text.element"/>
+        </optional>
+        <optional>
+          <ref name="content.element"/>
+        </optional>
+        <optional>
+          <ref name="abstract.element"/>
+        </optional>
+        <optional>
+          <ref name="description.element"/>
+        </optional>
+        <!-- XXX Leo might change Lines field to not generate an 
+             empty element. For now, avoid polluting the FE by 
+             making it optional. -->
+        <optional>
+          <ref name="attachments.element"/>
+        </optional>
+        <optional>
+          <ref name="is_private.element"/>
+        </optional>
+        <optional>
+          <ref name="mimetype.element"/>
+        </optional>
+        <optional>
+          <ref name="document_type.element"/>
+        </optional>
+        <optional>
+          <ref name="labels.element"/>
+        </optional>
+        <optional>
+          <ref name="dateauthored.element"/>
+        </optional>
+        <optional>
+          <ref name="language.element"/>
+        </optional>
+        <optional>
+          <ref name="country.element"/>
+        </optional>
+        <optional>
+          <ref name="authors.element"/>
+        </optional>
+        <optional>
+          <ref name="libraryreference.element"/>
+        </optional>
+        <optional>
+          <ref name="biogeographic_realm.element"/>
+        </optional>
+        <optional>
+          <ref name="habitat.element"/>
+        </optional>
+        <optional>
+          <ref name="conservation.element"/>
+        </optional>
+        <optional>
+          <ref name="directthreat.element"/>
+        </optional>
+        <optional>
+          <ref name="organization.element"/>
+        </optional>
+        <optional>
+          <ref name="monitoring.element"/>
+        </optional>
+        <optional>
+          <ref name="keywords.element"/>
+        </optional>
+        <optional>
+          <ref name="startDate.element"/>
+        </optional>
+        <optional>
+          <ref name="endDate.element"/>
+        </optional>
+        <optional>
+          <ref name="location.element"/>
+        </optional>
+        <optional>
+          <ref name="oid.element"/>
+        </optional>
+        <optional>
+          <ref name="gisdata.element"/>
+        </optional>
+        <optional>
+          <ref name="emailsuffix.element"/>
+        </optional>
+        <optional>
+          <element name="attendees">
+            <oneOrMore>
+              <ref name="items.child"/>
+            </oneOrMore>
+          </element>
+        </optional>
+        <optional>
+          <element name="eventType">
+            <text/>
+          </element>
+        </optional>
+        <optional>
+          <element name="contactName">
+            <text/>
+          </element>
+        </optional>
+        <optional>
+          <element name="contactEmail">
+            <text/>
+          </element>
+        </optional>
+
+
+        <!-- XXX Paul temporary hackity stuff 11/07 -->
+        <optional>
+          <element name="inlibrary">
+            <data type="boolean"/>
+          </element>
+        </optional>
+      </interleave>
+    </element>
+  </define>
+  <define name="portlets.element">
+    <element name="portlets">
+      <oneOrMore>
+        <element name="portlet">
+          <attribute name="title">
+            <text/>
+          </attribute>
+          <attribute name="type">
+            <text/>
+          </attribute>
+          <zeroOrMore>
+            <element name="resource">
+              <ref name="href.attr"/>
+              <ref name="title.element"/>
+              <zeroOrMore>
+                <ref name="anyElement"/>
+              </zeroOrMore>
+            </element>
+          </zeroOrMore>
+        </element>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="abstract.element">
+    <element name="abstract">
+      <text/>
+    </element>
+  </define>
+  <define name="text.element">
+    <element name="text">
+      <element name="html:div">
+        <optional>
+          <attribute name="class"/>
+        </optional>
+        <zeroOrMore>
+          <text/>
+        </zeroOrMore>
+        <zeroOrMore>
+          <ref name="anyElement"/>
+        </zeroOrMore>
+        <zeroOrMore>
+          <text/>
+        </zeroOrMore>
+      </element>
+    </element>
+  </define>
+  <define name="content.element">
+    <element name="content">
+      <element name="html:div">
+        <optional>
+          <attribute name="class"/>
+        </optional>
+        <zeroOrMore>
+          <ref name="anyElement"/>
+        </zeroOrMore>
+      </element>
+    </element>
+  </define>
+  <define name="language.element">
+    <element name="language">
+      <data type="string">
+        <param name="maxLength">2</param>
+      </data>
+    </element>
+  </define>
+  <define name="dateauthored.element">
+    <element name="dateauthored">
+      <choice>
+        <text/>
+        <data type="dateTime"/>
+      </choice>
+    </element>
+  </define>
+  <define name="country.element">
+    <element name="country">
+      <data type="string">
+        <param name="maxLength">3</param>
+      </data>
+    </element>
+  </define>
+  <define name="authors.element">
+    <element name="authors">
+      <zeroOrMore>
+        <ref name="items.child"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="libraryreference.element">
+    <element name="libraryreference">
+      <text/>
+    </element>
+  </define>
+  <define name="biogeographic_realm.element">
+    <element name="biogeographic_realm">
+      <text/>
+    </element>
+  </define>
+  <define name="habitat.element">
+    <element name="habitat">
+      <zeroOrMore>
+        <ref name="items.child"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="conservation.element">
+    <element name="conservation">
+      <zeroOrMore>
+        <ref name="items.child"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="directthreat.element">
+    <element name="directthreat">
+      <zeroOrMore>
+        <ref name="items.child"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="organization.element">
+    <element name="organization">
+      <text/>
+    </element>
+  </define>
+  <define name="monitoring.element">
+    <element name="monitoring">
+      <zeroOrMore>
+        <ref name="items.child"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="keywords.element">
+    <element name="keywords">
+      <ref name="items.child"/>
+    </element>
+  </define>
+  <define name="startDate.element">
+    <element name="startDate">
+      <data type="dateTime"/>
+    </element>
+  </define>
+  <define name="endDate.element">
+    <element name="endDate">
+      <data type="dateTime"/>
+    </element>
+  </define>
+  <define name="type.element">
+    <element name="type">
+      <attribute name="title"/>
+      <text/>
+    </element>
+  </define>
+  <define name="document_type.element">
+    <element name="document_type">
+      <ref name="items.child"/>
+    </element>
+  </define>
+  <define name="mimetype.element">
+    <element name="mimetype">
+      <attribute name="id"/>
+      <ref name="minString"/>
+    </element>
+  </define>
+  <define name="is_private.element">
+    <element name="is_private">
+      <data type="boolean"/>
+    </element>
+  </define>
+  <define name="attachments.element">
+    <element name="attachments">
+      <oneOrMore>
+        <element name="attachment">
+          <attribute name="name"/>
+          <attribute name="mime"/>
+          <ref name="href.attr"/>
+          <ref name="minString"/>
+        </element>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="contributors.element">
+    <a:documentation>Part of Dublin Core, not used in TNC</a:documentation>
+    <optional>
+      <element name="contributors">
+        <zeroOrMore>
+          <ref name="items.child"/>
+        </zeroOrMore>
+      </element>
+    </optional>
+  </define>
+  <define name="subject.element">
+    <a:documentation>Part of Dublin Core, not used in TNC</a:documentation>
+    <optional>
+      <element name="subject">
+        <ref name="items.child"/>
+      </element>
+    </optional>
+  </define>
+  <define name="license.element">
+    <a:documentation>Creative Commons license, from a vocabulary.</a:documentation>
+    <optional>
+      <element name="license">
+        <text/>
+      </element>
+    </optional>
+  </define>
+  <define name="emailsuffix.element">
+    <element name="emailsuffix">
+      <text/>
+    </element>
+  </define>
+  <define name="email.element">
+    <element name="email">
+      <text/>
+    </element>
+  </define>
+  <define name="creation_date.element">
+    <element name="creation_date">
+      <data type="dateTime"/>
+    </element>
+  </define>
+  <define name="modification_date.element">
+    <element name="modification_date">
+      <data type="dateTime"/>
+    </element>
+  </define>
+  <define name="size.element">
+    <element name="size">
+      <data type="integer"/>
+    </element>
+  </define>
+
+
+
+  <!--  ***  End of <resource>  *** -->
+
+
+  <!-- 
+    
+    Shared elements and attributes
+    
+  -->
+  <define name="value.element">
+    <element name="value">
+      <a:documentation>If the field has a value, enter it here. The value can be from an existing
+        resource, a default value, or a form error. The RNG types of values are not encoded here.</a:documentation>
+      <optional>
+        <attribute name="xml:space">
+          <value>preserve</value>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="vocabulary">
+          <a:documentation> The id attribute of a vocabulary in the vocabularies file. (Optional) </a:documentation>
+          <choice>
+            <value>countries</value>
+            <value>organizationtypes</value>
+            <value>backgrounds</value>
+            <value>documenttypes</value>
+            <value>languages</value>
+            <value>biogeographic_realms</value>
+            <value>habitats</value>
+            <value>conservation</value>
+            <value>directthreat</value>
+            <value>monitoring</value>
+            <value>licenses</value>
+          </choice>
+        </attribute>
+      </optional>
+      <choice>
+        <text/>
+        <oneOrMore>
+          <element name="selected">
+            <a:documentation>The identifier of a vocabulary item that is assigned to this resource
+              when there are multiple assignments (like multi select widget, checkbox widget, etc.)</a:documentation>
+            <text/>
+          </element>
+        </oneOrMore>
+        <oneOrMore>
+          <ref name="anyElement"/>
+        </oneOrMore>
+      </choice>
+    </element>
+  </define>
+  <define name="url.element">
+    <element name="url">
+      <data type="anyURI"/>
+    </element>
+  </define>
+  <define name="id.element">
+    <element name="id">
+      <ref name="minString"/>
+    </element>
+  </define>
+  <define name="id.attr">
+    <attribute name="id">
+      <data type="NMTOKENS"/>
+    </attribute>
+  </define>
+  <define name="uuid.attr">
+    <attribute name="uuid">
+      <data type="NMTOKENS"/>
+    </attribute>
+  </define>
+  <define name="href.attr">
+    <attribute name="href">
+      <data type="anyURI"/>
+    </attribute>
+  </define>
+  <define name="src.attr">
+    <attribute name="src">
+      <data type="anyURI"/>
+    </attribute>
+  </define>
+  <define name="error.element">
+    <element name="error">
+      <a:documentation> An error message for the form as a whole. </a:documentation>
+      <text/>
+    </element>
+  </define>
+  <define name="title.element">
+    <element name="title">
+      <text/>
+    </element>
+  </define>
+  <define name="description.element">
+    <element name="description">
+      <text/>
+    </element>
+  </define>
+  <define name="logo.element">
+    <element name="logo">
+      <ref name="src.attr"/>
+      <text/>
+    </element>
+  </define>
+  <define name="icon.element">
+    <element name="icon">
+      <ref name="src.attr"/>
+      <text/>
+    </element>
+  </define>
+  <define name="location.element">
+    <element name="location">
+      <text/>
+    </element>
+  </define>
+  <define name="oid.element">
+    <element name="oid">
+      <text/>
+    </element>
+  </define>
+  <define name="gisdata.element">
+    <element name="gisdata">
+      <ref name="href.attr"/>
+      <attribute name="mime"/>
+      <attribute name="name"/>
+      <text/>
+    </element>
+  </define>
+  <define name="author.element">
+    <element name="author">
+      <ref name="href.attr"/>
+      <ref name="minString"/>
+    </element>
+  </define>
+  <define name="created.element">
+    <a:documentation>Used by Ploneboard replies</a:documentation>
+    <element name="created">
+      <data type="dateTime"/>
+    </element>
+  </define>
+  <!-- 
+  
+  Databases
+  
+  -->
+  <define name="widget.choices">
+    <attribute name="widget">
+      <a:documentation> What style of widget is used for this field. </a:documentation>
+      <choice>
+        <value>text</value>
+        <value>textarea</value>
+        <value>radiogroup</value>
+        <value>password</value>
+        <value>file</value>
+        <value>selection</value>
+        <value>editor</value>
+        <value>boolean</value>
+        <value>captcha</value>
+        <value>checkbox</value>
+        <value>checkboxgroup</value>
+        <value>geographicscope</value>
+        <value>member-roster</value>
+        <value>labels</value>
+        <value>purpose</value>
+        <value>calendar</value>
+        <value>custom</value>
+        <value>noedit</value>
+        <value>authors</value>
+        <value>metadata</value>
+        <value>ymdentry</value>
+      </choice>
+    </attribute>
+  </define>
+  <!-- 
+    
+    Utility definitions
+  
+  -->
+  <define name="minString">
+    <data type="string">
+      <param name="minLength">1</param>
+    </data>
+  </define>
+  <define name="items.child">
+    <zeroOrMore>
+      <element name="item">
+        <ref name="minString"/>
+      </element>
+    </zeroOrMore>
+  </define>
+  <define name="anyElement">
+    <element>
+      <anyName/>
+      <zeroOrMore>
+        <choice>
+          <attribute>
+            <anyName/>
+          </attribute>
+          <text/>
+          <ref name="anyElement"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+</grammar>

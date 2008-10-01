@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="logout.html" type="site" title="Signed Out" section="people"/>  
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry>Sign Out</entry>
+  </breadcrumbs>
+</response>

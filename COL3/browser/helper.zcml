@@ -1,0 +1,36 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           xmlns:five="http://namespaces.zope.org/five"
+           xmlns:fate="http://namespaces.plone.org/fate/2">
+
+  <adapter factory=".helper.UserHelper" provides=".interfaces.IUserHelper" />
+  <adapter factory=".helper.UrlHelper"  provides=".interfaces.IUrlHelper" />
+  <adapter factory=".helper.ContentHelper"  provides=".interfaces.IContentHelper" />
+
+
+  <browser:view
+      for="*"
+      name="url"
+      permission="zope2.View"
+      class=".helper.UrlHelper"
+      layer="..skins.interfaces.ICOL3Skin"
+      />
+
+  <browser:view
+      for="*"
+      name="user"
+      permission="zope2.View"
+      class=".helper.UserHelper"
+      layer="..skins.interfaces.ICOL3Skin"
+      />
+
+  <browser:view
+      for="*"
+      name="content"
+      permission="zope2.View"
+      class=".helper.ContentHelper"
+      layer="..skins.interfaces.ICOL3Skin"
+      />
+
+</configure>

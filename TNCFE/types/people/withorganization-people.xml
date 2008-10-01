@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="withorganization.html" type="people" title="List People for Organization - Enfold"
+        section="people"/>
+    <batch total="929" start="21" end="40">
+        <pages>
+            <page current="current" href="#">1</page>
+            <page href="#">2</page>
+            <page href="#">3</page>
+        </pages>
+        <cols>
+            <col id="lastname" href="/server/url/to/sort/column" dir="asc">Last Name</col>
+            <col id="firstname" href="/server/url/to/sort/column">First Name</col>
+            <col id="country" href="/server/url/to/sort/column">Country</col>
+        </cols>
+        <items>
+            <item href="/server/url/to/matched/resource">
+                <lastname>Everitt</lastname>
+                <firstname>Paul</firstname>
+                <country>USA</country>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <lastname>Minor</lastname>
+                <firstname>Brit</firstname>
+                <country>Canada</country>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <lastname>Runyan</lastname>
+                <firstname>Alan</firstname>
+                <country>United Kingdom</country>
+            </item>            
+        </items>
+    </batch>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/people/">People</entry>
+        <entry>List People for Organization - Enfold</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>true</isadmin>
+    </user>
+</response>

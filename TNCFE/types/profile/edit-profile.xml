@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="edit.html" type="profile" title="Edit Profile: Paul Everitt" section="people"/>
+    <formcontroller action=".">
+        <field name="form.firstname" widget="text" required="required">
+            <label>First name</label>
+        </field>
+        <field name="form.lastname" widget="text" required="required">
+            <label>Last name</label>
+        </field>
+        <field name="form.country" widget="selection" required="required">
+            <label>Country</label>
+            <value vocabulary="countries"/>
+        </field>
+        <field name="form.organization" widget="text">
+            <label>Organization</label>
+        </field>
+        <field name="form.organizationtype" widget="selection">
+            <label>Organization type</label>
+            <value vocabulary="organizationtypes"/>
+        </field>
+        <field name="form.background" widget="selection">
+            <label>Your background</label>
+            <value vocabulary="backgrounds"/>
+        </field>
+        <field name="form.email" widget="text" required="required">
+            <label>Email address</label>
+            <description>Email address is required for login. We do not spam your email
+                address.</description>
+        </field>
+        <field name="form.oldpassword" widget="password">
+            <label>Current password</label>
+            <description>To change your password, type your old password here.</description>
+        </field>
+        <field name="form.newpassword" widget="password">
+            <label>New password</label>
+            <description>To change your password, type your new password here (letters and numbers only).
+                Leave blank if you do not want to change your password.</description>
+        </field>
+        <field name="form.confirmpassword" widget="password">
+            <label>Retype new password</label>
+        </field>
+        <field name="form.portrait" widget="file">
+            <label>Portrait</label>
+            <description>To add or change the portrait: click the "Browse" button; select a picture of
+                yourself. Recommended image size is 75 pixels wide by 100 pixels tall.</description>
+        </field>
+        <field name="form.description" widget="editor">
+            <label>Biography</label>
+            <description>Enter the full text of your biography above.</description>
+            <value xml:space="preserve"><html:div xmlns:html="http://www.w3.org/1999/xhtml">
+                <p>Sample bio <em>goes here</em></p>
+            </html:div></value>
+        </field>
+        <submit name="submit">Save</submit>
+        <submit name="cancel">Cancel</submit>
+    </formcontroller>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/people/">People</entry>
+        <entry href="/people/kadams/">My Profile</entry>
+        <entry>Edit Profile: Paul Everitt</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+    </user>
+</response>

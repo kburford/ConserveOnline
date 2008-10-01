@@ -1,0 +1,273 @@
+===============
+Exception Views
+===============
+
+Here we test exception views. in COL3 They're handled by the Page/Fragment
+method just like other views. 
+
+First, some preparations:
+
+    >>> import sys
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring as ettostring
+    >>> from lxml.etree import XML, tostring as lxtostring
+    >>> from zope.component import queryMultiAdapter
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> from Products.ATContentTypes.tests.utils import FakeRequestSession
+    >>> from Products.COL3.interfaces.workspace import IWorkspace
+    >>> from Products.COL3.tests.xml_validator import XMLValidator
+    >>> validator = XMLValidator()
+    >>> def tostring(elem):
+    ...     return lxtostring(XML(ettostring(elem)), pretty_print=True)
+    >>> def prepWorkspaceAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     workspace = app.plone.workspaces['workspace'].unrestrictedTraverse('++skin++col') 
+    ...     return workspace, workspace.REQUEST
+    >>> def prepPortalAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     portal = app.plone.unrestrictedTraverse('++skin++col') 
+    ...     return portal, portal.REQUEST
+    >>> self.setRoles(['Member','Community Member'])
+    >>> portal.error_log.setProperties(keep_entries=portal.error_log.keep_entries,
+    ...                                copy_to_zlog=False)
+
+Now let's create a workspace and a new portal member to invite to it:
+
+    >>> app.plone.workspaces.invokeFactory('Workspace', 'workspace') and None
+    >>> self.login() # aquire the Workspace Manager group and role
+    >>> pm = getToolByName(self.portal, 'portal_membership')
+    >>> pm.addMember('bjstest', '12345', ['Member','Community Member'], [])
+    >>> member = pm.getMemberById('bjstest')
+    >>> newprops = {'description':'I have a long history of freaking out!!!',
+    ...             'organization':'Enfold Systems',
+    ...             'email':'jjehosophat@foo.com',
+    ...             'country':'USA',
+    ...             'firstname':'Jumpin',
+    ...             'lastname':'Jehosophat',
+    ...             'organizationtype':'commercial',
+    ...             'background':'other',}
+    >>> member.setMemberProperties(newprops)
+
+Now let's invite that user to the workspace.
+
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> invtool = getToolByName(workspace, 'workspace_invitations')
+    >>> invId, = invtool.inviteToWorkspace(workspace, ['jjehosophat@foo.com'])
+
+And logout
+
+    >>> self.logout()
+
+Ideally, we should be testing these with a testbrowser, but manual lookup will
+have to do for now.
+
+Unauthorized redirection
+========================
+
+Since the Unauthorized exception is raised for both authenticated and
+non-authenticated users, we diferentiate them on the view itself, by
+checking if the user is authenticated there. For instance, we should be barred
+from visiting the "accept invitation" view for the invitation above:
+
+    >>> request['URL'] = 'http://nohost/plone/workspaces/workspace/accept-invitation.html'
+    >>> request['QUERY_STRING'] = 'id=' + invId
+    >>> workspace.restrictedTraverse('accept-invitation.html')
+    Traceback (most recent call last):
+    ...
+    Unauthorized: ...
+
+Now the view that should be associated with this exception should be our Z3 view
+
+    >>> e = sys.exc_info()[1]
+    >>> view = queryMultiAdapter((e, request), name=u'index.html')
+    >>> view.__class__.__name__
+    'UnauthorizedRedirect'
+
+This view just redirects the user into the 'unauthorized' Page, with a query
+string pointing to the original URL.
+
+    >>> view() # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    Redirect: http://nohost/plone/unauthorized?came_from=http%3A%2F%2Fnohost%2Fplone%2Fworkspaces%2Fworkspace%2Faccept-invitation.html%3Fid%3D...
+    >>> url, query_string = sys.exc_info()[1].args[0].split('?')
+    >>> query_string.endswith("accept-invitation.html%3Fid%3D" + invId)
+    True
+    >>> del e, view
+
+Unauthorized w/out login
+========================
+
+The "unauthorized" Page, when the user is not logged in, "renders" into
+another redirect, this time to the login_screen, but also with a "came_from"
+variable in the query string pointing to the url of the original error 
+
+    >>> portal, request = prepPortalAndRequest()
+    >>> request['QUERY_STRING'] = query_string
+    >>> view = portal.restrictedTraverse('++skin++col/unauthorized')
+    >>> view() # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    Redirect: http://foo/plone/login.html?came_from=http%3A%2F%2Fnohost%2Fplone%2Fworkspaces%2Fworkspace%2Faccept-invitation.html%3Fid%3D...
+    >>> url, query_string2 = sys.exc_info()[1].args[0].split('?')
+    >>> query_string2.endswith("accept-invitation.html%3Fid%3D" + invId)
+    True
+    >>> query_string == query_string2
+    True
+
+Unauthorized while logged in
+============================
+
+Now if we log in as the invited user, we should be able to access the "Accept
+Invitation" view normally.
+
+    >>> self.login('bjstest')
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> request['URL'] = 'http://nohost/plone/workspaces/workspace/accept-invitation.html'
+    >>> request['QUERY_STRING'] = 'id=' + invId
+    >>> workspace.restrictedTraverse('accept-invitation.html') # doctest: +ELLIPSIS 
+    <...AcceptInviationView...>
+
+However, we should not be able to access, say, the list or workspace
+invitations:
+
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> request['URL'] = 'http://nohost/plone/workspaces/workspace/workspace-invitations.xml'
+    >>> workspace.restrictedTraverse('workspace-invitations.xml')
+    Traceback (most recent call last):
+    ...
+    Unauthorized: ...
+
+Which should fetch the same exception view:
+
+    >>> e = sys.exc_info()[1]
+    >>> view = queryMultiAdapter((e, request), name=u'index.html')
+    >>> view.__class__.__name__
+    'UnauthorizedRedirect'
+
+Which will redirect to the "unauthorized" Page with a came_from pointing
+to the url we tried originally.
+
+    >>> view() # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    Redirect: http://nohost/plone/unauthorized?came_from=http%3A%2F%2Fnohost%2Fplone%2Fworkspaces%2Fworkspace%2Fworkspace-invitations.xml
+
+Except that this time, the "unauthorized" Page should render the xml for a
+nice FE screen like "You don't have enough permissions to see this page" or
+somesuch:
+
+    >>> url, query_string = sys.exc_info()[1].args[0].split('?')
+    >>> request['QUERY_STRING'] = query_string
+    >>> view = portal.restrictedTraverse('++skin++col/unauthorized')
+    >>> xml = view.getResponse()
+
+XML should validate against tnc.rng schema.
+    >>> validator.validateString(tostring(xml)) # doctest: -REPORT_NDIFF
+
+    >>> lastlogin = xml.find('user').find('lastlogin')
+    >>> lastlogin.text = lastlogin.text[:-6] + '-06:00'
+    >>> print tostring(xml) # doctest: +XMLDATA
+    <?xml version='1.0' encoding='utf-8'?>
+    <response>
+      <view name="unauthorized-error.html" type="site" title="Unauthorized"
+            section="home"/>
+      <breadcrumbs>
+        <entry href="http://nohost/plone">Home</entry>
+        <base>http://foo/plone/</base>
+      </breadcrumbs>
+      <user href="http://nohost/plone/view-profile.html?userid=bjstest">
+        <username>bjstest</username>
+        <title>Jumpin Jehosophat</title>
+        <email>jjehosophat@foo.com</email>
+        <emailsuffix>foo.com</emailsuffix>
+        <lastlogin>2000-01-01T00:00:00-06:00</lastlogin>
+        <isadmin>false</isadmin>
+      </user>
+    </response>
+
+Not Found error
+===============
+
+NotFound is raised when no URL matches a certain condition.
+
+    >>> from zExceptions import NotFound
+    >>> e = NotFound("http://foo/sometingorother")
+    >>> view = queryMultiAdapter((e, request), name=u'index.html')
+    >>> view.__class__.__name__
+    'NotFoundPage'
+    >>> xml = view.getResponse()
+
+XML should validate against tnc.rng schema.
+    >>> validator.validateString(tostring(xml)) # doctest: -REPORT_NDIFF
+
+    >>> lastlogin = xml.find('user').find('lastlogin')
+    >>> lastlogin.text = lastlogin.text[:-6] + '-06:00'
+    >>> print tostring(xml) # doctest: +XMLDATA
+    <?xml version='1.0' encoding='utf-8'?>
+    <response>
+        <view name="notfound-error.html" section="site" title="Not Found"
+              type="site"/>
+        <breadcrumbs>
+            <entry href="http://nohost/plone">Home</entry>
+            <base>http://nohost/plone/</base>
+            <entry>Not Found</entry>
+        </breadcrumbs>
+        <user href="http://nohost/plone/view-profile.html?userid=bjstest">
+            <username>bjstest</username>
+            <title>Jumpin Jehosophat</title>
+            <email>jjehosophat@foo.com</email>
+            <emailsuffix>foo.com</emailsuffix>
+            <lastlogin>2000-01-01T00:00:00-06:00</lastlogin>
+            <isadmin>false</isadmin>
+        </user>
+    </response>
+
+Generic exception view
+======================
+
+For all the other exception types, we provide a generic exception view.
+
+Let's try with a RuntimeError
+
+    >>> raise RuntimeError('fancy that...')
+    Traceback (most recent call last):
+    ...
+    RuntimeError: fancy that...
+    >>> t, e, tb = sys.exc_info()
+    >>> view = queryMultiAdapter((e, request), name=u'index.html')
+    >>> view.__class__.__name__
+    'ExceptionPage'
+    >>> xml = view.getResponse()
+
+XML should validate against tnc.rng schema.
+    >>> validator.validateString(tostring(xml)) # doctest: -REPORT_NDIFF
+    
+    >>> lastlogin = xml.find('user').find('lastlogin')
+    >>> lastlogin.text = lastlogin.text[:-6] + '-06:00'
+    >>> print tostring(xml) # doctest: +XMLDATA
+    <?xml version='1.0' encoding='utf-8'?>
+    <response>
+        <view currenturl="http://nohost/plone/workspaces/workspace/workspace-invitations.xml" name="generic-error.html" type="site" title="Whoops!"
+              section="site"/>
+        <breadcrumbs>
+            <entry href="http://nohost/plone">Home</entry>
+            <base>http://nohost/plone/</base>
+            <entry>Error</entry>
+        </breadcrumbs>
+        <user href="http://nohost/plone/view-profile.html?userid=bjstest">
+            <username>bjstest</username>
+            <title>Jumpin Jehosophat</title>
+            <email>jjehosophat@foo.com</email>
+            <emailsuffix>foo.com</emailsuffix>
+            <lastlogin>2000-01-01T00:00:00-06:00</lastlogin>
+            <isadmin>false</isadmin>
+        </user>
+    </response>
+
+The log entry above should be stored in the site error log:
+
+    >>> logEntry = portal.error_log.getLogEntries()[0]
+    >>> print logEntry['type'], logEntry['value']
+    RuntimeError fancy that...
+

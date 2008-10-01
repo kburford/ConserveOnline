@@ -1,0 +1,799 @@
+This is to test the indexing of a simple "person" object which is a simple item with properties that
+is indexable inside a zcatalog as well as the ability to perform searches on those objects as well
+via indexes in the catalog
+
+First, we'll import what we need to run the tests
+
+    >>> import os
+    >>> from StringIO import StringIO
+    >>> from elementtree.ElementTree import tostring, fromstring
+    >>> from Products.COL3.browser import tests as tests_package
+    >>> from Products.COL3.browser.people import PersonObj
+    >>> from Testing.makerequest import makerequest
+    >>> from Products.COL3.browser.user import UserEditNameDescForm
+    >>> from Products.COL3.browser.user import AddRegistrationFormFragment
+    >>> def prepPortalAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     portal = app.plone.unrestrictedTraverse('++skin++col') 
+    ...     return portal, portal.REQUEST
+    >>> portal, request = prepPortalAndRequest()
+    >>> def getCaptchaSolution(hashkey, captcha_key=app.plone.captcha_key):
+    ...     from Products.qPloneCaptchas.utils import decrypt, getWord, parseKey
+    ...     return getWord(int(parseKey(decrypt(captcha_key, hashkey))['key']))
+    >>> def removeHashKeyFromFormcontroller(formcontroller_tag):
+    ...     captcha_tag = formcontroller_tag.find('field/value/captcha')
+    ...     hashkey = captcha_tag.attrib['hashkey']
+    ...     captcha_tag.attrib['hashkey'] = '...'
+    ...     captcha_tag.attrib['href'] = captcha_tag.attrib['href'].replace(hashkey,
+    ...                                                                     '...')
+    ...     return hashkey
+
+Now let's create a person object and add it to the people index
+
+    >>> person1 = PersonObj('bschreiber', 'bernard', 'schreiber', 'USA', 'Enfold')
+    >>> person2 = PersonObj('bbarty', 'billy', 'barty', 'BRA', 'Universal Studios')
+    >>> person1.getPhysicalPath()
+    ('people', 'person', 'bschreiber')
+    >>> app.plone.people_catalog.catalog_object(person1)
+    >>> person2.getPhysicalPath()
+    ('people', 'person', 'bbarty')
+    >>> app.plone.people_catalog.catalog_object(person2)
+    >>> personbrain1 = app.plone.people_catalog.searchResults(userid='bschreiber')[0]
+    >>> personbrain2 = app.plone.people_catalog.searchResults(userid='bbarty')[0]
+    >>> print personbrain1.userid
+    bschreiber
+    >>> print personbrain1.firstname
+    bernard
+    >>> print personbrain1.lastname
+    schreiber
+    >>> print personbrain2.userid
+    bbarty
+
+Now let's change the value on the object, reindex it, and make sure the values are
+updated properly on the brains object in the catalog
+
+    >>> person1 = PersonObj('bschreiber', 'bernardino', 'schreiberino', 'USA', 'Universal Studios')
+    >>> app.plone.people_catalog.catalog_object(person1)
+    >>> personbrain1 = app.plone.people_catalog.searchResults(userid='bschreiber')[0]
+    >>> print personbrain1.userid
+    bschreiber
+    >>> print personbrain1.firstname
+    bernardino
+    >>> print personbrain1.lastname
+    schreiberino
+    
+Now let's create some users and make sure they are indexed properly in the people catalog:
+
+    >>> self.logout()
+    >>> portal, request = prepPortalAndRequest()
+    >>> registerPage = portal.restrictedTraverse("@@register.html")
+    >>> registerPageXML = registerPage.getResponse()
+    >>> registerPageXMLFormcontroller = registerPageXML[1] 
+    >>> hashKey = removeHashKeyFromFormcontroller(registerPageXMLFormcontroller)
+    >>> request.form['form.firstname'] = u'Marilyn'
+    >>> request.form['form.lastname'] = u'Manson'
+    >>> request.form['form.country'] = u'USA'
+    >>> request.form['form.organization'] = u'Somewhere Out There'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'mmanson@example.com'
+    >>> request.form['form.username'] = u'mmanson'
+    >>> request.form['form.password'] = u'12345678'
+    >>> request.form['form.confirm'] = u'12345678'
+    >>> request.form['form.termsandconditions.used'] = u''
+    >>> request.form['form.termsandconditions'] = u'on'
+    >>> request.form['form.captcha.hashkey'] = hashKey
+    >>> request.form['form.captcha'] = getCaptchaSolution(hashKey)
+    >>> request.form['form.actions.register'] = u'Register'
+    >>> AddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/view-profile.html?userid=mmanson
+    
+    >>> self.logout()
+    >>> portal, request = prepPortalAndRequest()
+    >>> registerPage = portal.restrictedTraverse("@@register.html")
+    >>> registerPageXML = registerPage.getResponse()
+    >>> registerPageXMLFormcontroller = registerPageXML[1] 
+    >>> hashKey = removeHashKeyFromFormcontroller(registerPageXMLFormcontroller)
+    >>> request.form['form.firstname'] = u'Billy'
+    >>> request.form['form.lastname'] = u'Idol'
+    >>> request.form['form.country'] = u'USA'
+    >>> request.form['form.organization'] = u'Punkville'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'bidol@example.com'
+    >>> request.form['form.username'] = u'bidol'
+    >>> request.form['form.password'] = u'12345678'
+    >>> request.form['form.confirm'] = u'12345678'
+    >>> request.form['form.termsandconditions.used'] = u''
+    >>> request.form['form.termsandconditions'] = u'on'
+    >>> request.form['form.captcha.hashkey'] = hashKey
+    >>> request.form['form.captcha'] = getCaptchaSolution(hashKey)
+    >>> request.form['form.actions.register'] = u'Register'
+    >>> AddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/view-profile.html?userid=bidol
+    
+    >>> self.logout()
+    >>> portal, request = prepPortalAndRequest()
+    >>> registerPage = portal.restrictedTraverse("@@register.html")
+    >>> registerPageXML = registerPage.getResponse()
+    >>> registerPageXMLFormcontroller = registerPageXML[1] 
+    >>> hashKey = removeHashKeyFromFormcontroller(registerPageXMLFormcontroller)
+    >>> request.form['form.firstname'] = u'Syl'
+    >>> request.form['form.lastname'] = u'Sylvain'
+    >>> request.form['form.country'] = u'USA'
+    >>> request.form['form.organization'] = u'NY Dolls'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'ssylvain@example.com'
+    >>> request.form['form.username'] = u'ssylvain'
+    >>> request.form['form.password'] = u'12345678'
+    >>> request.form['form.confirm'] = u'12345678'
+    >>> request.form['form.termsandconditions.used'] = u''
+    >>> request.form['form.termsandconditions'] = u'on'
+    >>> request.form['form.captcha.hashkey'] = hashKey
+    >>> request.form['form.captcha'] = getCaptchaSolution(hashKey)
+    >>> request.form['form.actions.register'] = u'Register'
+    >>> AddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/view-profile.html?userid=ssylvain
+    
+    >>> self.logout()
+    >>> portal, request = prepPortalAndRequest()
+    >>> registerPage = portal.restrictedTraverse("@@register.html")
+    >>> registerPageXML = registerPage.getResponse()
+    >>> registerPageXMLFormcontroller = registerPageXML[1] 
+    >>> hashKey = removeHashKeyFromFormcontroller(registerPageXMLFormcontroller)
+    >>> request.form['form.firstname'] = u'Bill'
+    >>> request.form['form.lastname'] = u'Petersen'
+    >>> request.form['form.country'] = u'ZIM'
+    >>> request.form['form.organization'] = u'Roosevelt High School'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'bpetersen@example.com'
+    >>> request.form['form.username'] = u'bpetersen'
+    >>> request.form['form.password'] = u'12345678'
+    >>> request.form['form.confirm'] = u'12345678'
+    >>> request.form['form.termsandconditions.used'] = u''
+    >>> request.form['form.termsandconditions'] = u'on'
+    >>> request.form['form.captcha.hashkey'] = hashKey
+    >>> request.form['form.captcha'] = getCaptchaSolution(hashKey)
+    >>> request.form['form.actions.register'] = u'Register'
+    >>> AddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/view-profile.html?userid=bpetersen
+    
+    >>> self.logout()
+    >>> portal, request = prepPortalAndRequest()
+    >>> registerPage = portal.restrictedTraverse("@@register.html")
+    >>> registerPageXML = registerPage.getResponse()
+    >>> registerPageXMLFormcontroller = registerPageXML[1] 
+    >>> hashKey = removeHashKeyFromFormcontroller(registerPageXMLFormcontroller)
+    >>> request.form['form.firstname'] = u'Johnny'
+    >>> request.form['form.lastname'] = u'Ramone'
+    >>> request.form['form.country'] = u'USA'
+    >>> request.form['form.organization'] = u'Rock n Roll High School'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'jramone@example.com'
+    >>> request.form['form.username'] = u'jramone'
+    >>> request.form['form.password'] = u'12345678'
+    >>> request.form['form.confirm'] = u'12345678'
+    >>> request.form['form.termsandconditions.used'] = u''
+    >>> request.form['form.termsandconditions'] = u'on'
+    >>> request.form['form.captcha.hashkey'] = hashKey
+    >>> request.form['form.captcha'] = getCaptchaSolution(hashKey)
+    >>> request.form['form.actions.register'] = u'Register'
+    >>> AddRegistrationFormFragment(portal, request).asElement()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/view-profile.html?userid=jramone    
+    
+    >>> mansonbrain = app.plone.people_catalog.searchResults(userid='mmanson')[0]
+    >>> print mansonbrain.userid+u', '+mansonbrain.firstname+u', '+mansonbrain.lastname+u', '+mansonbrain.organization
+    mmanson, Marilyn, Manson, Somewhere Out There
+    
+Now we need to edit the user's properties and make sure the people catalog is updated accordingly
+
+    >>> pmem = app.plone.portal_membership.getMemberById('mmanson')
+    >>> print pmem.id
+    mmanson
+    >>> self.login('mmanson')
+    >>> portraitpath = os.path.join(os.path.dirname(tests_package.__file__),
+    ...                             'notDefaultUser.gif')
+    >>> portraitfile = StringIO(open(portraitpath,'rb').read())
+    >>> portraitfile.filename = 'notDefaultUser.gif' # pretend it's a file upload
+    >>> portal, request = prepPortalAndRequest()
+    >>> request.form['form.firstname'] = u'Ricky'
+    >>> request.form['form.lastname'] = u'Ricardo'
+    >>> request.form['form.country'] = u'BRA'
+    >>> request.form['form.organization'] = u'Enfold Systems'
+    >>> request.form['form.organizationtype'] = u'commercial'
+    >>> request.form['form.background'] = u'other'
+    >>> request.form['form.email'] = u'leo@example.com'
+    >>> request.form['form.password'] = u''
+    >>> request.form['form.confirm_password'] = u''
+    >>> request.form['form.portrait'] = portraitfile
+    >>> request.form['form.actions.save'] = u'Save'
+    >>> print(tostring(UserEditNameDescForm(portal, request).asElement()))
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/view-profile.html?userid=mmanson
+
+    >>> ricardobrain = app.plone.people_catalog.searchResults(userid='mmanson')[0]
+    >>> print ricardobrain.userid
+    mmanson
+    >>> print ricardobrain.firstname
+    Ricky
+    >>> print ricardobrain.lastname
+    Ricardo
+    >>> print ricardobrain.organization
+    Enfold Systems
+    >>> people_results = app.plone.people_catalog.searchResults(sort_on='userid')
+    >>> len(people_results)
+    7
+    >>> [r.userid for r in people_results]
+    ['bbarty', 'bidol', 'bpetersen', 'bschreiber', 'jramone', 'mmanson', 'ssylvain']
+
+    >>> login_node1 = '<lastlogin>'
+    >>> login_node2 = '</lastlogin>'
+    >>> xml = portal.restrictedTraverse('people/@@all.html').getResponse()
+    >>> print tostring(xml.find('view')) #doctest: +XMLDATA
+    <view name="all-people.html" section="people" title="Browse All People" type="people"/>
+    >>> print tostring(xml.find('menus')) #doctest: +XMLDATA
+    <menus>
+        <utilitymenu label="By:">
+            <entry href="http://foo/plone/people/all.html">All</entry>
+            <entry href="http://foo/plone/people/bycountry.html">Regions/Countries</entry>
+            <entry href="http://foo/plone/people/byorganization.html">Organizations</entry>
+        </utilitymenu>
+    </menus>
+    >>> print tostring(xml.find('batch')) #doctest: +XMLDATA
+    <batch end="7" start="1" total="7">
+        <cols>
+            <col dir="desc"
+                href="http://foo?start:int=0&amp;sort_on=lastname&amp;sort_order=desc"
+                id="lastname">Last Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=firstname&amp;sort_order=asc"
+                id="firstname">First Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=organization&amp;sort_order=asc"
+                id="organization">Organization</col>
+            <col href="http://foo?start:int=0&amp;sort_on=country&amp;sort_order=asc"
+                id="country">Region/Country</col>
+        </cols>
+        <pages>
+            <page current="current" href="http://foo?start:int=0&amp;sort_on=lastname">1</page>
+        </pages>
+        <letters>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=A">A</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=B">B</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=C">C</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=D">D</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=E">E</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=F">F</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=G">G</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=H">H</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=I">I</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=J">J</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=K">K</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=L">L</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=M">M</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=N">N</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=O">O</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=P">P</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=Q">Q</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=R">R</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=S">S</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=T">T</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=U">U</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=V">V</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=W">W</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=X">X</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=Y">Y</letter>
+            <letter href="http://foo?start:int=0&amp;sort_on=lastname&amp;startswith=Z">Z</letter>
+        </letters>
+        <pagesize>
+            <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=10">10</size>
+            <size current="current" href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=20">20</size>
+            <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=50">50</size>
+            <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=100">100</size>
+        </pagesize>
+        <items>
+            <item href="http://foo/plone/view-profile.html?userid=bbarty">
+                <country>BRA</country>
+                <organization>Universal Studios</organization>
+                <firstname>billy</firstname>
+                <lastname>barty</lastname>
+            </item>
+            <item href="http://foo/plone/view-profile.html?userid=bidol">
+                <country>USA</country>
+                <organization>Punkville</organization>
+                <firstname>Billy</firstname>
+                <lastname>Idol</lastname>
+            </item>
+            <item href="http://foo/plone/view-profile.html?userid=bpetersen">
+                <country>ZIM</country>
+                <organization>Roosevelt High School</organization>
+                <firstname>Bill</firstname>
+                <lastname>Petersen</lastname>
+            </item>
+            <item href="http://foo/plone/view-profile.html?userid=jramone">
+                <country>USA</country>
+                <organization>Rock n Roll High School</organization>
+                <firstname>Johnny</firstname>
+                <lastname>Ramone</lastname>
+            </item>
+            <item href="http://foo/plone/view-profile.html?userid=mmanson">
+                <country>BRA</country>
+                <organization>Enfold Systems</organization>
+                <firstname>Ricky</firstname>
+                <lastname>Ricardo</lastname>
+            </item>
+            <item href="http://foo/plone/view-profile.html?userid=bschreiber">
+                <country>USA</country>
+                <organization>Universal Studios</organization>
+                <firstname>bernardino</firstname>
+                <lastname>schreiberino</lastname>
+            </item>
+            <item href="http://foo/plone/view-profile.html?userid=ssylvain">
+                <country>USA</country>
+                <organization>NY Dolls</organization>
+                <firstname>Syl</firstname>
+                <lastname>Sylvain</lastname>
+            </item>
+        </items>
+    </batch>
+    >>> userxml = xml.find('user')
+    >>> userxml.find('lastlogin').text = ''
+    >>> print tostring(userxml) #doctest: +XMLDATA
+    <user href="http://nohost/plone/view-profile.html?userid=mmanson">
+        <username>mmanson</username>
+        <title>Marilyn Manson</title>
+        <email>leo@example.com</email>
+        <emailsuffix>example.com</emailsuffix>
+        <lastlogin></lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+    >>> print tostring(xml.find('breadcrumbs')) #doctest: +XMLDATA
+    <breadcrumbs>
+        <entry href="http://nohost/plone">Home</entry>
+        <base>http://foo/plone/people/</base>
+        <entry href="http://foo/plone/people/">people</entry>
+        <entry>Browse All People</entry>
+    </breadcrumbs>
+        
+    >>> portal.REQUEST['sort_on'] = 'country'
+    >>> xml = portal.restrictedTraverse('people/@@bycountry.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> print xmlstr #doctest: +XMLDATA
+    <?xml version='1.0' encoding='utf-8'?>
+    <response>
+        <view name="bycountries-people.html" section="people" title="Browse People By Regions/Countries"
+            type="people"/>
+        <menus>
+            <utilitymenu label="By:">
+                <entry href="http://foo/plone/people/all.html">All</entry>
+                <entry href="http://foo/plone/people/bycountry.html">Regions/Countries</entry>
+                <entry href="http://foo/plone/people/byorganization.html">Organizations</entry>
+            </utilitymenu>
+        </menus>
+        <batch end="3" start="1" total="3">
+            <cols>
+                <col dir="desc"
+                    href="http://foo?start:int=0&amp;sort_on=country&amp;sort_order=desc"
+                    id="country">Region/Country</col>
+                <col href="http://foo?start:int=0&amp;sort_on=count&amp;sort_order=asc"
+                    id="count">Count</col>
+            </cols>
+            <pages>
+                <page current="current" href="http://foo?start:int=0&amp;sort_on=country"
+                >1</page>
+            </pages>
+            <pagesize>
+                <size href="http://foo?start:int=0&amp;sort_on=country&amp;sze=10">10</size>
+                <size current="current" href="http://foo?start:int=0&amp;sort_on=country&amp;sze=20">20</size>
+                <size href="http://foo?start:int=0&amp;sort_on=country&amp;sze=50">50</size>
+                <size href="http://foo?start:int=0&amp;sort_on=country&amp;sze=100">100</size>
+            </pagesize>
+            <items>
+                <item href="http://foo/plone/people/withcountry-people.html?name=BRA">
+                    <count>2</count>
+                    <country>Brazil</country>
+                </item>
+                <item href="http://foo/plone/people/withcountry-people.html?name=USA">
+                    <count>4</count>
+                    <country>United States of America</country>
+                </item>
+                <item href="http://foo/plone/people/withcountry-people.html?name=ZIM">
+                    <count>1</count>
+                    <country>Zimbabwe</country>
+                </item>
+            </items>
+        </batch>
+        <user href="http://nohost/plone/view-profile.html?userid=mmanson">
+            <username>mmanson</username>
+            <title>Marilyn Manson</title>
+            <email>leo@example.com</email>
+            <emailsuffix>example.com</emailsuffix>
+            <lastlogin/>
+            <isadmin>false</isadmin>
+        </user>
+        <breadcrumbs>
+            <entry href="http://nohost/plone">Home</entry>
+            <base>http://foo/plone/people/</base>
+            <entry href="http://foo/plone/people/">people</entry>
+            <entry>Browse People By Regions/Countries</entry>
+        </breadcrumbs>
+    </response>
+        
+    >>> portal.REQUEST['sort_on'] = 'organization'
+    >>> xml = portal.restrictedTraverse('people/@@byorganization.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> print xmlstr #doctest: +XMLDATA
+    <?xml version='1.0' encoding='utf-8'?>
+    <response>
+    <menus>
+        <utilitymenu label="By:">
+            <entry href="http://foo/plone/people/all.html">All</entry>
+            <entry href="http://foo/plone/people/bycountry.html">Regions/Countries</entry>
+            <entry href="http://foo/plone/people/byorganization.html">Organizations</entry>
+        </utilitymenu>
+    </menus>
+    <view name="byorganization-people.html" section="people" title="Browse People By Organization"
+        type="people"/>
+    <batch end="6" start="1" total="6">
+        <cols>
+            <col dir="desc" href="http://foo?start:int=0&amp;sort_on=organization&amp;sort_order=desc"
+                id="organization">Organization</col>
+            <col href="http://foo?start:int=0&amp;sort_on=count&amp;sort_order=asc" id="count"
+            >Count</col>
+        </cols>
+        <pages>
+            <page current="current" href="http://foo?start:int=0&amp;sort_on=organization">1</page>
+        </pages>
+        <pagesize>
+            <size href="http://foo?start:int=0&amp;sort_on=organization&amp;sze=10">10</size>
+            <size current="current" href="http://foo?start:int=0&amp;sort_on=organization&amp;sze=20">20</size>
+            <size href="http://foo?start:int=0&amp;sort_on=organization&amp;sze=50">50</size>
+            <size href="http://foo?start:int=0&amp;sort_on=organization&amp;sze=100">100</size>
+         </pagesize>
+         <items>
+            <item href="http://foo/plone/people/withorganization-people.html?name=Enfold Systems">
+                <count>1</count>
+                <organization>Enfold Systems</organization>
+            </item>
+            <item href="http://foo/plone/people/withorganization-people.html?name=NY Dolls">
+                <count>1</count>
+                <organization>NY Dolls</organization>
+            </item>
+            <item href="http://foo/plone/people/withorganization-people.html?name=Punkville">
+                <count>1</count>
+                <organization>Punkville</organization>
+            </item>
+            <item
+                href="http://foo/plone/people/withorganization-people.html?name=Rock n Roll High School">
+                <count>1</count>
+                <organization>Rock n Roll High School</organization>
+            </item>
+            <item
+                href="http://foo/plone/people/withorganization-people.html?name=Roosevelt High School">
+                <count>1</count>
+                <organization>Roosevelt High School</organization>
+            </item>
+            <item href="http://foo/plone/people/withorganization-people.html?name=Universal Studios">
+                <count>2</count>
+                <organization>Universal Studios</organization>
+            </item>
+        </items>
+    </batch>
+    <user href="http://nohost/plone/view-profile.html?userid=mmanson">
+        <username>mmanson</username>
+        <title>Marilyn Manson</title>
+        <email>leo@example.com</email>
+        <emailsuffix>example.com</emailsuffix>
+        <lastlogin/>
+        <isadmin>false</isadmin>
+    </user>
+    <breadcrumbs>
+        <entry href="http://nohost/plone">Home</entry>
+        <base>http://foo/plone/people/</base>
+        <entry href="http://foo/plone/people/">people</entry>
+        <entry>Browse People By Organizations</entry>
+    </breadcrumbs>
+    </response>
+    
+    
+    
+    >>> portal.REQUEST['sort_on'] = 'lastname'
+    >>> portal.REQUEST['name'] = 'Universal Studios'
+    >>> xml = portal.restrictedTraverse('people/@@withorganization-people.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> print xmlstr #doctest: +XMLDATA
+    <?xml version='1.0' encoding='utf-8'?>
+    <response>
+    <view name="withorganization.html" section="people"
+        title="List People for Organization - Universal Studios" type="people"/>
+    <batch end="2" start="1" total="2">
+        <cols>
+            <col dir="desc" href="http://foo?start:int=0&amp;sort_on=lastname&amp;sort_order=desc"
+                id="lastname">Last Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=firstname&amp;sort_order=asc" id="firstname"
+                >First Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=organization&amp;sort_order=asc"
+                id="organization">Organization</col>
+        </cols>
+        <pages>
+            <page current="current" href="http://foo?start:int=0&amp;sort_on=lastname">1</page>
+        </pages>
+        <pagesize>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=10">10</size>
+             <size current="current" href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=20">20</size>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=50">50</size>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=100">100</size>
+         </pagesize>
+         <items>
+            <item href="http://foo/plone/view-profile.html?userid=bbarty">
+                <lastname>barty</lastname>
+                <firstname>billy</firstname>
+                <organization>Universal Studios</organization>
+            </item>
+            <item href="http://foo/plone/view-profile.html?userid=bschreiber">
+                <lastname>schreiberino</lastname>
+                <firstname>bernardino</firstname>
+                <organization>Universal Studios</organization>
+            </item>
+        </items>
+    </batch>
+    <user href="http://nohost/plone/view-profile.html?userid=mmanson">
+        <username>mmanson</username>
+        <title>Marilyn Manson</title>
+        <email>leo@example.com</email>
+        <emailsuffix>example.com</emailsuffix>
+        <lastlogin/>
+        <isadmin>false</isadmin>
+    </user>
+    <breadcrumbs>
+        <entry href="http://nohost/plone">Home</entry>
+        <base>http://foo/plone/people/</base>
+        <entry href="http://foo/plone/people/">people</entry>
+        <entry>List People For Organization - Universal Studios</entry>
+    </breadcrumbs>
+    </response>
+    
+    
+    >>> portal.REQUEST['sort_on'] = 'lastname'
+    >>> portal.REQUEST['name'] = 'USA'
+    >>> xml = portal.restrictedTraverse('people/@@withcountry-people.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> print xmlstr #doctest: +XMLDATA
+    <?xml version='1.0' encoding='utf-8'?>
+    <response>
+    <view name="withcountry.html" section="people"
+        title="List People for Region/Country - United States of America" type="people"/>
+    <batch end="4" start="1" total="4">
+        <cols>
+            <col dir="desc" href="http://foo?start:int=0&amp;sort_on=lastname&amp;sort_order=desc"
+                id="lastname">Last Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=firstname&amp;sort_order=asc" id="firstname"
+                >First Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=organization&amp;sort_order=asc"
+                id="organization">Organization</col>
+        </cols>
+        <pages>
+            <page current="current" href="http://foo?start:int=0&amp;sort_on=lastname">1</page>
+        </pages>
+        <pagesize>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=10">10</size>
+             <size current="current" href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=20">20</size>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=50">50</size>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=100">100</size>
+         </pagesize>
+         <items>
+	        <item href="http://foo/plone/view-profile.html?userid=bidol">
+		        <lastname>Idol</lastname>
+		        <firstname>Billy</firstname>
+		        <organization>Punkville</organization>
+	    	</item>
+		    <item href="http://foo/plone/view-profile.html?userid=jramone">
+		        <lastname>Ramone</lastname>
+		        <firstname>Johnny</firstname>
+		        <organization>Rock n Roll High School</organization>
+		    </item>
+		    <item href="http://foo/plone/view-profile.html?userid=ssylvain">
+                <lastname>Sylvain</lastname>
+                <firstname>Syl</firstname>
+                <organization>NY Dolls</organization>
+            </item>
+            <item href="http://foo/plone/view-profile.html?userid=bschreiber">
+                <lastname>schreiberino</lastname>
+                <firstname>bernardino</firstname>
+                <organization>Universal Studios</organization>
+            </item>
+	    </items>
+    </batch>
+    <user href="http://nohost/plone/view-profile.html?userid=mmanson">
+        <username>mmanson</username>
+        <title>Marilyn Manson</title>
+        <email>leo@example.com</email>
+        <emailsuffix>example.com</emailsuffix>
+        <lastlogin/>
+        <isadmin>false</isadmin>
+    </user>
+    <breadcrumbs>
+        <entry href="http://nohost/plone">Home</entry>
+        <base>http://foo/plone/people/</base>
+        <entry href="http://foo/plone/people/">people</entry>
+        <entry>List People for Region/Country - United States of America</entry>
+    </breadcrumbs>
+    </response>
+    
+    
+
+    >>> portal.REQUEST['sort_on'] = 'lastname'
+    >>> portal.REQUEST['name'] = 'BRA'
+    >>> xml = portal.restrictedTraverse('people/@@withcountry-people.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> print xmlstr #doctest: +XMLDATA
+    <?xml version='1.0' encoding='utf-8'?>
+    <response>
+    <view name="withcountry.html" section="people" title="List People for Region/Country - Brazil"
+        type="people"/>
+    <batch end="2" start="1" total="2">
+        <cols>
+            <col dir="desc" href="http://foo?start:int=0&amp;sort_on=lastname&amp;sort_order=desc"
+                id="lastname">Last Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=firstname&amp;sort_order=asc" id="firstname"
+                >First Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=organization&amp;sort_order=asc"
+                id="organization">Organization</col>
+        </cols>
+        <pages>
+            <page current="current" href="http://foo?start:int=0&amp;sort_on=lastname">1</page>
+        </pages>
+        <pagesize>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=10">10</size>
+             <size current="current" href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=20">20</size>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=50">50</size>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=100">100</size>
+         </pagesize>
+        <items>
+            <item href="http://foo/plone/view-profile.html?userid=mmanson">
+                <lastname>Ricardo</lastname>
+                <firstname>Ricky</firstname>
+                <organization>Enfold Systems</organization>
+            </item>
+            <item href="http://foo/plone/view-profile.html?userid=bbarty">
+                <lastname>barty</lastname>
+                <firstname>billy</firstname>
+                <organization>Universal Studios</organization>
+            </item>
+        </items>
+    </batch>
+    <user href="http://nohost/plone/view-profile.html?userid=mmanson">
+        <username>mmanson</username>
+        <title>Marilyn Manson</title>
+        <email>leo@example.com</email>
+        <emailsuffix>example.com</emailsuffix>
+        <lastlogin/>
+        <isadmin>false</isadmin>
+    </user>
+    <breadcrumbs>
+        <entry href="http://nohost/plone">Home</entry>
+        <base>http://foo/plone/people/</base>
+        <entry href="http://foo/plone/people/">people</entry>
+        <entry>List People for Region/Country - Brazil</entry>
+    </breadcrumbs>
+    </response>
+    
+    
+    >>> portal.REQUEST['sort_on'] = 'lastname'
+    >>> portal.REQUEST['name'] = 'ZIM'
+    >>> portal.REQUEST['end'] = '15'
+    >>> xml = portal.restrictedTraverse('people/@@withcountry-people.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> print xmlstr #doctest: +XMLDATA
+    <?xml version='1.0' encoding='utf-8'?>
+    <response>
+    <view name="withcountry.html" section="people" title="List People for Region/Country - Zimbabwe"
+        type="people"/>
+    <batch end="1" start="1" total="1">
+        <cols>
+            <col dir="desc" href="http://foo?start:int=0&amp;sort_on=lastname&amp;sort_order=desc"
+                id="lastname">Last Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=firstname&amp;sort_order=asc" id="firstname"
+                >First Name</col>
+            <col href="http://foo?start:int=0&amp;sort_on=organization&amp;sort_order=asc"
+                id="organization">Organization</col>
+        </cols>
+        <pages>
+            <page current="current" href="http://foo?start:int=0&amp;sort_on=lastname">1</page>
+        </pages>
+        <pagesize>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=10">10</size>
+             <size current="current" href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=20">20</size>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=50">50</size>
+             <size href="http://foo?start:int=0&amp;sort_on=lastname&amp;sze=100">100</size>
+         </pagesize>
+        <items>
+            <item href="http://foo/plone/view-profile.html?userid=bpetersen">
+                <lastname>Petersen</lastname>
+                <firstname>Bill</firstname>
+                <organization>Roosevelt High School</organization>
+            </item>
+        </items>
+    </batch>
+    <user href="http://nohost/plone/view-profile.html?userid=mmanson">
+        <username>mmanson</username>
+        <title>Marilyn Manson</title>
+        <email>leo@example.com</email>
+        <emailsuffix>example.com</emailsuffix>
+        <lastlogin/>
+        <isadmin>false</isadmin>
+    </user>
+    <breadcrumbs>
+        <entry href="http://nohost/plone">Home</entry>
+        <base>http://foo/plone/people/</base>
+        <entry href="http://foo/plone/people/">people</entry>
+        <entry>List People for Region/Country - Zimbabwe</entry>
+    </breadcrumbs>
+    </response>
+
+Okay, we have six people objects in the catalog, now we'll add thirty more to test pagination, we changed the
+byXXX views to use slices and return ResultSet objects
+
+    >>> countries = {'1':'ALB', '2':'USA', '3':'ATA', '4':'ARG', '5':'BOL', '6':'GAM', '7':'ICE', '8':'IND', '9':'IRQ', '10':'ISR', 
+    ...              '11':'KAZ', '12':'LYA', '13':'LUX', '14':'MEX', '15':'MON', '16':'MNT', '17':'PER', '18':'PHI', '19':'POR', '20':'QAT',
+    ...              '20':'RWA', '21':'ROU', '22':'RUS', '23':'SWE', '24':'SWI', '25':'TUR', '26':'TON', '27':'TRK', '28':'UK', '29':'UAE',
+    ...              '30':'ZIM'}
+    >>> for key in countries.keys():
+    ...     person = PersonObj('bbarty'+key, 'billy'+key, 'barty'+key, countries[key], 'Universal Studios'+key)
+    ...     app.plone.people_catalog.catalog_object(person)
+    >>> portal.REQUEST['sort_on'] = 'organization'
+    >>> xml = portal.restrictedTraverse('people/@@byorganization.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> elem = fromstring(xmlstr)
+    >>> len(elem.findall('batch/items/item'))
+    20
+    >>> int(elem.find('batch').attrib['total'])
+    36
+    >>> len(elem.findall('batch/pages/page'))
+    2
+    >>> portal.REQUEST['start'] = 20
+    >>> xml = portal.restrictedTraverse('people/@@byorganization.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> elem = fromstring(xmlstr)
+    >>> len(elem.findall('batch/items/item')) #starting at 20, should get the remaining sixteen
+    16
+    >>> portal.REQUEST['start'] = 0
+    >>> xml = portal.restrictedTraverse('people/@@bycountry.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> elem = fromstring(xmlstr)
+    >>> len(elem.findall('batch/items/item'))
+    20
+    >>> int(elem.find('batch').attrib['total']) #there are now 31 "unique" countries in the system
+    31
+    >>> len(elem.findall('batch/pages/page'))
+    2
+    >>> portal.REQUEST['start'] = 20
+    >>> xml = portal.restrictedTraverse('people/@@bycountry.html')
+    >>> xmlstr = xml.__call__()
+    >>> xmlstr =  xmlstr[:xmlstr.index(login_node1)+len(login_node1)]+xmlstr[xmlstr.index(login_node2):]
+    >>> elem = fromstring(xmlstr)
+    >>> len(elem.findall('batch/items/item')) #starting at 20, should get the remaining sixteen
+    11
+    
+    

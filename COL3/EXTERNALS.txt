@@ -1,0 +1,5 @@
+# If you want to change externals, modify the relevant lines in this
+# file. Afterwards, run:
+#   svn propset svn:externals -F EXTERNALS.txt .
+# This working copy change must be committed.
+

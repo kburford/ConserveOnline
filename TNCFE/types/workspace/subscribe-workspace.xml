@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="subscribe.html" type="workspace" title="Subscribe To This Workspace" section="workspaces"/>
+    <resource href="/complete/path" uuid="643524525235">
+       
+        <id>california-birds</id>
+        <author href="/profile/paul">Paul EVeritt</author>
+        <size>1</size>
+        <title>California Birds</title>
+        <type title="Workspace">Workspace</type>
+        <description>Some text about the workspace, no HTML.</description>
+        <creation_date>2007-08-20T13:52:23-05:00</creation_date>
+        <modification_date>2007-08-20T13:52:23-05:00</modification_date>
+        <document_type>
+            <item>ecoregionalplans</item>
+            <item>datasets</item>
+            <item>casestudies</item>
+        </document_type>
+        <abstract> Abstract or description of the document, such as the abstract that might appear at
+            the beginning of a journal article, goes here. This allows people to see what the document is
+            about before they download it. </abstract>
+        <language>fr</language>
+        <dateauthored>2006-11-08T08:38:30</dateauthored>
+        <country>USA</country>
+        <biogeographic_realm>oceania</biogeographic_realm>
+        <habitat>
+            <item>desert</item>
+            <item>forest</item>
+        </habitat>
+        <conservation>
+            <item>landwatermanagement</item>
+        </conservation>
+        <directthreat>
+            <item>residcommdev</item>
+        </directthreat>
+        <organization>Enfold Systems</organization>
+        <monitoring>
+            <item>preposttestobs</item>
+        </monitoring>
+        <keywords>
+            <item>biodiversity</item>
+            <item>freshwater</item>
+        </keywords>
+        <license>a-nc</license>
+    </resource>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/workspaces">Workspaces</entry>
+        <entry href="/workspaces/calbirds">California Birds</entry>
+        <entry>Subscribe To This Workspace</entry>
+    </breadcrumbs>
+    <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+        <title>California Birds</title>
+        <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+        <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+        <private>true</private>
+        <section>subscribe</section>
+        <joinlink href="/url/to/join">Join this Workspace >></joinlink>
+        <editconfigurl>http://url.to.configuration</editconfigurl>
+        <editpropsurl>http://url.to.properties</editpropsurl>
+    </workspace>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>true</isadmin>
+    </user>
+</response>

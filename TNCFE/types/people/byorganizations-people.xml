@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="byorganizations-people.html" type="people" title="Browse People By Organizations" section="people"/>
+    <batch total="929" start="21" end="40">
+        <pages>
+            <page current="current" href="#">1</page>
+            <page href="#">2</page>
+            <page href="#">3</page>
+        </pages>
+        <cols>
+            <col id="organization" href="/server/url/to/sort/column" dir="asc">Organization</col>
+            <col id="count" href="/server/url/to/sort/column">Count</col>
+        </cols>
+        <items>
+            <item href="/server/url/to/matched/resource">
+                <organization>Biometric Databases</organization>
+                <count>34</count>
+            </item>
+            <item href="/server/url/to/matched/resource">                
+                <organization>Central Forest Range Management Plan </organization>
+                <count>8</count>
+            </item> 
+            <item href="/server/url/to/matched/resource">
+                <organization>Easement Monitoring Group</organization>
+                <count>13</count>
+            </item>  
+            <item href="/server/url/to/matched/resource">
+                <organization>OECS Protected Areas Planning  </organization>
+                <count>56</count>
+            </item>  
+        </items>
+    </batch>
+    <menus>
+        <utilitymenu label="By:">
+            <entry href="byall.html">All</entry>
+            <entry href="bykeywords.html">Countries</entry>
+            <entry href="byauthors.html" current="current">Organizations</entry>            
+        </utilitymenu>
+    </menus>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/library">People</entry>
+        <entry>Browse People By Organizations</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+</response>

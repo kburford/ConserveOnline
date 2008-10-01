@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<response xmlns:xi="http://www.w3.org/2001/XInclude">
+	<xi:include href="../../shared/staticdata.xml"/>
+	<view id="form">
+		<formcontroller action=".">
+			<title>Step 4: Invite People</title>
+			<description>Note: You can always change this or add more people later.</description>
+			<field name="form.roster" type="member-roster">
+				<required/>
+				<label>Who is allowed to participate in the group?</label>
+				<value>
+					<records count="2">
+						<record index="0">
+							<lastName>Doe</lastName>
+							<firstName>John</firstName>
+							<email>jd@example.com</email>
+							<remove>1</remove>
+						</record>
+						<record index="1">
+							<lastName>DaSilva</lastName>
+							<firstName>Fulano</firstName>
+							<email>fs@example.com</email>
+							<remove>2</remove>
+						</record>
+					</records>
+				</value>
+			</field>
+		</formcontroller>
+	</view>
+	<context>
+		<parent href="http://karl.soros.org/">KARL Home Page</parent>
+	</context>
+</response>

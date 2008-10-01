@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<import-steps>
+
+ <import-step id="portal_form_controller" version="20061009-01"
+               handler="Products.CMFFormController.exportimport.importCMFFormController"
+               title="FormController Tool">
+   Install redirect for member edits
+ </import-step>
+
+ <import-step id="placefulworkflow" version="20070504-01"
+              handler="Products.COL3.setuphandlers.setupPlacefulWorkflow"
+              title="Set up the placeful workflow">
+   <dependency step="workflow"/>
+   <dependency step="COL3-markerinterfaces"/>
+   Set up the placeful workflow on the Workspaces Container at /workspaces
+ </import-step>
+
+ <import-step id="COL3-markerinterfaces" version="20071001-01"
+              handler="Products.COL3.setuphandlers.setupInitialContent"
+              title="Set up initial content">
+   <dependency step="toolset"/>
+   <dependency step="workflow"/>
+   Do some changes on the initial content.
+ </import-step>
+
+ <import-step id="pas" version="20070508-01"
+              handler="Products.COL3.setuphandlers.setupPAS"
+              title="Import PAS structure">
+ </import-step>
+
+ <import-step id="quickinstallerdeps" version="20070815-01"
+              handler="Products.COL3.setuphandlers.setupQuickInstallerDependencies"
+              title="Set up other quickinstaller dependencies">
+ </import-step>
+
+ <import-step id="qplonecaptchas" version="20070517-01"
+              handler="Products.COL3.setuphandlers.setupCaptchas"
+              title="Set up the qPloneCaptchas product">
+ </import-step>
+
+ <import-step id="toolset" version="20040630-01"
+              handler="Products.GenericSetup.tool.importToolset"
+              title="Required tools">
+   Create required tools, replacing any of the wrong class, and remove
+   forbidden ones.
+ </import-step>
+
+ <import-step id="setupportalindexes" version="20071019-01"
+              handler="Products.COL3.setuphandlers.setupPortalIndexes"
+              title="Add Custom Indexes to Portal Catalog">
+ </import-step>
+
+ <import-step id="setuptransforms"
+              version="20080207-01"
+              handler="Products.COL3.setuphandlers.setupTransforms"
+              title="Allows custom configuration of the safe_html transform.">
+ </import-step>
+
+</import-steps>

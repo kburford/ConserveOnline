@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="profile.html" type="profile" title="My Profile" section="people"/>
+  <portlets>
+    <portlet title="My Invitations" type="invitations">
+      <resource
+        href="http://dev.tnc.enfoldsystems.com:84/workspaces/as-kyle-workspace/accept-invitation.html?id=2007-12-11_03-59-55.182829-1I6hkH">
+        <title>Amy Smith Kyle Workspace</title>
+        <manager>Kyle Burford</manager>
+        <created>2006-11-08T08:38:30</created>
+      </resource>
+    </portlet>
+    <portlet title="My Workspaces" type="workspaces">
+      <resource href="http://dev.tnc.enfoldsystems.com:84/workspaces/paulspace">
+        <title>Paulie's Workspace</title>
+        <status>Manager</status>
+        <created>2006-11-08T08:38:30</created>
+      </resource>
+    </portlet>
+  </portlets>
+
+  <profile>
+    <about href="http://www.conserveonline.org/profiles/paul">
+      <email>paul@agendaless.com</email>
+      <firstname>Paul</firstname>
+      <lastname>Everitt</lastname>
+      <password>********</password>
+      <country>SWA</country>
+      <background>academic</background>
+      <organization>Agendaless Consulting</organization>
+      <organizationtype>ngo</organizationtype>
+      <joined>2007-10-31T10:28:26-05:00</joined>
+    </about>
+    <bio href="http://dev.tnc.enfoldsystems.com:84/edit-bio.html">
+      <html:div class="tinyFix" xmlns:html="http://www.w3.org/1999/xhtml">
+        
+        <html:div class="tinyFix">My name is Paul Everitt.</html:div>
+        <html:div class="tinyFix">&#160;</html:div>
+        <html:div class="tinyFix">I live in
+          <html:strong>Virginia</html:strong>.&#160;</html:div>
+      </html:div>
+    </bio>
+  </profile>
+
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/people/">People</entry>
+    <entry>Paul Everitt</entry>
+  </breadcrumbs>
+
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+</response>

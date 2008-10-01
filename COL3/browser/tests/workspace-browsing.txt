@@ -1,0 +1,689 @@
+This is a series of tests to test the browsing of workspaces
+
+First some handy imports
+
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring
+    >>> from Products.ATContentTypes.tests.utils import FakeRequestSession
+    >>> SESSION = FakeRequestSession()
+    >>> from Products.COL3.browser.workspacebrowsing import WorkspaceByCountryViewFragment
+    >>> from Products.COL3.browser.workspacebrowsing import WorkspaceByCountryBatchFragment
+    >>> from Products.COL3.browser.workspacebrowsing import WorkspaceWithCountryBatchFragment
+    >>> from Products.COL3.browser.workspacebrowsing import WorkspaceWithCountryViewFragment
+    >>> from Products.COL3.browser.workspacebrowsing import WSBrowseBySearchtermViewFragment
+    >>> from Products.COL3.browser.workspacebrowsing import WSBrowseBySearchtermBatchFragment
+    >>> from Products.COL3.browser.workspacebrowsing import WSBrowseWithSearchtermViewFragment
+    >>> from Products.COL3.browser.workspacebrowsing import WSBrowseWithSearchtermBatchFragment
+    >>> from Products.COL3.browser.workspacebrowsing import BrowseMyWorkspacesViewFragment
+    >>> from Products.COL3.browser.workspacebrowsing import BrowseMyWorkspacesBatchFragment
+    >>> from Products.COL3.browser.workspacebrowsing import BrowseMyWorkspacesPage
+    >>> from Products.COL3.tests.xml_validator import XMLValidator
+    >>> validator = XMLValidator()
+    >>> def prepWorkspaceContainerAndRequest(app=app, SESSION=SESSION):
+    ...     app = makerequest(app.aq_base).unrestrictedTraverse('++skin++col')
+    ...     request = app.REQUEST
+    ...     request['SESSION'] = SESSION
+    ...     return app.plone.workspaces, request
+
+A quick test to make sure the view fragment is correct
+
+   >>> viewfrag = WorkspaceByCountryViewFragment(app.plone.workspaces, app.REQUEST)
+   >>> print tostring(viewfrag.asElement()) #doctest: +XMLDATA
+   <view name="bycountries-workspaces.html" section="workspaces" title="Browse Workspaces By Region/Country"
+    type="workspaces"/>
+
+Now let's create some workspaces to actually browse, we'll need two for one country
+and two for another, then we'll add more, test, add more, test...
+    
+    >>> self.login()
+    >>> self.setRoles(['Member','Community Member'])
+
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'USA Workspace One'
+    >>> request.form['form.id'] = 'usaworkspaceone'
+    >>> request.form['form.description'] = 'My USA Workspace One Description'
+    >>> request.form['form.country'] = 'USA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'education'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.keywords'] = 'usakeyword1'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/usaworkspaceone/wsmembers/workspace-members.html
+
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'USA Workspace Two'
+    >>> request.form['form.id'] = 'usaworkspacetwo'
+    >>> request.form['form.description'] = 'My USA Workspace Two Description'
+    >>> request.form['form.country'] = 'USA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'education'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.keywords'] = 'usakeyword1'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/usaworkspacetwo/wsmembers/workspace-members.html
+    
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'BRA Workspace One'
+    >>> request.form['form.id'] = 'braworkspaceone'
+    >>> request.form['form.description'] = 'My BRA Workspace One Description'
+    >>> request.form['form.country'] = 'BRA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'education'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.keywords'] = 'brakeyword1'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/braworkspaceone/wsmembers/workspace-members.html
+    
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'BRA Workspace Two'
+    >>> request.form['form.id'] = 'braworkspacetwo'
+    >>> request.form['form.description'] = 'My BRA Workspace Two Description'
+    >>> request.form['form.country'] = 'BRA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'education'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.keywords'] = 'brakeyword1'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/braworkspacetwo/wsmembers/workspace-members.html
+
+Workspaces are created, let's try to browse them...
+
+   >>> bycountryfragment = WorkspaceByCountryBatchFragment(app.plone.workspaces, app.REQUEST)
+   >>> print tostring(bycountryfragment.asElement()) #doctest:+XMLDATA
+   <batch end="2" start="1" total="2">
+	    <cols>
+	        <col dir="desc"
+	            href="http://nohost?start:int=0&amp;sort_on=country&amp;sort_order=desc"
+	            id="country">Region/Country</col>
+	        <col href="http://nohost?start:int=0&amp;sort_on=count&amp;sort_order=asc"
+	            id="count">Count</col>
+	    </cols>
+	    <pages>
+	        <page current="current" href="http://nohost?start:int=0&amp;sort_on=country">1</page>
+	    </pages>
+            <pagesize>
+                <size href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=10">10</size>
+                <size current="current" href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=20">20</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=50">50</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=100">100</size>
+            </pagesize>
+	    <items>
+	        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=BRA">
+	            <count>2</count>
+	            <country>Brazil</country>
+	        </item>
+	        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=USA">
+	            <count>2</count>
+	            <country>United States of America</country>
+	        </item>
+	    </items>
+    </batch>
+
+   
+   
+
+Now lets add some more workspaces with different countries and sit back and watch the fun!!!
+
+
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'BRA Workspace Three'
+    >>> request.form['form.id'] = 'braworkspacethree'
+    >>> request.form['form.description'] = 'My BRA Workspace Three Description'
+    >>> request.form['form.country'] = 'BRA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'education'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.keywords'] = 'brakeyword2'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/braworkspacethree/wsmembers/workspace-members.html
+
+    >>> bycountryfragment = WorkspaceByCountryBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> print tostring(bycountryfragment.asElement()) #doctest:+XMLDATA
+    <batch end="2" start="1" total="2">
+	    <cols>
+	        <col dir="desc"
+	            href="http://nohost?start:int=0&amp;sort_on=country&amp;sort_order=desc"
+	            id="country">Region/Country</col>
+	        <col href="http://nohost?start:int=0&amp;sort_on=count&amp;sort_order=asc"
+	            id="count">Count</col>
+	    </cols>
+	    <pages>
+	        <page current="current" href="http://nohost?start:int=0&amp;sort_on=country">1</page>
+	    </pages>
+            <pagesize>
+                <size href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=10">10</size>
+                <size current="current" href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=20">20</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=50">50</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=100">100</size>
+            </pagesize>
+	    <items>
+	        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=BRA">
+	            <count>3</count>
+	            <country>Brazil</country>
+	        </item>
+	        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=USA">
+	            <count>2</count>
+	            <country>United States of America</country>
+	        </item>
+	    </items>
+    </batch>
+    
+    
+    
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'JAM Workspace One'
+    >>> request.form['form.id'] = 'jamworkspaceone'
+    >>> request.form['form.description'] = 'My JAM Workspace One Description'
+    >>> request.form['form.country'] = 'JAM'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'education'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.keywords'] = 'jamkeyword1'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/jamworkspaceone/wsmembers/workspace-members.html
+    
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'JAM Workspace Two'
+    >>> request.form['form.id'] = 'jamworkspacetwo'
+    >>> request.form['form.description'] = 'My JAM Workspace Two Description'
+    >>> request.form['form.country'] = 'JAM'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'education'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.keywords'] = 'jamkeyword1'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/jamworkspacetwo/wsmembers/workspace-members.html
+    
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'ZIM Workspace One'
+    >>> request.form['form.id'] = 'zimworkspaceone'
+    >>> request.form['form.description'] = 'My ZIM Workspace One Description'
+    >>> request.form['form.country'] = u'ZIM'
+    >>> request.form['form.biogeographic_realm'] = u'indomalay'
+    >>> request.form['form.habitat'] = u'caves'
+    >>> request.form['form.conservation'] = u'education'
+    >>> request.form['form.directthreat'] = u'biological'
+    >>> request.form['form.monitoring'] = u'none'
+    >>> request.form['form.organization'] = u'Not Much'
+    >>> request.form['form.is_private'] = u'False'
+    >>> request.form['form.keywords'] = 'zimkeywordone'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/zimworkspaceone/wsmembers/workspace-members.html
+    
+    >>> bycountryfragment = WorkspaceByCountryBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> print tostring(bycountryfragment.asElement()) #doctest:+XMLDATA
+    <batch end="4" start="1" total="4">
+	    <cols>
+	        <col dir="desc"
+	            href="http://nohost?start:int=0&amp;sort_on=country&amp;sort_order=desc"
+	            id="country">Region/Country</col>
+	        <col href="http://nohost?start:int=0&amp;sort_on=count&amp;sort_order=asc"
+	            id="count">Count</col>
+	    </cols>
+	    <pages>
+	        <page current="current" href="http://nohost?start:int=0&amp;sort_on=country">1</page>
+	    </pages>
+            <pagesize>
+                <size href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=10">10</size>
+                <size current="current" href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=20">20</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=50">50</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=country&amp;sze=100">100</size>
+            </pagesize>
+	    <items>
+	        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=BRA">
+	            <count>3</count>
+	            <country>Brazil</country>
+	        </item>
+	        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=JAM">
+	            <count>2</count>
+	            <country>Jamaica</country>
+	        </item>
+	        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=USA">
+	            <count>2</count>
+	            <country>United States of America</country>
+	        </item>
+	        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=ZIM">
+	            <count>1</count>
+	            <country>Zimbabwe</country>
+	        </item>
+	    </items>
+    </batch>
+
+    >>> app.REQUEST['sort_on'] = 'count'
+    >>> bycountryfragment = WorkspaceByCountryBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> print tostring(bycountryfragment.asElement()) #doctest:+XMLDATA
+    <batch end="4" start="1" total="4">
+    <cols>
+        <col href="http://nohost?start:int=0&amp;sort_on=country&amp;sort_order=asc" id="country">Region/Country</col>
+        <col dir="desc" href="http://nohost?start:int=0&amp;sort_on=count&amp;sort_order=desc" id="count"
+            >Count</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://nohost?start:int=0&amp;sort_on=count">1</page>
+    </pages>
+            <pagesize>
+                <size href="http://nohost?start:int=0&amp;sort_on=count&amp;sze=10">10</size>
+                <size current="current" href="http://nohost?start:int=0&amp;sort_on=count&amp;sze=20">20</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=count&amp;sze=50">50</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=count&amp;sze=100">100</size>
+            </pagesize>
+    <items>
+        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=ZIM">
+            <count>1</count>
+            <country>Zimbabwe</country>
+        </item>
+        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=JAM">
+            <count>2</count>
+            <country>Jamaica</country>
+        </item>
+        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=USA">
+            <count>2</count>
+            <country>United States of America</country>
+        </item>
+        <item href="http://nohost/plone/workspaces/withcountry-workspaces.html?country=BRA">
+            <count>3</count>
+            <country>Brazil</country>
+        </item>
+    </items>
+    </batch>
+    
+
+Now to test the fragments for the with country functionality
+   
+    >>> app.REQUEST['sort_on'] = 'title'
+    >>> app.REQUEST['country'] = 'USA'
+    >>> withcountryviewfrag = WorkspaceWithCountryViewFragment(app.plone.workspaces, app.REQUEST)
+    >>> print tostring(withcountryviewfrag.asElement()) #doctest: +XMLDATA
+    <view name="withcountry-workspaces.html" section="workspaces" title="List Workspaces For Region/Country - United States of America"
+     type="workspaces"/>
+    
+    >>> withcountrybatchfrag = WorkspaceWithCountryBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> withcountrybatchelem = withcountrybatchfrag.asElement()
+    >>> for element in withcountrybatchelem.findall('items/item/dateupdated'):
+    ...     element.text = ''
+    >>> print tostring(withcountrybatchelem) #doctest: +XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+        <col dir="desc" href="http://nohost?start:int=0&amp;sort_on=title&amp;sort_order=desc" id="title"
+            >Workspace Title</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=dateupdated&amp;sort_order=asc" id="dateupdated"
+            >Date Updated</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://nohost?start:int=0&amp;sort_on=title">1</page>
+    </pages>
+    <pagesize>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+        <size current="current" href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://nohost/plone/workspaces/usaworkspaceone">
+            <title>USA Workspace One</title>
+            <dateupdated></dateupdated>
+        </item>
+        <item href="http://nohost/plone/workspaces/usaworkspacetwo">
+            <title>USA Workspace Two</title>
+            <dateupdated></dateupdated>
+        </item>
+    </items>
+    </batch>
+    
+    >>> app.REQUEST['country'] = 'JAM'
+    >>> withcountrybatchfrag = WorkspaceWithCountryBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> withcountrybatchelem = withcountrybatchfrag.asElement()
+    >>> for element in withcountrybatchelem.findall('items/item/dateupdated'):
+    ...     element.text = ''
+    >>> print tostring(withcountrybatchelem) #doctest: +XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+        <col dir="desc" href="http://nohost?start:int=0&amp;sort_on=title&amp;sort_order=desc" id="title"
+            >Workspace Title</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=dateupdated&amp;sort_order=asc" id="dateupdated"
+            >Date Updated</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://nohost?start:int=0&amp;sort_on=title">1</page>
+    </pages>
+    <pagesize>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+        <size current="current" href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://nohost/plone/workspaces/jamworkspaceone">
+            <title>JAM Workspace One</title>
+            <dateupdated></dateupdated>
+        </item>
+        <item href="http://nohost/plone/workspaces/jamworkspacetwo">
+            <title>JAM Workspace Two</title>
+            <dateupdated></dateupdated>
+        </item>
+    </items>
+    </batch>
+  
+Now to test the fragments for the by searchterm functionality
+   
+    >>> app.REQUEST['sort_on'] = 'searchterm'
+    >>> bysearchtermviewfrag = WSBrowseBySearchtermViewFragment(app.plone.workspaces, app.REQUEST)
+    >>> print tostring(bysearchtermviewfrag.asElement()) #doctest: +XMLDATA
+    <view name="bysearchterms-workspaces.html" section="workspaces" title="Browse Workspaces by Search Terms"
+     type="workspaces"/>     
+
+    >>> bysearchtermsbatchfrag = WSBrowseBySearchtermBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> print tostring(bysearchtermsbatchfrag.asElement()) #doctest: +XMLDATA
+    <batch end="5" start="1" total="5">
+	    <cols>
+	        <col dir="desc"
+	            href="http://nohost?start:int=0&amp;sort_on=searchterm&amp;sort_order=desc"
+	            id="searchterm">Search Term</col>
+	        <col href="http://nohost?start:int=0&amp;sort_on=count&amp;sort_order=asc"
+	            id="count">Count</col>
+	    </cols>
+	    <pages>
+	        <page current="current" href="http://nohost?start:int=0&amp;sort_on=searchterm">1</page>
+	    </pages>
+            <pagesize>
+                <size href="http://nohost?start:int=0&amp;sort_on=searchterm&amp;sze=10">10</size>
+                <size current="current" href="http://nohost?start:int=0&amp;sort_on=searchterm&amp;sze=20">20</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=searchterm&amp;sze=50">50</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=searchterm&amp;sze=100">100</size>
+            </pagesize>
+	    <items>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=brakeyword1">
+	            <count>2</count>
+	            <searchterm>brakeyword1</searchterm>
+	        </item>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=brakeyword2">
+	            <count>1</count>
+	            <searchterm>brakeyword2</searchterm>
+	        </item>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=jamkeyword1">
+	            <count>2</count>
+	            <searchterm>jamkeyword1</searchterm>
+	        </item>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=usakeyword1">
+	            <count>2</count>
+	            <searchterm>usakeyword1</searchterm>
+	        </item>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=zimkeywordone">
+	            <count>1</count>
+	            <searchterm>zimkeywordone</searchterm>
+	        </item>
+	    </items>
+    </batch>
+    
+    >>> app.REQUEST['sort_on'] = 'count'
+    >>> bysearchtermsbatchfrag = WSBrowseBySearchtermBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> print tostring(bysearchtermsbatchfrag.asElement()) #doctest: +XMLDATA
+    <batch end="5" start="1" total="5">
+	    <cols>
+	        <col href="http://nohost?start:int=0&amp;sort_on=searchterm&amp;sort_order=asc"
+	            id="searchterm">Search Term</col>
+	        <col dir="desc"
+	            href="http://nohost?start:int=0&amp;sort_on=count&amp;sort_order=desc"
+	            id="count">Count</col>
+	    </cols>
+	    <pages>
+	        <page current="current" href="http://nohost?start:int=0&amp;sort_on=count">1</page>
+	    </pages>
+            <pagesize>
+                <size href="http://nohost?start:int=0&amp;sort_on=count&amp;sze=10">10</size>
+                <size current="current" href="http://nohost?start:int=0&amp;sort_on=count&amp;sze=20">20</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=count&amp;sze=50">50</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=count&amp;sze=100">100</size>
+            </pagesize>
+	    <items>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=brakeyword2">
+	            <count>1</count>
+	            <searchterm>brakeyword2</searchterm>
+	        </item>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=zimkeywordone">
+	            <count>1</count>
+	            <searchterm>zimkeywordone</searchterm>
+	        </item>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=brakeyword1">
+	            <count>2</count>
+	            <searchterm>brakeyword1</searchterm>
+	        </item>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=jamkeyword1">
+	            <count>2</count>
+	            <searchterm>jamkeyword1</searchterm>
+	        </item>
+	        <item
+	            href="http://nohost/plone/workspaces/withsearchterm-workspaces.html?searchterm=usakeyword1">
+	            <count>2</count>
+	            <searchterm>usakeyword1</searchterm>
+	        </item>
+	    </items>
+    </batch>
+    
+    
+New we can test the with searchterm batch fragment
+
+    >>> app.REQUEST['sort_on'] = 'title'
+    >>> app.REQUEST['searchterm'] = 'usakeyword1'
+    >>> withsearchtermsviewfrag = WSBrowseWithSearchtermViewFragment(app.plone.workspaces, app.REQUEST)
+    >>> print tostring(withsearchtermsviewfrag.asElement()) #doctest: +XMLDATA
+    <view name="withsearchterm-workspaces.html" section="workspaces" title="List Workspaces For Search Term - usakeyword1" type="workspaces" />
+    
+    >>> withsearchtermsbatchfrag = WSBrowseWithSearchtermBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> withsearchtermsbatchelem = withsearchtermsbatchfrag.asElement()
+    >>> for element in withsearchtermsbatchelem.findall('items/item/dateupdated'):
+    ...     element.text = ''
+    >>> print tostring(withsearchtermsbatchelem) #doctest: +XMLDATA
+    <batch end="2" start="1" total="2">
+	    <cols>
+	        <col dir="desc"
+	            href="http://nohost?start:int=0&amp;sort_on=title&amp;sort_order=desc"
+	            id="title">Workspace Title</col>
+	        <col href="http://nohost?start:int=0&amp;sort_on=dateupdated&amp;sort_order=asc"
+	            id="dateupdated">Date Updated</col>
+	    </cols>
+	    <pages>
+	        <page current="current" href="http://nohost?start:int=0&amp;sort_on=title">1</page>
+	    </pages>
+            <pagesize>
+                <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+                <size current="current" href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+                <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+            </pagesize>
+	    <items>
+	        <item href="http://nohost/plone/workspaces/usaworkspaceone">
+	            <title>USA Workspace One</title>
+	            <dateupdated/>
+	        </item>
+	        <item href="http://nohost/plone/workspaces/usaworkspacetwo">
+	            <title>USA Workspace Two</title>
+	            <dateupdated/>
+	        </item>
+	    </items>
+    </batch>
+    
+    >>> app.REQUEST['searchterm'] = 'brakeyword1'
+    >>> withsearchtermsbatchfrag = WSBrowseWithSearchtermBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> withsearchtermsbatchelem = withsearchtermsbatchfrag.asElement()
+    >>> for element in withsearchtermsbatchelem.findall('items/item/dateupdated'):
+    ...     element.text = ''
+    >>> print tostring(withsearchtermsbatchelem) #doctest: +XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+        <col dir="desc"
+            href="http://nohost?start:int=0&amp;sort_on=title&amp;sort_order=desc"
+            id="title">Workspace Title</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=dateupdated&amp;sort_order=asc"
+            id="dateupdated">Date Updated</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://nohost?start:int=0&amp;sort_on=title">1</page>
+    </pages>
+    <pagesize>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+        <size current="current" href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://nohost/plone/workspaces/braworkspaceone">
+            <title>BRA Workspace One</title>
+            <dateupdated/>
+        </item>
+        <item href="http://nohost/plone/workspaces/braworkspacetwo">
+            <title>BRA Workspace Two</title>
+            <dateupdated/>
+        </item>
+    </items>
+    </batch>
+    
+    >>> myworkspacesviewfrag = BrowseMyWorkspacesViewFragment(app.plone.workspaces, app.REQUEST)
+    >>> print tostring(myworkspacesviewfrag.asElement()) #doctest: +XMLDATA
+    <view name="browsemine-workspaces.html" section="workspaces" title="Browse My Workspaces" type="workspaces" />
+    
+    >>> myworkspacesbatchfrag = BrowseMyWorkspacesBatchFragment(app.plone.workspaces, app.REQUEST)
+    >>> myworkspacesbatchelem = myworkspacesbatchfrag.asElement()
+    >>> for element in myworkspacesbatchelem.findall('items/item/dateupdated'):
+    ...     element.text = ''
+
+    >>> print tostring(myworkspacesbatchelem) #doctest: +XMLDATA
+    <batch end="8" start="1" total="8">
+    <cols>
+        <col dir="desc" href="http://nohost?start:int=0&amp;sort_on=title&amp;sort_order=desc" id="title"
+            >Workspace Title</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=dateupdated&amp;sort_order=asc" id="dateupdated"
+            >Date Updated</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://nohost?start:int=0&amp;sort_on=title">1</page>
+    </pages>
+    <pagesize>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+        <size current="current" href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://nohost/plone/workspaces/braworkspaceone">
+            <title>BRA Workspace One</title>
+            <dateupdated/>
+        </item>
+        <item href="http://nohost/plone/workspaces/braworkspacethree">
+            <title>BRA Workspace Three</title>
+            <dateupdated/>
+        </item>
+        <item href="http://nohost/plone/workspaces/braworkspacetwo">
+            <title>BRA Workspace Two</title>
+            <dateupdated/>
+        </item>
+        <item href="http://nohost/plone/workspaces/jamworkspaceone">
+            <title>JAM Workspace One</title>
+            <dateupdated/>
+        </item>
+        <item href="http://nohost/plone/workspaces/jamworkspacetwo">
+            <title>JAM Workspace Two</title>
+            <dateupdated/>
+        </item>
+        <item href="http://nohost/plone/workspaces/usaworkspaceone">
+            <title>USA Workspace One</title>
+            <dateupdated/>
+        </item>
+        <item href="http://nohost/plone/workspaces/usaworkspacetwo">
+            <title>USA Workspace Two</title>
+            <dateupdated/>
+        </item>
+        <item href="http://nohost/plone/workspaces/zimworkspaceone">
+            <title>ZIM Workspace One</title>
+            <dateupdated/>
+        </item>
+    </items>
+    </batch>
+    
+Now we try to traverse to the workspaces folder as an anonymous user, this should cause us to be redirected
+to the view all workspaces screen instead of the default view my workspaces screen
+
+    >>> self.logout()
+    >>> workspaces = BrowseMyWorkspacesPage(app.plone.workspaces, app.REQUEST)
+    >>> workspaces.getResponse()
+    Traceback (most recent call last):
+    ...
+    Redirect: http://nohost/plone/workspaces/all.html
+

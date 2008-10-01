@@ -1,0 +1,185 @@
+==================
+Profile View Tests
+==================
+
+This is the test for the user profile view, first we add a member
+
+ >>> from Products.CMFCore.utils import getToolByName
+ >>> from elementtree.ElementTree import tostring
+ >>> pmem = getToolByName(self.portal, 'portal_membership')
+ >>> pmem.addMember('bjstest', '12345', ['Manager'], [])
+ >>> pmem.addMember('bjstest2', '12345', ['Manager'], [])
+ >>> me = pmem.getMemberById('bjstest')
+ >>> self.login(me.id)
+ >>> newprops = {'description':'I have a long history of freaking out!!!',
+ ...             'fullname': 'Jumpin Jehosophat',
+ ...             'organization':'Enfold Systems',
+ ...             'email':'jjehosophat@foo.com',
+ ...             'country':'United States Of America',
+ ...             'firstname':'Jumpin',
+ ...             'lastname':'Jehosophat',
+ ...             'type_of_organization':'Import/Export',}
+
+ >>> me.setMemberProperties(newprops)
+
+Spot Checking some of the new properties set above
+
+ >>> me.getProperty('description')
+ 'I have a long history of freaking out!!!'
+ >>> me.getProperty('fullname')
+ 'Jumpin Jehosophat'
+ >>> me.getProperty('country')
+ 'United States Of America'
+ >>> me.getProperty('email')
+ 'jjehosophat@foo.com'
+ >>> me.getProperty('firstname')
+ 'Jumpin'
+ >>> me.reindexObject()
+ >>> self.login(me.id)
+
+Need to add a workspace to invite the member above to
+
+ >>> portal = self.portal
+ >>> self.setRoles(['Member','Community Member'])
+ >>> portal.workspaces.invokeFactory("Workspace", "bjsws1") and None
+ >>> ws1 = portal.workspaces['bjsws1']
+ >>> ws1.id
+ 'bjsws1'
+ >>> ws1.reindexObject()
+
+ >>> portal.workspaces.invokeFactory("Workspace", "bjsws2") and None
+ >>> ws2 = portal.workspaces['bjsws2']
+ >>> ws2.id
+ 'bjsws2'
+ >>> ws2.reindexObject()
+
+Now get the invitation add tool and invite the person above
+
+ >>> invtool = getToolByName(app.plone, 'workspace_invitations')
+ >>> invids = invtool.inviteToWorkspace(ws1, (me.getProperty('email'),))
+ >>> invites = invtool.getInvitationsForEmail(me.getProperty('email'))
+ >>> len([r for r in invites])
+ 1
+
+Now add the member to the second workspace created
+
+ >>> from Products.COL3.interfaces.workspace import IWorkspaceMemberManagement
+ >>> from Products.COL3.browser.member import MemberWorkspacesMixin
+ >>> wm = IWorkspaceMemberManagement(ws2)
+ >>> wm.addMember(me)
+ >>> pg = getToolByName(self.portal, 'portal_groups')
+ >>> groupIds = pg.getGroupsForPrincipal(me)
+ >>> [r for r in groupIds]
+ ['bjsws1members', 'bjsws1admins', 'bjsws2members', 'bjsws2admins']
+
+ >>> ctx = self.portal.unrestrictedTraverse("++skin++col")
+ >>> from Products.COL3.browser.user import ViewProfileFragment
+ >>> app.REQUEST['userid'] = 'bjstest'
+ >>> profilefrag = ViewProfileFragment(self.portal, app.REQUEST)
+ >>> profile_elem = profilefrag.asElement()
+ >>> print profile_elem.find('firstname').text
+ Jumpin
+ >>> print profile_elem.find('lastname').text
+ Jehosophat
+ >>> print profile_elem.find('about').attrib['href']
+ http://nohost/plone/edit-profile.html
+ >>> print profile_elem.find('about/country').text
+ United States Of America
+ >>> print profile_elem.find('about/background').text
+ other
+ >>> print profile_elem.find('about/organization').text
+ other
+ >>> print profile_elem.find('about/password').text
+ ********
+ >>> print profile_elem.find('bio').attrib['href']
+ http://nohost/plone/edit-bio.html
+ >>> print profile_elem.find('bio').getchildren()[0].text
+ <BLANKLINE>
+ I have a long history of freaking out!!!
+ <BLANKLINE>
+
+Testing the userworkspace porlet fragment which contains all the workspaces a user
+is a member of
+
+ >>> from Products.COL3.browser.user import UserWorkspacesPortletFragment
+ >>> workspacesfrag = UserWorkspacesPortletFragment(ctx, app.REQUEST)
+ >>> portletelem = workspacesfrag.asElement()
+ >>> print portletelem.attrib['title']
+ My Workspaces
+ >>> print portletelem.attrib['type']
+ workspaces
+ >>> resources = portletelem.findall('resource')
+ >>> for resource in resources:
+ ...     print resource.attrib['href']
+ ...     print resource.find('title').text
+ ...     print resource.find('status').text
+ http://nohost/plone/workspaces/bjsws1
+ bjsws1
+ Manager
+ http://nohost/plone/workspaces/bjsws2
+ bjsws2
+ Manager
+
+ >>> workspacesfrag_elem = workspacesfrag.asElement()
+
+Testing the invitation portlet fragment for the user view 
+
+ >>> from Products.COL3.browser.user import UserInvitationPortletFragment
+ >>> invitesfrag = UserInvitationPortletFragment(ctx, app.REQUEST)
+ >>> invite_elem = invitesfrag.asElement()
+ >>> print invite_elem.attrib['title']
+ My Invitations
+ >>> print invite_elem.attrib['type']
+ invitations
+ >>> inv = invite_elem.find('resource').attrib['href']
+ >>> print inv[:inv.index('?')]
+ http://nohost/plone/workspaces/bjsws1/accept-invitation.html
+ >>> print invite_elem.find('resource/manager').text
+ bjstest
+
+This is to test putting both the invitation and the workspace portlets together,
+there is a portlets fragment which contains two other fragments 
+
+ >>> from Products.COL3.browser.user import ViewProfilePortletFragment
+ >>> portalsfrag = ViewProfilePortletFragment(ctx, app.REQUEST)
+ >>> portlets_elem = portalsfrag.asElement()
+ >>> portlets = portlets_elem.findall('portlet')
+ >>> len(portlets)
+ 2
+ >>> portlet = portlets[0]
+ >>> print portlet.attrib['title']
+ My Invitations
+ >>> print portlet.attrib['type']
+ invitations
+ >>> resources = portlet.findall('resource')
+ >>> for resource in resources:
+ ...     print resource.find('manager').text
+ bjstest
+ >>> portlet = portlets[1]
+ >>> print portlet.attrib['title']
+ My Workspaces
+ >>> print portlet.attrib['type']
+ workspaces
+ >>> resources = portlet.findall('resource')
+ >>> for resource in resources:
+ ...     print resource.find('title').text
+ ...     print resource.find('status').text
+ bjsws1
+ Manager
+ bjsws2
+ Manager
+
+Need to test to make sure when viewing someone else's profile that the right stuff is returned
+
+ >>> app.REQUEST['userid'] = 'bjstest2'
+ >>> from Products.COL3.browser.user import ViewProfilePortletFragment
+ >>> portalsfrag = ViewProfilePortletFragment(ctx, app.REQUEST)
+ >>> portlets_elem = portalsfrag.asElement()
+ >>> portlets = portlets_elem.findall('portlet')
+ >>> len(portlets)
+ 1
+ >>> portlet = portlets[0]
+ >>> print portlet.attrib['title']
+ Member of Workspaces
+ >>> print portlet.attrib['type']
+ workspaces

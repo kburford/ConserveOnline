@@ -1,0 +1,24 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:contentratings="http://namespaces.plone.org/contentratings">
+
+  <include package="contentratings" />
+
+  <interface
+      interface=".interfaces.IRecommendationRating"
+      type="contentratings.interfaces.IRatingType"
+      />
+
+  <class class="..content.library.LibraryFile">
+      <implements interface=".interfaces.IRecommendationRatable" />
+  </class>
+
+  <contentratings:category
+      for=".interfaces.IRecommendationRatable"
+      title="Recommendation Rating Category"
+      storage=".storage.RecommendationRatingStorage"
+      />
+
+  <interface interface=".interfaces.IRecommendationRatable" />
+
+</configure>

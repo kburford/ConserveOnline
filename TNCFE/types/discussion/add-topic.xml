@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="add.html" type="topic" title="Add Topic" section="workspaces"/>
+  <formcontroller action=".">
+    <field name="form.title" widget="text" required="required">
+      <label>Title</label>
+      <description>Provide a descriptive title for your page.</description>
+    </field>
+    <field name="form.body" widget="editor" required="required">
+      <label>Content</label>
+      <description>Use the rich-text editor to type formatted text.</description>
+    </field>
+    <submit name="submit">Save</submit>
+    <submit name="cancel">Cancel</submit>
+  </formcontroller>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry href="/workspaces/california-birds/documents/">Discussion</entry>
+    <entry>Add Topic</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>discussions</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+</response>

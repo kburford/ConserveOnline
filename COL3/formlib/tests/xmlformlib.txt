@@ -1,0 +1,218 @@
+========================================================
+Making formlib generate the xml we need for the frontend
+========================================================
+
+Formlib knows how to generate HTML forms, but we need it to generate our xml flavour for forms.
+
+Let's start with a test schema that we'll later to turn into a form.
+
+    >>> from zope import interface, schema
+    >>> from zope.formlib import form
+    >>> from elementtree.ElementTree import Element, SubElement, tostring
+    >>> from Products.COL3.formlib import xmlform
+    >>> from Products.COL3.exceptions import InvariantError
+    >>> from zope.app.form.interfaces import WidgetInputError, IWidgetInputError
+    >>> class ITestForm(interface.Interface):
+    ...     oneline = schema.TextLine(title=u'A Text Line',
+    ...                               description=u'A single text line',
+    ...                               required=True)
+    ...     anotherline = schema.TextLine(title=u'Another Text Line',
+    ...                                   description=u'An optional text line',
+    ...                                   required=False)
+    ...     # XXX add more text fields above as types are added
+    ...     @interface.invariant
+    ...     def stupidInvariant(obj):
+    ...         if obj.anotherline and len(obj.oneline) < len(obj.anotherline):
+    ...             raise InvariantError(u"oneline must be bigger than anotherline",
+    ...                                  fields=("oneline","anotherline"))
+    ...         return True
+
+Now, we create a form with the schema fields above, and Actions to "click"
+
+    >>> class TestForm(xmlform.FormFragment):
+    ...     form_fields = form.FormFields(ITestForm)
+    ... 
+    ...     @form.action("Submit this form", name="send")
+    ...     def form_send(self, action, data):
+    ...	        submitted_tag = Element('submitted')
+    ...	        SubElement(submitted_tag, 'oneline').text = data['oneline']
+    ...	        if data['anotherline'] is not None:
+    ...             SubElement(submitted_tag, 'anotherline').text = data['anotherline']
+    ...         return submitted_tag
+    ... 
+    ...     @form.action("Cancel this form", name="cancel", validator=xmlform.NO_VALIDATION)
+    ...     def form_cancel(self, action, data):
+    ...         return Element('canceled')
+    ... 
+    ...     @form.action("Error!", name="error", validator=xmlform.NO_VALIDATION)
+    ...     def form_error(self, action, data):
+    ...         widget_error = WidgetInputError('anotherline', u'Another Text Line',
+    ...                                         "I didn't like it")
+    ...         self.widgets['anotherline']._error = widget_error
+    ...		self.status = 'There were manually-set errors'
+    ...         # we want the form to render again with the error we set
+    ...         self.form_reset = False
+
+Finally, let's try to get it to render our form flavour
+
+    >>> app = app.unrestrictedTraverse('++skin++col')
+    >>> request = app.REQUEST
+    >>> testform = TestForm(app, request).__of__(app)
+    >>> print tostring(testform.asElement()) # doctest: +XMLDATA
+    <formcontroller action="http://nohost">
+        <field name="form.oneline" widget="text" required="required">
+            <label>A Text Line</label>
+            <description>A single text line</description>
+        </field>
+        <field name="form.anotherline" widget="text">
+            <label>Another Text Line</label>
+            <description>An optional text line</description>
+        </field>
+        <submit name="form.actions.send">Submit this form</submit>
+        <submit name="form.actions.cancel">Cancel this form</submit>
+        <submit name="form.actions.error">Error!</submit>
+    </formcontroller>
+
+So now we want the form values to show up when the form is submitted, so let's simulate a submitted request to this form.
+First let's not provide a required value (the "oneline" field):
+
+    >>> request.form['form.oneline'] = ''
+    >>> request.form['form.anotherline'] = 'Second Value'
+    >>> request.form['form.actions.send'] = 'Submit this form'
+    >>> testform = TestForm(app, request).__of__(app)
+    >>> print tostring(testform.asElement()) #doctest:+XMLDATA
+    <formcontroller action="http://nohost">
+        <error>There were errors</error>
+        <field name="form.oneline" widget="text" required="required">
+            <label>A Text Line</label>
+            <description>A single text line</description>
+            <error>Required input is missing.</error>
+        </field>
+        <field name="form.anotherline" widget="text">
+            <label>Another Text Line</label>
+            <description>An optional text line</description>
+	    <value xml:space="preserve">Second Value</value>
+        </field>
+        <submit name="form.actions.send">Submit this form</submit>
+        <submit name="form.actions.cancel">Cancel this form</submit>
+        <submit name="form.actions.error">Error!</submit>
+    </formcontroller>
+
+Now let's submit a proper form. Sending an empty string for the second field is valid, since it's not a required field,
+however this means we'll get None for the second field value:
+
+    >>> from Testing.makerequest import makerequest
+    >>> app = makerequest(app.aq_base).unrestrictedTraverse('++skin++col')
+    >>> request = app.REQUEST
+    >>> request.form['form.oneline'] = 'First Value'
+    >>> request.form['form.anotherline'] = ''
+    >>> request.form['form.actions.send'] = 'Submit this form'
+    >>> testform = TestForm(app, request)
+    >>> print tostring(testform.asElement()) # doctest: +XMLDATA
+    <submitted>
+        <oneline>First Value</oneline>
+    </submitted>
+
+As a security measure, our form flavor doesn't allow submission if
+required input is not present. The required input might be present and
+empty, in which case the regular validation mechanism kicks in, but
+simply not sending the input is not allowed.
+
+    >>> from Testing.makerequest import makerequest
+    >>> app = makerequest(app.aq_base).unrestrictedTraverse('++skin++col')
+    >>> request = app.REQUEST
+    >>> request.form['form.actions.send'] = 'Submit this form'
+    >>> testform = TestForm(app, request)
+    >>> tostring(testform.asElement())
+    Traceback (most recent call last):
+    ...
+    AssertionError: Missing required input: oneline
+
+If instead of sending the proper values, we just "click the cancel button", We shouldn't have validation errors,
+rather, the "cancel" action should run:
+
+    >>> app = makerequest(app.aq_base).unrestrictedTraverse('++skin++col')
+    >>> request = app.REQUEST
+    >>> request.form['form.oneline'] = ''
+    >>> request.form['form.anotherline'] = ''
+    >>> request.form['form.actions.cancel'] = 'Cancel this form'
+    >>> testform = TestForm(app, request).__of__(app)
+    >>> print tostring(testform.asElement())
+    <canceled />
+
+Sometimes we can't detect an error condition until after the handler has been
+run. But we can still set the error manually in this case, which is what the
+"error" action does. When a form handler doesn't return anything (i.e., it
+returns none), the form returns the result of the rendering, instead of the
+handler results:
+
+    >>> app = makerequest(app.aq_base).unrestrictedTraverse('++skin++col')
+    >>> request = app.REQUEST
+    >>> request.form['form.oneline'] = ''
+    >>> request.form['form.anotherline'] = ''
+    >>> request.form['form.actions.error'] = 'Error!'
+    >>> testform = TestForm(app, request).__of__(app)
+    >>> print tostring(testform.asElement()) # doctest: +XMLDATA
+    <formcontroller action="http://foo">
+        <error>There were manually-set errors</error>
+        <field name="form.oneline" widget="text" required="required">
+            <label>A Text Line</label>
+            <description>A single text line</description>
+        </field>
+        <field name="form.anotherline" widget="text">
+            <label>Another Text Line</label>
+            <description>An optional text line</description>
+            <error>I didn't like it</error>
+        </field>
+        <submit name="form.actions.send">Submit this form</submit>
+        <submit name="form.actions.cancel">Cancel this form</submit>
+        <submit name="form.actions.error">Error!</submit>
+    </formcontroller>
+
+Sometimes schemas contain invariants, and these can raise errors that may concern the relationship between
+values of different fields, or the relationship between field values and the context.
+
+We have provided one specific exception to be raised in by invariant validators that specify the fields
+to be singled out.
+
+Submitting our form with a longer "anotherline" than "online" causes an invariant error that should
+display an error on both form fields
+
+    >>> app = makerequest(app.aq_base).unrestrictedTraverse('++skin++col')
+    >>> request = app.REQUEST
+    >>> request.form['form.oneline'] = 'one'
+    >>> request.form['form.anotherline'] = 'another'
+    >>> request.form['form.actions.send'] = 'Submit this form'
+    >>> testform = TestForm(app, request).__of__(app)
+    >>> print tostring(testform.asElement()) # doctest: +XMLDATA
+    <formcontroller action="http://foo">
+        <error>There were errors</error>
+        <field name="form.oneline" widget="text" required="required">
+            <label>A Text Line</label>
+            <description>A single text line</description>
+	    <value xml:space="preserve">one</value>
+            <error>oneline must be bigger than anotherline</error>
+        </field>
+        <field name="form.anotherline" widget="text">
+            <label>Another Text Line</label>
+            <description>An optional text line</description>
+	    <value xml:space="preserve">another</value>
+            <error>oneline must be bigger than anotherline</error>
+        </field>
+        <submit name="form.actions.send">Submit this form</submit>
+        <submit name="form.actions.cancel">Cancel this form</submit>
+        <submit name="form.actions.error">Error!</submit>
+    </formcontroller>
+
+But not if the user canceled the form, as it has a no-op validation:
+
+    >>> app = makerequest(app.aq_base).unrestrictedTraverse('++skin++col')
+    >>> request = app.REQUEST
+    >>> request.form['form.oneline'] = 'one'
+    >>> request.form['form.anotherline'] = 'another'
+    >>> request.form['form.actions.cancel'] = 'Cancel this form'
+    >>> testform = TestForm(app, request).__of__(app)
+    >>> print tostring(testform.asElement())
+    <canceled />
+
+XXX Test Add and Edit forms

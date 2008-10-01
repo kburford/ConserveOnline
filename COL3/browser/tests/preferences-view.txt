@@ -1,0 +1,155 @@
+Preferences view tests
+~~~~~~~~~~~~~~~~~~~~~~
+
+These tests ensure expected functionality for the view class used by the 
+COL3 member preferences form.
+
+  >>> portal = self.portal
+  >>> initial_users = self.portal.acl_users.searchUsers()
+
+Create the browser object we'll be using.
+
+  >>> from Products.Five.testbrowser import Browser
+  >>> browser = Browser()
+  >>> browser.handleErrors = False
+
+Defining some convenience functions
+
+  >>> def fillIn(field, value):
+  ...     browser.getControl(field).value = value
+
+  >>> def fillInByName(field, value):
+  ...     browser.getControl(name='form.%s' % field).value = value
+
+  >>> def select(field):
+  ...     browser.getControl(field).selected = True
+
+  >>> def click(field):
+  ...     browser.getControl(field).click()
+
+  >>> def value(field):
+  ...     return browser.getControl(field).value
+
+  >>> def valueByName(field):
+  ...     return browser.getControl(name='form.%s' % field).value
+
+  >>> def createImage():
+  ...     from PIL import Image
+  ...     from cStringIO import StringIO
+  ...     img = Image.new('RGB', (75, 100))
+  ...     file = StringIO()
+  ...     img.save(file, 'GIF')
+  ...     file.seek(0)
+  ...     return file
+
+We will create a new member for this purpose, with the login "testuser" and the password "supersecret".
+
+  >>> test_user = 'testuser'
+  >>> test_password = 'supersecret'
+
+  >>> from Products.CMFCore.utils import getToolByName 
+  >>> properties = dict(username=test_user,
+  ...                   fullname='New User',
+  ...                   email='testuser@example.com',
+  ...                   type_of_organization='Government',
+  ...                   organization='My Organization',
+  ...                   country='Albania',
+  ...                  )
+  >>> registration_tool = getToolByName(app.plone, 'portal_registration')
+  >>> registration_tool.addMember(test_user,
+  ...                             test_password,
+  ...                             properties=properties.copy()               
+  ...                            ) and None
+
+Now I "log in" by visiting the login url and getting the auth. cookie.
+
+  >>> browser.handleErrors = False
+  >>> browser.open('http://localhost/++skin++col/plone/login?__ac_name=' + 
+  ...              test_user + '&__ac_password=' + test_password)
+
+Let's check the it worked
+
+  >>> browser.open('http://localhost/plone/portal_membership/getAuthenticatedMember')
+  >>> browser.contents
+  'testuser'
+ 
+The preferences form will show the values we specified during registration,
+except for the Biography field, which is not part of the registration data.
+
+  >>> browser.open('http://localhost/plone/preferences.html')
+  >>> value('Full Name')
+  'New User'
+  >>> value('E-mail')
+  'testuser@example.com'
+  >>> valueByName('type_of_organization')
+  ['Government']
+  >>> valueByName('organization')
+  'My Organization'
+  >>> value('Country')
+  ['Albania']
+  >>> value('Biography')
+  ''
+  >>> old_contents = browser.contents
+  >>> click('Set preferences')
+  >>> browser.url
+  'http://localhost/plone/preferences.html'
+  >>> old_contents == browser.contents
+  True
+
+Now we provide some different values
+
+  >>> browser.open('http://localhost/plone/preferences.html')
+  >>> fillIn('Full Name', 'Different User')
+  >>> fillIn('E-mail', 'differentuser@example.com')
+  >>> fillInByName('type_of_organization', ['Academic'])
+  >>> fillInByName('organization', 'New Organization')
+  >>> fillIn('Country', ['Aruba'])
+  >>> fillIn('Biography', 'I had a busy life')
+  >>> click('Set preferences')
+  >>> browser.url
+  'http://localhost/plone/preferences.html'
+  >>> member = portal.portal_membership.getMemberById(test_user)
+  >>> member.getId()
+  'testuser'
+  >>> member.getProperty('fullname')
+  'Different User'
+  >>> member.getProperty('email')
+  'differentuser@example.com'
+  >>> member.getProperty('type_of_organization')
+  'Academic'
+  >>> member.getProperty('organization')
+  'New Organization'
+  >>> member.getProperty('country')
+  'Aruba'
+  >>> member.getProperty('description')
+  'I had a busy life'
+
+As the last test, we will attempt to upload a member portrait. At first, it 
+does not exist. Not using the browser here because it will blow
+
+  >>> browser.handleErrors = True
+  >>> browser.open('http://localhost/plone/portal_memberdata/portraits/testuser')
+  Traceback (most recent call last):
+  ...
+  HTTPError: HTTP Error 404: Not Found
+  >>> browser.handleErrors = False
+
+Now I upload an image from the preferences form:
+
+  >>> browser.open('http://localhost/plone/preferences.html')
+  >>> portrait_field = browser.getControl('Portrait')
+  >>> portrait_data = createImage()
+  >>> portrait_field.add_file(portrait_data, 'image/gif', 'test.gif')
+  >>> click('Set preferences')
+
+Now the image should exist:
+
+  >>> browser.open('http://localhost/plone/portal_memberdata/portraits/testuser')
+  >>> browser.isHtml
+  False
+  >>> browser.headers['status']
+  '200 OK'
+  >>> portrait_data.seek(0)
+  >>> browser.contents == portrait_data.getvalue()
+  True
+

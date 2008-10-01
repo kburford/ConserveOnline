@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<archetypetool>
+  <catalogmap>
+    <type portal_type="LibraryFile">
+      <catalog value="portal_catalog"/>
+      <catalog value="notification_catalog"/>
+    </type>
+    <type portal_type="COLFile">
+      <catalog value="portal_catalog"/>
+      <catalog value="notification_catalog"/>
+    </type>
+     <type portal_type="COLPage">
+      <catalog value="portal_catalog"/>
+      <catalog value="notification_catalog"/>
+    </type>
+  </catalogmap>
+</archetypetool>

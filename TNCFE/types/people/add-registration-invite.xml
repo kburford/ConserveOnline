@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<!-- 
+  
+  You have been invited and probably don't exist in COL.
+  The URL will be /register-invite.html?invitationid=3413414
+  
+-->
+<response>
+  <view name="add-registration.html" type="registration" title="Register" section="people">
+    <invitation id="08098430">
+      <workspace title="California Birds" href="/workspaces/california-birds"/>
+      <!-- 
+        Bernard, if the invitation isn't tracking who did the inviting, then 
+        we might need to get the spec changed.
+      -->
+      <inviter>Kathy Adams</inviter>
+    </invitation>
+  </view>
+  <formcontroller action=".">
+    <field name="form.firstname" widget="text" required="required">
+      <label>First name</label>
+    </field>
+    <field name="form.lastname" widget="text" required="required">
+      <label>Last name</label>
+    </field>
+    <field name="form.country" widget="selection" required="required">
+      <label>Country</label>
+      <value vocabulary="countries"/>
+    </field>
+    <field name="form.organization" widget="text">
+      <label>Organization</label>
+    </field>
+    <field name="form.organizationtype" widget="selection">
+      <label>Organization type</label>
+      <value vocabulary="organizationtypes"/>
+    </field>
+    <field name="form.background" widget="selection">
+      <label>Your background</label>
+      <value vocabulary="backgrounds"/>
+    </field>
+    <field name="form.email" widget="text" required="required">
+      <label>Email address</label>
+      <description>Email address is required for login. We do not spam your email
+        address.</description>
+    </field>
+    <field name="form.username" widget="text" required="required">
+      <label>Username</label>
+      <description>Usernames are case SENSITIVE so be careful with your choice.</description>
+    </field>
+    <field name="form.newpassword" widget="password" required="required">
+      <label>Password</label>
+      <description>Letters and numbers only.</description>
+    </field>
+    <field name="form.confirmpassword" widget="password">
+      <label>Retype password</label>
+    </field>
+    <field name="form.captcha" widget="captcha" required="required">
+      <label>Enter the verification code to the right</label>
+      <description>This prevents automated spam programs from completing the form.</description>
+      <value>
+        <captcha href="../static/images/example-captcha-image.jpg" hashkey="07080f00000300010308190e076f08066901030905030f01" />
+      </value>
+    </field>
+    <field name="form.termsandconditions" widget="text" required="required">
+      <label>I agree to the above terms and conditions</label>
+    </field>
+    <submit name="form.actions.register">Accept Invitation</submit>
+    <submit name="form.actions.reject">Reject Invitation</submit>
+    <submit name="form.actions.cancel">Cancel</submit>
+  </formcontroller>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry>Register</entry>
+  </breadcrumbs>  
+</response>

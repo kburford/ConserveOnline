@@ -1,0 +1,367 @@
+Security and Workflow
+~~~~~~~~~~~~~~~~~~~~~
+
+  These tests describe and test the security policies chosen for the
+  TNC COL 3.0 application.
+
+  >>> from AccessControl.SecurityManagement import getSecurityManager
+  >>> from AccessControl.SecurityManagement import setSecurityManager
+  >>> from AccessControl.SecurityManagement import newSecurityManager
+  >>> from AccessControl.SpecialUsers import nobody as Anonymous
+  >>> from Acquisition import aq_base
+  >>> from Products.CMFCore.permissions import AddPortalContent
+  >>> from Products.CMFCore.permissions import DeleteObjects
+  >>> from Products.CMFCore.permissions import ListFolderContents
+  >>> from Products.CMFCore.permissions import ModifyPortalContent
+  >>> from Products.CMFCore.permissions import View
+  >>> from Products.COL3.permissions import ADD_WORKGROUPS_PERMISSION
+  >>> from Products.PloneTestCase.setup import portal_owner
+
+  >>> p = self.portal
+  >>> uf = p.acl_users
+  >>> AddATDocument = 'ATContentTypes: Add Document'
+
+  >>> wgadmin = 'Workspace Administrator'
+  >>> wgmember = 'Workspace Member'
+  >>> colmember = 'Community Member'
+  >>> anon = 'Anonymous'
+
+
+Roles
+~~~~~
+
+COL 3.0 uses four distinct roles to model its security policy:
+
+1) Workspace Administrator
+
+2) Workspace Member
+
+3) Community Member (any user with a account on COL)
+
+4) Anonymous: (unauthenticated site visitors)
+
+
+Permission States
+~~~~~~~~~~~~~~~~~
+
+In order to participate in any functionality on ConserveOnline, a user
+must be at least a Community Member. In order to add content, the user
+must be at least a Workspace Member in the workspace she is adding
+content to.
+
+Workspaces container
+    view:               Community Member, Anonymous
+    add workspaces:     Community Member
+
+Workspace [Public]:
+    view:               Workspace Administrator, Workspace Member, 
+                        Community Member, Anonymous
+    participate:        Workspace Administrator, Workspace Member,
+                        Community Member
+    add/edit/delete:    Workspace Administrator, Workspace Member
+
+Workspace [Public][Vault]:
+    view:               Workspace Administrator, Workspace Member
+    participate:        Workspace Administrator, Workspace Member
+    add/edit/delete:    Workspace Administrator, Workspace Member
+
+Workspace [Private]:
+    view:               Workspace Administrator, Workspace Member
+    participate:        Workspace Administrator, Workspace Member
+    add/edit/delete:    Workspace Administrator, Workspace Member
+
+The meaning of "participate" is not defined at all right now, so this test
+concentrates on adding/editing/deleting content.
+
+
+Security Setup
+~~~~~~~~~~~~~~
+
+For this testing, we are going to setup some users and groups and 
+make sure that the permissions are enforced properly. 
+
+The following conventions will be used:
+
+  grpadminX  = Workspace Administrator X
+  grpmemberX = Workspace Member X
+  colmemberX = Community Member X
+  anonymous  = Anonymous
+
+  gXadmins  = Workspace X Administrator Group
+  gXmembers = Workspace X Member Group
+  
+The initial group/member mapping will look like the table below. Every
+user including 'anonymous', can view the workspace listing.
+
+Table 1::
+
+            ! g1members ! g1admins ! g2members ! g2admins !
+ -----------!-----------!----------!-----------!----------!
+ grpmember1 !     X     !          !           !          !
+ grpmember2 !           !          !     X     !          !
+ grpadmin1  !           !     X    !           !          !
+ grpadmin2  !           !          !           !     X    !
+ colmember1 !           !          !           !          !
+ colmember2 !           !          !           !          !
+ anonymous  !           !          !           !          !
+ ----------------------------------------------------------
+
+Here's some helper methods that will make the actual tests easier to 
+express:
+
+  >>> def check(user, perm, obj, uf=uf):
+  ...     if isinstance(user, str):
+  ...         user = uf.getUserById(user)
+  ...     sm = getSecurityManager()
+  ...     try:
+  ...         newSecurityManager(None, user)
+  ...         return bool(getSecurityManager().checkPermission(perm, obj))
+  ...     finally:
+  ...         setSecurityManager(sm) 
+
+  >>> def groups(user_id, uf=uf):
+  ...     user = uf.getUserById(user_id)
+  ...     if getattr(aq_base(user), 'getGroups', None) is None:
+  ...         return []
+  ...     return [g for g in sorted(set(user.getGroups()) or []) 
+  ...               if g not in ('AuthenticatedUsers',)]
+
+  >>> def roles(uid, ctx, uf=uf):
+  ...    return [r for r in uf.getUserById(uid).getRolesInContext(ctx)
+  ...            if r not in ('Authenticated',)]
+
+  >>> def permissionsOfRole(ctx, role):
+  ...     inscrutable = ctx.permissionsOfRole(role)
+  ...     permissions = [x['name'] for x in inscrutable if x['selected']]
+  ...     permissions.sort()
+  ...     return permissions
+
+  >>> def changeUser(uf, user_id):
+  ...     user = uf.getUserById(user_id)
+  ...     if not hasattr(user, 'aq_base'):
+  ...         user = user.__of__(uf)
+  ...     newSecurityManager(None, user)
+
+
+Initial setup
+~~~~~~~~~~~~~
+
+Set up the groups:
+
+  >>> all_group_ids = ('g1members','g1admins','g2members','g2admins')
+  >>> _ = [uf.source_groups.addGroup(group_id, ()) for group_id in all_group_ids]
+
+Set up the users:
+
+  >>> _ = uf.userFolderAddUser('grpmember1', 'secret', (), (), ('g1members',))
+  >>> _ = uf.userFolderAddUser('grpadmin1', 'secret', (), (), ('g1admins',))
+  >>> _ = uf.userFolderAddUser('grpmember2', 'secret', (), (), ('g2members',))
+  >>> _ = uf.userFolderAddUser('grpadmin2', 'secret', (), (), ('g2admins',))
+  >>> _ = uf.userFolderAddUser('colmember1', 'secret', ('Community Member',), (), ())
+  >>> _ = uf.userFolderAddUser('colmember2', 'secret', ('Community Member',), (), ())
+  >>> all_user_ids = ('grpmember1', 'grpadmin1', 'grpmember2', 
+  ...                 'grpadmin2', 'colmember1', 'colmember2')
+  >>> everyone = all_user_ids + (Anonymous,)
+
+
+Testing the initial state
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now we test the initial setup, including group settings, role/permission
+mappings and access to the container at /workspaces:
+
+  >>> groups('grpmember1')
+  ['g1members']
+
+  >>> groups('grpadmin1')
+  ['g1admins']
+
+  >>> groups('grpmember2')
+  ['g2members']
+
+  >>> groups('grpadmin2')
+  ['g2admins']
+
+  >>> groups('colmember1')
+  []
+
+  >>> groups('colmember2')
+  []
+
+  >>> roles('colmember1', p)
+  ['Community Member']
+
+  >>> roles('colmember2', p)
+  ['Community Member']
+
+  >>> [x in p.valid_roles() for x in [wgmember, wgadmin, colmember]]
+  [True, True, True]
+
+  >>> [check(user_id, View, p.workspaces) for user_id in everyone]
+  [True, True, True, True, True, True, True]
+
+  >>> permissionsOfRole(p, wgmember)
+  ['ATContentTypes: Add Document', 'ATContentTypes: Add Folder', 'Delete objects', 'List folder contents', 'Modify portal content', 'View']
+
+  >>> permissionsOfRole(p, wgadmin)
+  ['ATContentTypes: Add Document', 'ATContentTypes: Add Folder', 'Delete objects', 'List folder contents', 'Modify portal content', 'View']
+
+  >>> permissionsOfRole(p, colmember)
+  ['Add workspaces']
+
+  >>> permissionsOfRole(p.workspaces, anon)
+  []
+
+
+Testing a Private Workspace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As a first step, we create two workspaces. Normally, group creation would
+happen alongside workspace creation (there is one group per workspace), but in
+this contrived scenario we alreay created it. We have a member group and a 
+admin group per workspace, and assign them local role "Workspace Member" and 
+"Workspace Administrator", respectively, at the workspace level.
+
+The first workspace, workspace1, is Private, meaning restricted to group 
+members. Only they can access the workspace.
+
+  >>> p.workspaces.setConstrainTypesMode(0) # remove any artificial constraints
+  >>> changeUser(uf, 'colmember1')
+  >>> _ = p.workspaces.invokeFactory('Workspace', 'workspace1')
+  >>> self.loginAsPortalOwner()
+  >>> wg1 = p.workspaces.workspace1
+  >>> wg1.setConstrainTypesMode(0) # remove any artificial constraints
+  >>> wg1.manage_addLocalRoles('g1members', (wgmember,))
+  >>> wg1.manage_addLocalRoles('g1admins', (wgadmin,))
+
+Making the workspace Private requires the Workspace Administrator role:
+ 
+  >>> changeUser(uf, 'grpadmin1')
+  >>> p.portal_workflow.doActionFor(wg1, 'hide')
+  >>> self.loginAsPortalOwner()
+
+Create a piece of content as one of the workspace members:
+
+  >>> changeUser(uf, 'grpmember1')
+  >>> _ = wg1.invokeFactory('Document', 'wg1document')
+  >>> self.loginAsPortalOwner()
+
+Now we make sure that only members in /workspaces/workspace1 can see its
+contents or add/edit/delete it.
+
+  >>> wg1_privileged = ('grpmember1', 'grpadmin1', 'colmember1')
+  >>> wg1_unprivileged = ('grpmember2', 'grpadmin2', 
+  ...                     'colmember2', Anonymous)
+
+  >>> [check(u_id, View, p.workspaces.workspace1) for u_id in wg1_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, AddATDocument, p.workspaces.workspace1) 
+  ...        for u_id in wg1_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, DeleteObjects, p.workspaces.workspace1)
+  ...        for u_id in wg1_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, ListFolderContents, p.workspaces.workspace1) 
+  ...        for u_id in wg1_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, ModifyPortalContent, p.workspaces.workspace1.wg1document) 
+  ...        for u_id in wg1_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, AddATDocument, p.workspaces.workspace1) 
+  ...        for u_id in wg1_unprivileged]
+  [False, False, False, False]
+
+  >>> [check(u_id, DeleteObjects, p.workspaces.workspace1) 
+  ...        for u_id in wg1_unprivileged]
+  [False, False, False, False]
+
+  >>> [check(u_id, ListFolderContents, p.workspaces.workspace1) 
+  ...        for u_id in wg1_unprivileged]
+  [False, False, False, False]
+
+  >>> [check(u_id, ModifyPortalContent, p.workspaces.workspace1.wg1document) 
+  ...        for u_id in wg1_unprivileged]
+  [False, False, False, False]
+
+  >>> [check(u_id, View, p.workspaces.workspace1) for u_id in wg1_unprivileged]
+  [False, False, False, False]
+
+  >>> [check(u_id, View, p.workspaces.workspace1.wg1document) 
+  ...        for u_id in wg1_unprivileged]
+  [False, False, False, False]
+
+
+Testing a Public Workspace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The second workspace, "workspace2", is unrestricted - we achieve that by
+changing the workflow state to Published. Make sure all users and
+all anonymous visitors can see its contents, but only group members can
+undertake privileged actions.
+
+  >>> changeUser(uf, 'colmember2')
+  >>> _ = p.workspaces.invokeFactory('Workspace', 'workspace2')
+  >>> self.loginAsPortalOwner()
+  >>> wg2 = p.workspaces.workspace2
+  >>> wg2.setConstrainTypesMode(0) # remove any artificial constraints
+  >>> wg2.manage_addLocalRoles('g2members', (wgmember,))
+  >>> wg2.manage_addLocalRoles('g2admins', (wgadmin,))
+
+  >>> wg2_privileged = ('grpmember2', 'grpadmin2', 'colmember2')
+  >>> wg2_unprivileged = ('grpmember1', 'grpadmin1', 
+  ...                     'colmember1', Anonymous)
+
+Create a piece of content as one of the workspace members:
+
+  >>> changeUser(uf, 'grpmember2')
+  >>> _ = wg2.invokeFactory('Document', 'wg2document')
+  >>> self.loginAsPortalOwner()
+
+  >>> [check(u_id, View, p.workspaces.workspace2) for u_id in wg2_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, AddATDocument, p.workspaces.workspace2) 
+  ...        for u_id in wg2_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, DeleteObjects, p.workspaces.workspace2)
+  ...        for u_id in wg2_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, ListFolderContents, p.workspaces.workspace2) 
+  ...        for u_id in wg2_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, ModifyPortalContent, p.workspaces.workspace2.wg2document) 
+  ...        for u_id in wg2_privileged]
+  [True, True, True]
+
+  >>> [check(u_id, AddATDocument, p.workspaces.workspace2) 
+  ...        for u_id in wg2_unprivileged]
+  [False, False, False, False]
+
+  >>> [check(u_id, DeleteObjects, p.workspaces.workspace2) 
+  ...        for u_id in wg2_unprivileged]
+  [False, False, False, False]
+
+  >>> [check(u_id, ListFolderContents, p.workspaces.workspace2) 
+  ...        for u_id in wg2_unprivileged]
+  [False, False, False, False]
+
+  >>> [check(u_id, ModifyPortalContent, p.workspaces.workspace2.wg2document) 
+  ...        for u_id in wg2_unprivileged]
+  [False, False, False, False]
+
+  >>> [check(u_id, View, p.workspaces.workspace2) for u_id in wg2_unprivileged]
+  [True, True, True, True]
+
+  >>> [check(u_id, View, p.workspaces.workspace2.wg2document) 
+  ...        for u_id in wg2_unprivileged]
+  [True, True, True, True]
+
+

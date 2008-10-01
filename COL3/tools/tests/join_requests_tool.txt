@@ -1,0 +1,127 @@
+==================
+Join Requests Tool
+==================
+
+ConserveOnline users can request to join an existing workspace. Most of the
+heavy-lifting is done by the Join-Requests tool, which keeps track of which
+requests are active and to what workspaces they are related.
+
+Some preparations:
+
+    >>> import re
+    >>> from DateTime.DateTime import DateTime
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> from Products.COL3.interfaces.workspace import IWorkspaceMemberManagement
+    >>> portal = self.portal
+    >>> me = app.plone.portal_membership.getAuthenticatedMember()
+    >>> me.setProperties(fullname="Test User", email="test@example.com")
+    >>> mailhost = portal.MailHost
+
+First of all, let's test the COL3 product setup has properly installed the
+join-requests tool:
+
+    >>> jrtool = getToolByName(app.plone, 'workspace_join_requests')
+
+And now let's create a workspace to handle its join-requests:
+
+    >>> self.setRoles(['Member','Community Member'])
+    >>> app.plone.workspaces.invokeFactory('Workspace', 'ws') and None
+    >>> ws = app.plone.workspaces['ws']
+    >>> ws.update(title="My nifty workspace")
+
+And log back in to take on the workspace manager permission:
+
+    >>> self.login()
+
+Obviusly, a newly created workspace will have no outstanding join requests at
+first.
+
+    >>> list(jrtool.getJoinRequestsForWorkspace(ws))
+    []
+
+The join-request is registered based on the currently logged in user. If the
+current user is already a workspace member (or manager), attempting a join
+request should fail:
+
+    >>> jrtool.addJoinRequest(ws, reason=u"Let me in!") # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    AlreadyWorkspaceMember: test_user_1_
+
+So let's create another user and log in.
+
+    >>> from Products.CMFCore.interfaces import IRegistrationTool
+    >>> properties = dict(username='user1',
+    ...                   firstname='New1',
+    ...                   lastname='User1',
+    ...                   email="user1@example.com",
+    ...                   type_of_organization="Comercial",
+    ...                   organization="Enfold Systems",
+    ...                   country="Brazil",
+    ...                  )
+    >>> registration_tool = getToolByName(app.plone, 'portal_registration')
+    >>> registration_tool.addMember('user1',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()               
+    ...                            ) and None
+    >>> app.plone.manage_setLocalRoles('user1', ['Community Member'])
+    >>> self.login('user1')
+
+Now let's create a join-request. It returns the Join-Request id:
+
+    >>> jrId = jrtool.addJoinRequest(ws, reason=u"Let me in!")
+
+Creating another join-request with the same user for the same workspace should
+fail:
+
+    >>> jrtool.addJoinRequest(ws, reason=u"Let me in!") # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    JoinRequestAlreadySubmited: user1
+
+At this point a single e-mail has been sent to the single manager in the
+workspace:
+
+    >>> len(mailhost.sent)
+    1
+    >>> mailhost.sent[0][0][1]
+    ['test@example.com']
+
+Let's approve this membership, 
+
+    >>> _ = jrtool.acceptJoinRequestsById([jrId])
+
+There should be another e-mail sent to the recently subscribed user, notifying
+her of her new membership:
+
+    >>> len(mailhost.sent)
+    2
+    >>> mailhost.sent[-1][0][1]
+    ['user1@example.com']
+
+Now let's turn this user into a manager:
+
+    >>> wm = IWorkspaceMemberManagement(ws)
+    >>> wm.promoteMemberById('user1')
+
+And have another member attempt to join:
+
+    >>> properties.update(username='user2',
+    ...                   firstname='New2',
+    ...                   lastname='User2',
+    ...                   email='user2@example.com')
+    >>> registration_tool.addMember('user2',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()               
+    ...                            ) and None
+    >>> app.plone.manage_setLocalRoles('user2', ['Community Member'])
+    >>> self.login('user2')
+
+By cleaning the e-mail list and sending a Join Request with this new user, we
+can see that two e-mails are sent, one for each manager:
+
+    >>> del mailhost.sent[:]
+    >>> jrId = jrtool.addJoinRequest(ws, reason=u"Let me in too!")
+    >>> [entry[0][1] for entry in mailhost.sent]
+    [['test@example.com'], ['user1@example.com']]
+

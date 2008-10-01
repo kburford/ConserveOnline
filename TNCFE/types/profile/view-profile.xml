@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<response>
+  <user href="http://col3-test.example.com/view-profile.html?userid=kburford">
+    <username>kburford</username>
+    <title>Kyle Burford</title>
+    <email>burfordk@gmail.com</email>
+    <emailsuffix>gmail.com</emailsuffix>
+    <lastlogin>2008-08-13T16:28:28+00:00</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+  <breadcrumbs>
+    <entry href="http://col3-test.example.com">Home</entry>
+    <base>http://col3-test.example.com/</base>
+    <entry>My Profile - Kyle Burford</entry>
+  </breadcrumbs>
+  <view name="profile.html" section="people" title="My Profile" type="profile"/>
+  <profile>
+    <about href="http://col3-test.example.com/edit-profile.html">
+      <email>burfordk@gmail.com</email>
+      <firstname>Kyle</firstname>
+      <lastname>Burford</lastname>
+      <password>********</password>
+      <country>USA</country>
+      <background>other</background>
+      <organization>None Given</organization>
+      <organizationtype>other</organizationtype>
+      <joined>2007-10-08T21:19:51Z</joined>
+      <bio href="http://col3-test.example.com/edit-bio.html"/>
+    </about>
+  </profile>
+  <portlets>
+    <portlet title="My Invitations" type="invitations"/>
+    <portlet title="My Workspaces" type="workspaces"/>
+  </portlets>
+  <menus>
+    <actionmenu>
+      <entry href="edit-profile.html">Edit</entry>
+    </actionmenu>
+  </menus>
+</response>

@@ -1,0 +1,47 @@
+Test to test the edit preferences forms
+
+Needed imports
+
+ >>> from Products.COL3.browser.user import EditUserBioViewFragment
+ >>> from Products.COL3.browser.user import EditUserBioForm
+ >>> from Products.CMFCore.utils import getToolByName
+ >>> from elementtree.ElementTree import tostring
+
+First we need to create a user and add preferences
+
+ >>> pmem = getToolByName(self.portal, 'portal_membership')
+ >>> pmem.addMember('bjstest', '12345', ['Manager'], [])
+ >>> me = pmem.getMemberById('bjstest')
+ >>> self.login(me.id)
+ >>> newprops = {'description':'I have a long history of freaking out!!!',
+ ...             'fullname': 'Jumpin Jehosophat'}
+ >>> me.setMemberProperties(newprops)
+ >>> me.getProperty('description')
+ 'I have a long history of freaking out!!!'
+ >>> me.getProperty('fullname')
+ 'Jumpin Jehosophat'
+ >>> me.reindexObject()
+ >>> self.login(me.id)
+ 
+Now lets take a look at the view fragment
+
+ >>> editbioviewfrag = EditUserBioViewFragment(self.portal, app.REQUEST)
+ >>> tostring(editbioviewfrag.asElement())
+ '<view name="edit.html" section="workspaces" title="My Bio: Jumpin Jehosophat" type="bio" />'
+ 
+Now let's test the edit form and make sure we get the right stuff back
+
+ >>> ctx = self.portal.unrestrictedTraverse("++skin++col")
+ >>> editBioFormFragment = EditUserBioForm(ctx, app.REQUEST).asElement()
+ >>> tostring(editBioFormFragment) # doctest: +XMLDATA
+ <formcontroller action="http://nohost">
+    <field name="form.biography" required="required" widget="editor">
+        <label>Biography</label>
+        <description>Enter the full text of your biography below</description>
+        <value xml:space="preserve">
+           <html:div xmlns:html="http://www.w3.org/1999/xhtml">\nI have a long history of freaking out!!!\n</html:div>
+        </value>
+    </field>
+    <submit name="form.actions.apply">Apply</submit>
+    <submit name="form.actions.cancel">Cancel</submit>
+ </formcontroller>

@@ -1,0 +1,12 @@
+<configure 
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    >
+
+    <interface
+        interface=".interfaces.ICOL3Skin"
+        type="zope.publisher.interfaces.browser.IBrowserSkinType"
+        name="col"
+        />
+
+</configure>

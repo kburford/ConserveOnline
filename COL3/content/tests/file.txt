@@ -1,0 +1,127 @@
+==============
+Workspace Page
+==============
+
+The Workspace Document is an ATBlob derived content with blob support
+
+First, some preparations:
+
+    >>> import sys, tempfile, os, os.path
+    >>> import PIL
+    >>> from ZODB.blob import Blob
+    >>> from StringIO import StringIO
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring as ettostring
+    >>> from lxml.etree import XML, tostring as lxtostring
+    >>> from Products.COL3.interfaces.workspace import IWorkspace
+    >>> from Products.COL3.content.tests import __file__ as testlocation
+    >>> from plone.app.blob.tests import makeFileUpload
+    >>> testlocation = os.path.dirname(testlocation)
+    >>> def tostring(elem):
+    ...     return lxtostring(XML(ettostring(elem)), pretty_print=True)
+    >>> def prepWorkspaceAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     workspace = app.plone.workspaces['workspace'].unrestrictedTraverse('++skin++col') 
+    ...     return workspace, workspace.REQUEST
+    >>> self.setRoles(['Member','Community Member'])
+
+Now let's create a workspace which holds the documents folder.
+
+    >>> app.plone.workspaces.invokeFactory('Workspace', 'workspace') and None
+    >>> self.login() # aquire the Workspace Manager group and role
+
+This workspace already contains a 'documents' folder by default:
+
+    >>> from Products.COL3.interfaces.workspace import IWorkspaceDocumentsFolder
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> documents = workspace.documents
+    >>> IWorkspaceDocumentsFolder.providedBy(documents)
+    True
+
+IBlobbable Adapter
+==================
+
+In order to work with blobs, we need an IBlobbable adapter for regular
+filesystem files, since these will be required in tests and during migration:
+
+    >>> from plone.app.blob.interfaces import IBlobbable
+    >>> fileno, filename = tempfile.mkstemp()
+    >>> os.close(fileno)
+    >>> f = file(filename, 'wb')
+    >>> f.write('some text')
+    >>> f.flush()
+    >>> blobbable = IBlobbable(f)
+    >>> blobbable
+    <Products.COL3.content.file.BlobbableStandardFile object at ...>
+
+The blobbable adapter goes to some pains not to remove the original file from
+the filesystem if it's in the same partition
+
+    >>> os.path.isfile(filename)
+    True
+    >>> blob = Blob()
+    >>> blobbable.feed(blob)
+    >>> os.path.isfile(filename)
+    True
+    >>> f.close()
+    >>> os.remove(filename)
+    >>> f = blob.open()
+    >>> f.read()
+    'some text'
+
+Not renaming on upload
+======================
+
+    >>> documents.invokeFactory('COLFile', 'afile') and None
+    >>> afile = documents['afile']
+
+If a new file is uploaded to the document, the document should not change its
+id:
+
+    >>> text = 'some text'
+    >>> upload = StringIO(text)
+    >>> print afile.getId()
+    afile
+    >>> upload.name = upload.filename = r"C:\foo\bar\ingo.txt"
+    >>> afile.update(file=upload)
+    >>> print afile.getId()
+    afile
+    >>> print str(afile.getFile()) == text
+    True
+
+Image thumbnails
+================
+
+COLFiles will also double as images to be used inside pages and so have to
+provide a thumbnail view that can be used by the tinyMCE browsing plugin.
+
+This currently amounts to providing a 'image_thumb' view for all objects that
+have a mime-type appropriate for the web (gifs, jpegs and pngs).
+
+Notice that we will not provide this view for objects that can't be resized.
+
+   >>> afile.restrictedTraverse('image_thumb', 'No Thumb')
+   'No Thumb'
+
+Now let's first test if PIL is working correctly:
+
+   >>> imagefile = file(os.path.join(testlocation, 'test.png'), 'rb')
+   >>> from Products.COL3.content.file import scale
+   >>> data, format = scale(imagefile)
+   >>> thumbnail = PIL.Image.open(data)
+   >>> thumbnail.size
+   (128, 96)
+
+Now we upload this test image to the file instance and see if the thumbnail
+has been generated corrrectly.
+
+   >>> imagefile.seek(0)
+   >>> imagefile = makeFileUpload(imagefile.read(), 'test.png')
+   >>> afile.update(file=imagefile)
+   >>> ofsImage = afile.restrictedTraverse('image_thumb')
+   >>> ofsImage
+   <Image at /plone/workspaces/workspace/documents/afile/image_thumb>
+   >>> data = StringIO(str(ofsImage.data))
+   >>> thumbnail = PIL.Image.open(data)
+   >>> thumbnail.size
+   (128, 96)

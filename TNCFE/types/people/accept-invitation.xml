@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="accept-invitation.html" type="people" title="Invitation to Join Workspace" section="people">
+        <accept href="/accept-invitation.html?id=34&amp;mode=accept"/>
+        <reject href="/accept-invitation.html?id=34&amp;mode=reject"/>
+        <cancel href="/accept-invitation.html?id=34&amp;mode=cancel"/>
+    </view>    
+    <resource href="/workspaces/birds/discussion/topic1" uuid="643524525235">
+        <title>Name of Workspace</title>
+        <manager>Firstname Lastname</manager>
+    </resource>    
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/people/">People</entry>
+        <entry href="/people/myprofile/"> First Lastname</entry>
+    </breadcrumbs>
+    
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+    </user>
+</response>

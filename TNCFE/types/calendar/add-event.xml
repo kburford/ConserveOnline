@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="add.html" type="event" title="Add Event" section="workspaces"/>
+  <formcontroller action=".">
+    <field name="form.title" widget="text" required="required">
+      <label>Title</label>
+      <description>Provide a descriptive title for your page.</description>
+      <value>Existing Value For Title</value>
+      <error>Title is required</error>
+    </field>
+    <field name="form.startDate" widget="calendar" required="required">
+      <label>Starts</label>
+      <description>Select  Year : Month : Day and time that this event starts.</description>
+    </field>
+    <field name="form.endDate" widget="calendar" required="required">
+      <label>Ends</label>
+      <description>Select  Year : Month : Day and time that this event finishes.</description>
+      <value>2007-03-05T15:00:00+00:00</value>
+    </field>
+    <field name="form.location" widget="textarea">
+      <label>Location</label>
+      <description>Short information about the location of the event.</description>
+    </field>
+    <field name="form.text" widget="editor">
+      <label>Body text</label>
+      <description>Rich text describing the information about the event.</description>
+    </field>
+    <field name="form.attendees" widget="textarea">
+      <label>Attendees</label>
+      <description>Provide a list of attendee information, one per line.</description>
+    </field>
+    <field name="form.contactName" widget="text">
+      <label>Contact name</label>
+      <description>The full name of this event's point of contact.</description>
+    </field>
+    <field name="form.contactEmail" widget="text">
+      <label>Contact email</label>
+      <description>Email address for this event's point of contact.</description>
+    </field>
+    <submit name="submit">Save</submit>
+    <submit name="cancel">Cancel</submit>
+  </formcontroller>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry href="/workspaces/california-birds/documents/">Calendar</entry>
+    <entry>Add Event</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>calendar</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+</response>

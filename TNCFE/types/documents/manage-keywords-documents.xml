@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="manage-keywords.html" type="documents"/>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/workspaces/">Workspaces</entry>
+        <entry href="/workspaces/california-birds/">California Birds</entry>
+        <entry href="/workspaces/california-birds/documents/">Files &amp; Pages</entry>
+        <entry>Manage Keywords</entry>
+    </breadcrumbs>
+    <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+        <title>Work Space 1</title>
+        <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+        <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+        <private>false</private>
+        <section>documents</section>
+    </workspace>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+    </user>
+</response>

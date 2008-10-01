@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="view.html" type="comment" title="Title of Discussion Topic" section="workspaces"/>
+  <resource href="/workspaces/birds/discussion/comment1" uuid="71f057f15cd93a338e10e5ea6de6f2d1">
+    <type title="Discussion Comment">PloneboardComment</type>
+    <author href="/profile/admin"/>
+    <url>/workspaces/birds/discussion/comment1</url>
+    <created>2007-08-20T13:52:23-05:00</created>
+    <modified>2007-08-20T13:52:23-05:00</modified>
+    <creator>admin</creator>
+    <size>1</size>
+    <is_private>false</is_private>
+    <id>comment1</id>
+    <title>Title of Discussion Topic</title>
+    <description/>
+    <text>
+      <div xmlns="http://www.w3.org/1999/xhtml">
+        <p>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat,
+          vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio
+          dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla
+          facilisi.</p>
+        <p>This is <em>Some Text</em>.</p>
+        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod
+          tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
+          quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo
+          consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie
+          consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
+          odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait
+          nulla facilisi. Sed ut perspiciatis, unde omnis iste natus error sit voluptatem
+          accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore
+          veritatis et quasi architecto beatae vitae dicta sunt, explicabo. nemo enim ipsam
+          voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni
+          dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem
+          ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi
+          tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. ut enim ad minima
+          veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex
+          ea commodi consequatur? quis autem vel eum iure reprehenderit, qui in ea voluptate velit
+          esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas
+          nulla pariatur?</p>
+        <p>This is <em>Some Text</em>.</p>
+        <p>Another paragraph.</p>
+        <p>This is <em>Some Text</em>.</p>
+        <p>Another paragraph.</p>
+      </div>
+    </text>
+    <constrainTypesMode>0</constrainTypesMode>
+    <locallyAllowedTypes>Document; Event; Favorite; File; Folder; Image; Link; News Item; Topic;
+      Ploneboard; workspace; workspace Vault; workspaces Container</locallyAllowedTypes>
+    <immediatelyAddableTypes>Document; Event; Favorite; File; Folder; Image; Link; News Item; Topic;
+      Ploneboard; workspace; workspace Vault; workspaces Container</immediatelyAddableTypes>
+    <subject/>
+    <relatedItems/>
+    <location/>
+    <language/>
+    <effectiveDate/>
+    <expirationDate/>
+    <creation_date>2007-08-20T13:52:23-05:00</creation_date>
+    <modification_date>2007-08-20T13:52:23-05:00</modification_date>
+    <creators>admin</creators>
+    <contributors/>
+    <rights/>
+    <allowDiscussion>false</allowDiscussion>
+    <excludeFromNav>false</excludeFromNav>
+    <nextPreviousEnabled>false</nextPreviousEnabled>
+  </resource>
+  <menus>
+    <actionmenu>
+      <entry href="edit.html">Edit</entry>
+      <entry href="delete.html">Delete</entry>
+    </actionmenu>
+  </menus>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry href="/workspaces/california-birds/documents/">Discussion</entry>
+    <entry href="/workspaces/california-birds/documents/">Some Topic</entry>
+    <entry>View Comment</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>discussions</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+</response>

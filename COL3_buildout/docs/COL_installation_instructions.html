@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+	<title>ConserveOnline Installation Instructions</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <style type="text/css">
+            body {font-family: verdana; font-size: 12px;}
+            h1 {font-size: 18px; text-align: center;}
+            h2 {font-size: 16px; text-align: center;}
+            .codeblock {font-family: courier; font-size: 10px; padding-left: 10px;}
+	    h3 {font-size: 14px; text-decoration: underline;}
+	    .warn {color: red;}
+	    li {font-family: courier; font-size: 10px; padding-top: 5px;}
+	    ul { list-style: square;}
+    
+        </style>
+
+    </head>
+    <body bgcolor="#ffffff">
+    
+
+
+<h1>ConserveOnline Installation Instructions</h1>
+
+<p>This document will guide you through all the steps to build a new ConserveOnline 3 sandbox with Zope/Plone back-end and Apache+LXML front-end.  It is assumed that you are building a back-end sandbox on a Linux system and that the sandbox will be independent of the operating system Python, the one that's used by the front-end. The instructions consist of a series of commands to be executed on the host machine.  Red Hat 5 Linux is assumed.</p>
+
+<p>The install uses separate pythons for front- and back-ends.  The back-end assumes Python 2.4.4 to support Zope 2.10.5.  The front-end should use Python 2.5.1.  Recent versions of shared libraries libxml2 and libxslt and their devel counterparts must be available to both front-end and back-end Python.  libxml2 should be at least at version 2.6.28, and libxslt should be at least at version 1.1.20.</p>
+
+<p>In order for these instructions to work you need to be on a system that has a suitable compiler and development packages installed.  A user and group named zope must exist on the server.  Be sure to run all available unit tests after installing a new product.</p>
+
+<p>These instructions have been generalized from the more specific instructions used to install the conserveonline.org site.  There thus are some gaps in these adapted instructions, in particular where to obtain components.</p>
+
+<h3>Build Apache</h3>
+<p>Apache must be configured with the -with-mpm=worker argument, i.e., /wherever/httpd-2.2.8/configure [usual arguments] -with-mpm=worker</p> 
+<p>This install puts apache into the buildout directory for ConserveOnline use only.   The buildout directory will be assumed to be /usr/local/www/col3 for purposes of this document.</p>
+<div class="codeblock">
+    <p>cd /usr/local/www<br/>
+    mkdir col3</p>
+
+<p> -- obtain httpd-2.2.8.tar.gz<br/>
+    tar zxvf httpd-2.2.8.tar.gz <br/>
+    cd httpd-2.2.8</p>
+
+<p> export CPPFLAGS=-I/usr/kerberos/include<br/>
+./configure \<br/>
+--enable-module=so,dir,alias,env,log_config --enable-ssl \<br/>
+--enable-proxy --enable-proxy-http --enable-rewrite \<br/>
+--enable-speling --enable-deflate --enable-headers \<br/>
+--enable-cache --enable-disk-cache --enable-mem-cache \<br/>
+--with-included-apr --prefix=/usr/local/www/col3/apache2 \<br/>
+--with-mpm=worker<br/>
+make clean<br/>
+make<br/>
+make install<br/>
+cp -rv --reply=yes /usr/local/apache2/conf* /usr/local/www/col3/apache2/<br/>
+cd /usr/local/www/col3/apache2/<br/>
+mkdir ssl run<br/>
+chown -R apache.apache run logs<br/>
+cd ssl<br/>
+# Make certs<br/>
+openssl genrsa -des3 -rand ../conf.d/local.conf -out <your.site.org>.key 1024<br/>
+# Enter passphrase, you will only need it in the next steps<br/>
+openssl rsa -in <your.site.org>.key -out <your.site.org>.pem<br/>
+openssl req -new -key <your.site.org>.key -out <your.site.org>.csr<br/>
+# Enter some information here<br/>
+openssl x509 -req -days 365 -in <your.site.org>.csr -signkey col3-test.tnc.org.pem -out <your.site.org>.crt</p>
+
+<p>Note: instructions for editing apache2/conf.d/local.conf are below.</p>
+</div>
+
+<h2>Back-end build-out using buildout script</h2>
+
+<h3>Build Python 2.4</h3> 
+<p>For the back-end, we need the latest Python 2.4 version.  ConserveOnline needs certain development libraries, and It is useful to build Python with ncurses and readline.  If needed, these can be obtained as follows:</p>
+<div class="codeblock">
+    <p>yum install libjpeg-devel<br/>
+yum install freetype-devel<br/>
+yum install zlib-devel<br/>
+yum install ncurses-devel<br/>
+yum install readline-devel</p>
+
+<p>-- obtain Python-2.4.4.tar.bz2<br/>
+tar xjvf Python-2.4.4.tar.bz2<br/>
+cd Python-2.4.4<br/>
+./configure --prefix=/usr/local/www/col3<br/>
+make<br/>
+make install<br/>
+make test</p>
+
+<p>Obtain and build libxml2-python extension</p>
+</div>
+
+<h3>Build PIL extension</h3>
+<p>The buildout script installs PIL as an egg, and most image-related operations succeed, but for some reason the captcha image is not displayed unless we install PIL the old-fashioned way, into lib/python2.4/site-packages.</p>
+
+<div class="codeblock">
+    <p>Must be built with truetype support, i.e., freetype.  If needed, install with 
+yum install freetype-devel</p>
+
+<p>-- obtain Imaging-1.1.6.tar.gz<br/>
+tar zxvf Imaging-1.1.6.tar.gz<br/>
+cd Imaging-1.1.6/<br/>
+/usr/local/www/col3/bin/python ./setup.py install</p>
+</div>
+
+<h3>Obtain Plone 3.0 and COL 3.0 source code</h3>
+<p>A list of files that need to be downloaded and the expected directory structure is in the buildout's README.txt.</p>
+
+
+<h3>Edit and run buildout script</h3>
+<div class="codeblock">
+<p>vi buildout.cfg<br/>
+-- edit buildout.cfg settings for your site</p>
+
+<p>script buildout.log<br/>
+bin/python2.4 bootstrap.py<br/>
+bin/buildout -vc buildout.cfg<br/>
+exit</p>
+</div>
+
+<h3>Set ownership to zope user</h3>
+<div class="codeblock">chown -R zope:zope /usr/local/www/col3</div>
+
+<h2>Run unit tests on back-end</h2>
+<p>At this point your Zope instance is ready to be run or to perform unit tests. Unit tests reside in sub folders named "tests" in the code hierarchy, such as "COL3/tests" or "COL3/browser/tests". Since some tests take a long time to run you normally limit the tests to be run to a specific Zope product or single test modules inside a Zope product. The test runner is very sensitive to the current working directory you are in, so it is assumed that you run these invocations from /usr/local/www/col3</p>
+
+<p>The tests make use of the Python egg cache, which must be created.</p>
+<div class="codeblock">
+    <p>cd /usr/local/www/col3<br/>
+mkdir .python-eggs<br/>
+chown zope:zope .python-eggs<br/>
+export PYTHON_EGG_CACHE=/usr/local/www/col3/.python-eggs</p>
+</div>
+
+<p>The following invocation will find and run all tests in the COL3 product:</p>
+<div class="codeblock"><p>script unit_tests.log<br/>
+./bin/instance1 test -sProducts.COL3<br/>
+exit</p>
+</div>
+
+<p>To run a specific test module, e.g., test_security.py, which is not a necessary step for the installation but may be needed for troubleshooting, use this command:</p>
+<div class="codeblock">
+    ./bin/instance1 test -sProducts.COL3 -mtest_security </div>
+
+
+<p class="warn">Tests may fail due to recent fixes in the wording and item ordering of xml files, for which tests have not yet been updated.</p>
+
+<h2>Front-end build-out</h2>
+
+<p>The Apache front end requires an LXML extension and some updates to apache configuration scripts.  Build Python 2.5 and necessary Python extensions
+obtain the following: 
+Python-2.5.1.tgz</p>
+<div class="codeblock">
+<p>cd /usr/local<br/>
+tar zxvpf Python-2.5.1.tgz<br/>
+cd Python-2.5.1<br/>
+./configure --prefix=/usr/local<br/>
+make<br/>
+make install</p>
+
+<p>-- obtain ez_setup.py<br/>
+/usr/local/bin/python setup/ez_setup.py</p>
+
+<p>-- obtain lxml-1.3.6.tgz and python-dateutil-1.4.tar<br/>
+tar xvfz lxml-1.3.6.tgz<br/>
+cd lxml-1.3.6<br/>
+/usr/local/bin/python ./setup.py install</p>
+
+<p>tar xvf python-dateutil-1.4.tar<br/>
+cd python-dateutil-1.4<br/>
+/usr/local/bin/python ./setup.py install</p>
+
+<p>-- obtain enfold.lxml and enfold.gcache<br/>
+cd enfold.lxml<br/>
+/usr/local/bin/python setup.py install</p>
+
+<p>cd enfold.gcache<br/>
+/usr/local/bin/easy_install gcache-0.1-py2.5.egg</p>
+</div>
+
+
+<h3>Build mod_python module</h3>
+<div class="codeblock">
+    <p>-- obtain mod_python-3.3.1.tgz<br/>
+tar zxvpf mod_python-3.3.1.tgz<br/>
+cd mod_python-3.3.1<br/>
+./configure --with-apxs=/usr/local/www/col3/apache2/bin/apxs --with-python=/usr/local/bin/python<br/>
+make<br/>
+make install</p>
+</div>
+
+<h3>Configure Apache for Zope and to use mod_python</h3>
+<div class="codeblock">A recommended configuration can be found at enfold.lxml/docs/sample_apache.conf</div>
+
+<h3>Test mod_python</h3>
+
+<div class="codeblock">
+    <p>/usr/local/apache2/bin/apachectl stop<br/>
+/usr/local/www/col3/apache2/bin/apachectl start</p>
+    </div>
+
+<p>In a browser, go to http://<hostname>/mpinfo</p>  
+<p>The page should show mod_python configuration report.</p>
+
+<h3>Test Front-End</h3>
+
+<div class="codeblock">
+    <p>cd /usr/local/www/col3<br/>
+chown -R zope:zope .<br/>
+bin/zeoserver start<br/>
+chown -R zope:zope .<br/>
+bin/instance fg	<br/>	
+# fg starts the instance in the foreground in debug mode</p>
+</div>
+
+
+<p>You may see the following warning logged::<br/>
+2008-04-06 18:17:24 WARNING ZEO.zrpc (6995) CW: error connecting to ('127.0.0.1', 8100): ECONNREFUSED</p>
+<p>If you see four in a row, then zeo probably has shut down.  If so, then stop the zope instance and run the above set of commands again.  The solution seems to be running chown -R zope:zope enough times.</p>
+<p>[If necessary, you can run zeo in debug mode with 'bin/zeoserver fg']</p>
+
+<h2>Add and Configure COL 3.0 Plone Site</h2>
+
+<p>Now that Plone/Zope and the COL3.0 codebase are installed and functioning, you need to add and configure the ConserverOnline Plone site.  You do this in a browser using the ZMI (Zope Management Interface) and the Plone site setup screen that can be reached from the ZMI.</p>
+
+<h3>Create Zope admin account</h3>
+<div class="codeblock">
+    <p>open https://<path-to-site>:54321/manage	# brings up the ZMI.  <br/>
+log in as initial user				# limited, initial account, e.g., 								  admin:admin</p>
+
+<p>click acl_users folder<br/>
+add webadmin:<password-of-server> as a manager account<br/>
+logout via the drop-down list next to "logged in as <initial user>"<br/>
+click Refresh and log back in as webadmin</p>
+</div>
+
+<h3>Add Plone Site</h3>
+<p>At the root node of ZMI,</p> 
+<div class="codeblock">
+    <p>select Plone Site from the drop-down box, then set<br/>
+-- id=ConserveOnline<br/>
+-- title=ConserveOnline<br/>
+-- description=ConserveOnline.  <br/>
+Click Add Plone Site.</p>
+
+<p>click ConserveOnline 		# the ZMI node just added<br/>
+click portal_quickinstaller 	# after scrolling down a couple of pages <br/>
+choose COL3<br/>
+click Install.  </p> </div>
+
+<p>This will install COL3,  Ploneboard, and other products needed by ConserveOnline.  Due to a bug in the installation, Ploneboard and certain other installed products will still appear in the Uninstalled list in quickinstaller, but they have indeed been installed.  The site should now be working and should be reachable at http://path-to-site or http://path-to-site/ConserveOnline.</p>
+
+<h3>Switch to running Zope in background</h3>
+<p>At the command line,</p>
+<div class="codeblock">
+    <p>Ctrl-c to close zope		# which has been running in foreground<br/>
+bin/instance1 start</p>
+    </div>
+
+
+<h3>Site Setup</h3>
+<p>Further site setup is required for the mail server and HTML filtering.  For these steps you will use the Plone interface, which is reachable through the ZMI. </p> 
+<p>In the ZMI ,</p>
+<ol> <li> click ConserveOnline in breadcrumbs to return to root of Plone site 
+<li> click View tab 
+<li> click Site Setup 					# upper-right corner of screen   
+<li> Click Mail 						# aka Mail Settings 
+<ul><li>enter the SMTP server IP address</li></ul>
+<li> Click the Mail Sender tab
+<ul><li>enter the site admin name and e-mail address</li></ul>
+<li> click Save.
+
+<li> click HTML Filtering [if desired]		# Left sidebar
+<li> Place a check mark next to each of these "stripped" tags that are in the     	list: 
+<ul><li> abbr, 
+<li> acronym, 
+<li> address, 
+<li> col, 
+<li> colgroup, 
+<li> style, 
+<li> tfoot, 
+<li> thead </li></ul>
+<li> click "remove selected items"
+<li> click Save.  
+<li> Click the Attributes tab
+<li> check all 9 stripped attributes
+<li> click "remove selected items"
+<li> click Save. </li></ol> 
+
+<p>As a courtesy to the site admin, who may have occasion to edit content from the Plone UI, </p>
+<ol> <li> click Visual Editor				# Left sidebar
+<li> uncheck the "Filter HTML in source view" box
+<li> click Save.</li></ol>
+
+
+
+<p>Installation is done!</p>
+
+</body>
+</html>
+

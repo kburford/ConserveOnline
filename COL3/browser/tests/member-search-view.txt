@@ -1,0 +1,138 @@
+Member Search View
+~~~~~~~~~~~~~~~~~~
+
+These tests ensure expected functionality for the view class used by searches
+for workspace members.
+
+First, some imports and useful definitions:
+
+  >>> from lxml.etree import XMLParser, parse
+  >>> from lxml.objectify import ObjectifyElementClassLookup
+  >>> from cStringIO import StringIO
+  >>> parser = XMLParser(remove_blank_text=True)
+  >>> parser.setElementClassLookup(ObjectifyElementClassLookup())
+  >>> from Products.CMFCore.utils import getToolByName
+  >>> from Products.CMFCore.utils import getToolByName
+  >>> pm = getToolByName(app.plone, 'portal_membership')
+  >>> from Products.COL3.interfaces.workspace import IWorkspaceMemberManagement
+
+Let's create some users and workspaces to work with:
+
+    >>> from Products.CMFCore.interfaces import IRegistrationTool
+    >>> properties = dict(username='user1',
+    ...                   fullname='New User1',
+    ...                   email="user1@example.com",
+    ...                   type_of_organization="Comercial",
+    ...                   organization="Enfold Systems",
+    ...                   country="Brazil",
+    ...                  )
+    >>> registration_tool = getToolByName(app.plone, 'portal_registration')
+    >>> registration_tool.addMember('user1',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()               
+    ...                            ) and None
+    >>> app.plone.manage_setLocalRoles('user1', ['Community Member'])
+    >>> properties.update(username='user2', fullname='New User2',
+    ...                   email="user2@example.com")
+    >>> registration_tool.addMember('user2',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()               
+    ...                            ) and None
+    >>> app.plone.manage_setLocalRoles('user2', ['Community Member'])
+
+
+    >>> self.setRoles(['Member','Community Member'])
+    >>> w = app.unrestrictedTraverse("++skin++col/plone/workspaces")
+    >>> w.invokeFactory("Workspace", "ws1") and None
+    >>> w['ws1'].update(title="Workspace 1")
+    >>> w['ws1']._setupWorkspaceSecurity()
+    >>> w.invokeFactory("Workspace", "ws2") and None
+    >>> w['ws2'].update(title="Workspace & 2") # test special char handling
+    >>> w['ws2']._setupWorkspaceSecurity()
+
+Now when we set up the workspace security as above, the currently
+authenticated member (the testing portal user) is set up as the first
+workspace manager, so let's change the test user properties to look good on
+tape:
+
+    >>> me = app.plone.portal_membership.getAuthenticatedMember()
+    >>> me.setProperties(fullname="Test User", email="test@example.com")
+
+Let's use another user to create 2 more workspaces,
+
+    >>> self.login('user1')
+    >>> w.invokeFactory("Workspace", "ws3") and None
+    >>> w['ws3'].update(title="Workspace 3")
+    >>> w['ws3']._setupWorkspaceSecurity()
+    >>> w.invokeFactory("Workspace", "ws4") and None
+    >>> w['ws4'].update(title="Workspace 4")
+    >>> w['ws4']._setupWorkspaceSecurity()
+
+Add one user user as a member into one of them.
+
+  >>> wm3 = IWorkspaceMemberManagement(w['ws3'])
+  >>> self.login('user2')
+  >>> wm3.addMember(pm.getAuthenticatedMember())
+
+And the the test user into another.
+
+  >>> wm4 = IWorkspaceMemberManagement(w['ws4'])
+  >>> self.login()
+  >>> wm4.addMember(pm.getAuthenticatedMember())
+
+
+
+  >>> portal = self.portal
+  >>> self.setRoles(['Member','Community Member'])
+  >>> portal.workspaces.invokeFactory("Workspace", "ws") and None
+  >>> workspace = portal.workspaces.ws
+  >>> me = app.plone.portal_membership.getAuthenticatedMember()
+  >>> me.setProperties(fullname="Test User", email="test@example.com")
+  >>> workspace._setupWorkspaceSecurity()
+  >>> self.login() # acquire workspace manager roles
+
+Now let's create the browser object we'll be using, and log into the site to
+get the proper credential cookies.
+
+  >>> from Products.Five.testbrowser import Browser
+  >>> browser = Browser()
+  >>> browser.handleErrors = False
+  >>> browser.open('http://localhost/++skin++col/plone/login?__ac_name=test_user_1_&__ac_password=secret')
+
+Finally, let's try some searches. Search should match on first name:
+
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/member-search.xml')
+  >>> browser.getControl(name='form.name').value = "User" 
+  >>> browser.getControl(name='form.actions.search').click()
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+
+The top level tag is <members>:
+
+  >>> xml.tag
+  'members'
+
+It contains one <member> tag for each Located member. Each member tag
+contains the tags <firstname>, <lastname> and <email>. Only members from the
+same workspaces as the requesting user are shown. That is, User2 won't show up
+since it's only member of a workspace that the test user is not a member of.
+    
+  >>> [member_tag.firstname.text for member_tag in xml.member]
+  ['New', 'Test']
+  >>> [member_tag.lastname.text for member_tag in xml.member]
+  ['User1', 'User']
+  >>> [member_tag.email.text for member_tag in xml.member]
+  ['user1@example.com', 'test@example.com']
+
+If we log in as "New User2", we won't see the test user in our searches.
+
+  >>> browser.open('http://localhost/++skin++col/plone/login?__ac_name=user2&__ac_password=somepasswd')
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/member-search.xml')
+  >>> browser.getControl(name='form.name').value = "User" 
+  >>> browser.getControl(name='form.actions.search').click()
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+  >>> [member_tag.firstname.text for member_tag in xml.member]
+  ['New', 'New']
+  >>> [member_tag.lastname.text for member_tag in xml.member]
+  ['User1', 'User2']
+  >>> [member_tag.email.text for member_tag in xml.member]
+  ['user1@example.com', 'user2@example.com']

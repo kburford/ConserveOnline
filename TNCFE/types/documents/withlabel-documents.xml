@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="withlabel.html" type="documents" title="Files &amp; Pages by Label - Meeting Agendas"
+    section="workspaces"/>
+  <currentlabel>
+    <text><div xmlns="http://www.w3.org/1999/xhtml">
+      <h4>This is <em>Some Text</em>.</h4>
+      <p>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat,
+        vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio
+        dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla
+        facilisi.</p>
+      <p>
+        <img src="../static/images/imgWorkgroupDetail.gif" alt="sample image"/>
+      </p>
+      <p>This is <em>Some Text</em>.</p>
+      <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod
+        tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
+        quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo
+        consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie
+        consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
+        odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait
+        nulla facilisi.</p>
+    </div></text>
+    <footer><div xmlns="http://www.w3.org/1999/xhtml">
+      <p>Some <strong>footer</strong> text goes in here.</p>
+      <p>This is <em>Some Text</em>.</p>
+    </div></footer>
+  </currentlabel>
+  <resource href="/complete/path" uuid="643524525235">
+    <title>Meeting Agendas</title>
+  </resource>
+  <batch total="929" start="21" end="40">
+    <pages>
+      <page current="current" href="#">1</page>
+      <page href="#">2</page>
+      <page href="#">3</page>
+    </pages>
+    <cols>
+      <col id="title" href="/server/url/to/sort/column" dir="asc">Title</col>
+      <col id="mimetype" href="/server/url/to/sort/column">Format</col>
+      <col id="size" href="/server/url/to/sort/column">Size</col>
+      <col id="date" href="/server/url/to/sort/column">Date</col>
+    </cols>
+    <items>
+      <item href="/server/url/to/matched/resource">
+        <title>California Condor photo</title>
+        <mimetype id="jpg">JPG</mimetype>
+        <size>20</size>
+        <date>2007-04-11T09:11:30+00:00</date>
+      </item>
+      <item href="/server/url/to/matched/resource">
+        <title>California Condor migratory habits</title>
+        <mimetype id="pdf">PDF</mimetype>
+        <size>12</size>
+        <date>2007-03-11T09:11:30+00:00</date>
+      </item>
+      <item href="/server/url/to/matched/resource">
+        <title>Facts about Condors</title>
+        <mimetype id="doc">DOC</mimetype>
+        <size>37</size>
+        <date>2006-03-01T09:11:30+00:00</date>
+      </item>
+    </items>
+  </batch>
+  <menus>
+    <addmenu>
+      <entry href="add.html">Add Page</entry>
+      <entry href="add.html">Add File</entry>
+    </addmenu>
+    <actionmenu>
+      <entry href="edit.html">Edit Label</entry>
+    </actionmenu>
+  </menus>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry href="/workspaces/california-birds/documents/">Labels</entry>
+    <entry>Files &amp; Pages by Label - Meeting Agendas</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>Files &amp; Pages</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>true</isadmin>
+  </user>
+</response>

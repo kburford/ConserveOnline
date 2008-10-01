@@ -1,0 +1,50 @@
+-*- doctest -*-
+
+Tests for the Portal configuration
+==================================
+
+We'll test some basic portal behaviour and configuration. First some
+definitions:
+
+    >>> from Products.COL3.interfaces.workspace import IWorkspaceContainer
+    >>> from Products.COL3.interfaces.library import IDocumentLibrary
+    >>> portal = self.portal
+
+Initial Content
+---------------
+
+When initially created, the portal should have some content stucture already
+in place.
+
+This includes the workspace container:
+
+    >>> IWorkspaceContainer.providedBy(portal.workspaces)
+    True
+
+And the document library
+
+    >>> IDocumentLibrary.providedBy(portal.library)
+    True
+
+The workflow state of the library should be "published
+
+    >>> portal.portal_workflow.getCatalogVariablesFor(portal.library)
+    {'review_state': 'published'}
+
+Hiding the Plone Interface
+--------------------------
+
+The Plone interface is not supposed to be visible from the XSLT rendered views
+
+    >>> self.setRoles(())
+    >>> portal.restrictedTraverse('++skin++col/folder_listing')()
+    Traceback (most recent call last):
+    ...
+    NotFound:   <h2>Site Error</h2>...
+
+But should be visible from the default CMF skin.
+
+    >>> self.setRoles(['Manager'])
+    >>> print portal.restrictedTraverse('++skin++cmf/folder_listing')()
+    <!DOCTYPE html PUBLIC ...
+

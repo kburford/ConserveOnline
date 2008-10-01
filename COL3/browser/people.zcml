@@ -1,0 +1,76 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="col3"
+    >
+
+    <five:traversable
+      class="Products.CMFPlone.Portal.PloneSite"
+      />
+    <five:traversable
+      class="Products.Archetypes.public.BaseObject"
+      />
+
+    <browser:page
+        for="*"
+        class=".people.People"
+        name="people"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <five:traversable
+      class=".people.People"
+      />
+
+    <five:defaultViewable
+      class=".people.People"
+     />
+
+    <browser:page
+      for='.people.People'
+      class='.people.BrowseAllPeoplePage'
+      name='all.html'
+      layer='..skins.interfaces.ICOL3Skin'
+      permission='zope2.View'
+     />
+
+   <browser:defaultView
+      for=".people.IPeople"
+      name="all.html"
+      layer="..skins.interfaces.ICOL3Skin"
+    />
+
+   <browser:page
+      for='.people.People'
+      class='.people.BrowsePeopleByCountryPage'
+      name='bycountry.html'
+      layer='..skins.interfaces.ICOL3Skin'
+      permission='zope2.View'
+     />
+
+   <browser:page
+      for='.people.People'
+      class='.people.BrowsePeopleByOrganizationPage'
+      name='byorganization.html'
+      layer='..skins.interfaces.ICOL3Skin'
+      permission='zope2.View'
+     />
+
+   <browser:page
+      for='.people.People'
+      class='.people.BrowsePeopleWithOrganizationPage'
+      name='withorganization-people.html'
+      layer='..skins.interfaces.ICOL3Skin'
+      permission='zope2.View'
+     />
+
+     <browser:page
+      for='.people.People'
+      class='.people.BrowsePeopleWithCountryPage'
+      name='withcountry-people.html'
+      layer='..skins.interfaces.ICOL3Skin'
+      permission='zope2.View'
+     />
+</configure>

@@ -1,0 +1,8 @@
+[validators]
+validators = validate_base, captcha_validator
+
+[actions]
+action.failure = traverse_to:string:reg_form
+action.success = traverse_to:string:registered
+action.pending = traverse_to:string:pending
+action.prefs = redirect_to:string:prefs_users_overview

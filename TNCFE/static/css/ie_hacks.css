@@ -1,0 +1,111 @@
+* html #left .boxSearch {
+	height: 98px !important;
+}
+
+* html .boxForm .header .workspaceIcon{
+	margin-top: 1px;
+}
+
+* html .formFieldSideLayout {
+	float: right;
+}
+
+* html .formFieldBox {
+    margin-top: .3em;
+    margin-bottom: .3em;
+}
+
+* html #workspace-content {
+	margin-left: -3px;
+}
+
+* html #left .boxSearch #searchForm input{
+	width: 139px;
+}
+
+* html table.content-listing {
+	width: 75%;
+}
+
+* html .kpagination_pages {
+	margin-top: .3em;
+}
+
+/* The following two styles are to fix a box model problem with IE6 that was causing mis-alignment of the green background
+ * of the LI from the A tag in front of it. - Logan 9/25/07
+ */
+* html #left .box2 .content li {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	height: 40px;
+}
+
+* html #left .box2 .content li a {
+	height: 41px;
+}
+
+#left .box2 .header a {
+	display: block;
+}
+
+.workspaceBrandingText {
+	height: 100px;
+}
+
+#gettingStartedBox2 {
+	width: 50%;
+}
+
+* html #gettingStartedBox2 {
+	width: 70%;
+}
+
+#middle {
+	margin-right: 290px;
+	overflow: hidden;
+}
+
+* html #middle {
+	width: 100%;	
+}
+
+* html .publishing {
+	height: 86px;
+}
+
+#middleNoRight {
+	overflow: hidden;
+}
+
+* html .metadataBox {
+	margin-bottom: -18px;
+}
+
+* html .metadataBox .clearBox {
+	height: 0px;
+}
+
+* html #left {
+	width: 225px;
+}
+
+#footer {
+	padding-top: 28px;
+}
+
+* html .metadataLabels {
+	font-size: 9pt;
+}
+
+.metadataLabels {
+	width: 85%;
+}
+
+.formLabelSideLayout {
+	height: 20px !important;
+        line-height:1.1;
+}
+
+.formLabel {
+/*	line-height: 2em ! important;*/
+}

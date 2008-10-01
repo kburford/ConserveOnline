@@ -1,0 +1,112 @@
+==================================================================
+Testing the processing of adding library file metadata to crossref
+==================================================================
+
+First imports and preparations...
+
+    >>> import transaction
+    >>> import sys, tempfile, os, os.path
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring, fromstring
+    >>> from plone.app.blob.tests import makeFileUpload
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> from Products.COL3.browser.tests import __file__ as testdir
+    >>> testdir = os.path.dirname(testdir)
+    >>> testfile = os.path.join(testdir, 'test.pdf')
+    >>> def prepPortalAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     portal = app.plone.unrestrictedTraverse('++skin++col')
+    ...     return portal, portal.REQUEST
+    >>> def copyToTempFile(filename):
+    ...     tempno, tempname = tempfile.mkstemp()
+    ...     os.close(tempno)
+    ...     shutil.copyfile(filename, tempname)
+    ...     return file(tempname, 'rb')
+    >>> portal, request = prepPortalAndRequest()
+    >>> self.loginAsPortalOwner()
+
+Creating a couple of library files for the update.
+
+    >>> uploadFile = makeFileUpload(file(testfile, 'rb').read(), testfile)
+    >>> portal, request = prepPortalAndRequest()
+    >>> request.form['form.file'] = uploadFile
+    >>> request.form['form.title'] = 'My Library File Title'
+    >>> request.form['form.authors'] = 'Almeida, Leonardo'
+    >>> request.form['form.document_type'] = ['laws', 'reports']
+    >>> request.form['form.description'] = 'My Library File Abstract'
+    >>> request.form['form.language'] = 'en'
+    >>> request.form['form.dateauthored'] = '2007-01-01 00:00'
+    >>> request.form['form.country'] = 'USA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'external'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.keywords'] = ''
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.createdoi'] = 'no'
+    >>> request.form['form.actions.add'] = 'Save'
+    >>> addFormPage = portal.library.restrictedTraverse('@@add-libraryfile.html')
+    >>> print tostring(addFormPage.getResponse()) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/library/my-library-file-title/@@view.html
+
+    >>> uploadFile = makeFileUpload(file(testfile, 'rb').read(), testfile)
+    >>> portal, request = prepPortalAndRequest()
+    >>> request.form['form.file'] = uploadFile
+    >>> request.form['form.title'] = 'My Library File Title Too'
+    >>> request.form['form.authors'] = 'Schreiber, Bernard'
+    >>> request.form['form.document_type'] = ['laws', 'reports']
+    >>> request.form['form.description'] = 'My Library File Too Abstract'
+    >>> request.form['form.language'] = 'en'
+    >>> request.form['form.dateauthored'] = '2007-01-01 00:00'
+    >>> request.form['form.country'] = 'USA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'external'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.organization'] = 'Not Much as Well'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.keywords'] = ''
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.createdoi'] = 'no'
+    >>> request.form['form.actions.add'] = 'Save'
+    >>> addFormPage = portal.library.restrictedTraverse('@@add-libraryfile.html')
+    >>> print tostring(addFormPage.getResponse()) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/library/my-library-file-title-too/@@view.html
+
+Now to test the functionality of the cross reference tool, if from queue is set to false
+then all the library files currently in the system will be submitted
+
+    >>> crossref_tool = getToolByName(portal, 'crossreference_tool')
+    >>> response = crossref_tool.processLibraryFiles(from_queue=False, area='test')
+    >>> responseelem = fromstring(response)
+    >>> responseelem.find('body/h2').text
+    'SUCCESS'
+
+Now let's check to make sure library files are queued properly and that after processing the queue
+that the queue is indeed empty, , if from queue is set to false then all the library files
+currently references by the tool will be submitted
+
+    >>> pcat = getToolByName(portal, 'portal_catalog')
+    >>> libfiles = pcat.searchResults(portal_type='LibraryFile')
+    >>> len(libfiles)
+    2
+    >>> for file in libfiles:
+    ...     crossref_tool.libraryFileIsQueued(file.getObject())
+    2
+    2
+    >>> len([r for r in crossref_tool.keys()])
+    2
+    >>> response = crossref_tool.processLibraryFiles(from_queue=True, area='test')
+    >>> responseelem = fromstring(response)
+    >>> responseelem.find('body/h2').text
+    'SUCCESS'
+
+When run in the test area, processLibraryFiles does not delete any queued files
+    >>> len([r for r in crossref_tool.keys()])
+    2

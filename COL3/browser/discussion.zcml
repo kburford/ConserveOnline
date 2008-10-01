@@ -1,0 +1,92 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="col3"
+    >
+
+    <browser:page
+        for="Products.Ploneboard.interfaces.IForum"
+        class=".discussion.TopicAddPage"
+        name="add-topic.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <browser:page
+        for="Products.Ploneboard.interfaces.IConversation"
+        class=".discussion.TopicEditPage"
+        name="edit.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.ModifyPortalContent"
+    />
+
+    <!-- we need a more fine grained permission below, one that contemplates both ws-managers
+         and conversation owners, according to screen 55 -->
+    <browser:page
+        for="Products.Ploneboard.interfaces.IConversation"
+        class=".discussion.TopicDeletePage"
+        name="delete.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ManageWorkspace"
+    />
+
+	<browser:page
+		for="Products.Ploneboard.interfaces.IForum"
+		class=".discussion.ViewTopicsViewPage"
+        name="view-topics.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="Products.Ploneboard.interfaces.IForum"
+        name="view-topics.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+    <browser:page
+        for="Products.Ploneboard.interfaces.IConversation"
+        class=".discussion.TopicViewPage"
+        name="view-topic.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="Products.Ploneboard.interfaces.IConversation"
+        name="view-topic.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+    <browser:page
+        for="Products.Ploneboard.interfaces.IComment"
+        class=".discussion.CommentViewPage"
+        name="view-comment.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="Products.Ploneboard.interfaces.IComment"
+        name="view-comment.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+    <browser:page
+        for="Products.Ploneboard.interfaces.IComment"
+        class=".discussion.CommentEditPage"
+        name="edit-comment.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <browser:page
+        for="Products.Ploneboard.interfaces.IComment"
+        class=".discussion.CommentDeletePage"
+        name="delete.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ManageWorkspace"
+    />
+
+</configure>

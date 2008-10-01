@@ -1,0 +1,146 @@
+==========================
+Workspace management views
+==========================
+
+The workspace management screens involve quite a lot of asyncronous frontend
+interaction (a.k.a. AJAX). These interactions involve listing the workspaces
+that a certain user is a member of, as well as searching and listing the users
+in those workspaces. 
+
+We'll test some of those views here. But first, some useful imports and
+definitions:
+
+    >>> from lxml.etree import XMLParser, parse, tostring
+    >>> from lxml.objectify import ObjectifyElementClassLookup
+    >>> from cStringIO import StringIO
+    >>> parser = XMLParser(remove_blank_text=True)
+    >>> parser.setElementClassLookup(ObjectifyElementClassLookup())
+    >>> from Products.COL3.interfaces import IWorkspaceMemberManagement
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> pm = getToolByName(app.plone, 'portal_membership')
+
+And now, let's create some users for us to work with.
+
+    >>> properties = dict(username='user1',
+    ...                   firstname='New',
+    ...                   lastname='User1',
+    ...                   email="user1@example.com",
+    ...                   type_of_organization="Comercial",
+    ...                   organization="Enfold Systems",
+    ...                   country="Brazil",
+    ...                  )
+    >>> registration_tool = getToolByName(app.plone, 'portal_registration')
+    >>> registration_tool.addMember('user1',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()               
+    ...                            ) and None
+    >>> app.plone.manage_setLocalRoles('user1', ['Community Member'])
+    >>> properties.update(username='user2',
+    ...                   firstname='New',
+    ...                   lastname='User2',
+    ...                   email="user2@example.com")
+    >>> registration_tool.addMember('user2',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()               
+    ...                            ) and None
+    >>> app.plone.manage_setLocalRoles('user2', ['Community Member'])
+    >>> properties.update(username='user0',
+    ...                   firstname='New',
+    ...                   lastname='User0',
+    ...                   email="user0@example.com")
+    >>> registration_tool.addMember('user0',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()               
+    ...                            ) and None
+    >>> app.plone.manage_setLocalRoles('user0', ['Community Member'])
+
+And some workspaces as user0
+
+    >>> self.login('user0')
+    >>> w = app.unrestrictedTraverse("++skin++col/plone/workspaces")
+    >>> w.invokeFactory("Workspace", "ws1") and None
+    >>> w['ws1'].update(title="Workspace 1")
+    >>> w.invokeFactory("Workspace", "ws2") and None
+    >>> w['ws2'].update(title="Workspace & 2") # test special char handling
+
+Now when we set up the workspace security as above, the currently
+authenticated member is set up as the first workspace manager.
+
+Let's use another user to create 2 more workspaces.
+
+    >>> self.login('user1')
+    >>> w.invokeFactory("Workspace", "ws3") and None
+    >>> w['ws3'].update(title="Workspace 3")
+    >>> w.invokeFactory("Workspace", "ws4") and None
+    >>> w['ws4'].update(title="Workspace 4")
+
+And add user0 as a member into one of them.
+
+    >>> wm4 = IWorkspaceMemberManagement(w['ws4'])
+    >>> self.login('user0')
+    >>> wm4.addMember(pm.getAuthenticatedMember())
+
+Member listing
+==============
+
+Another view is a list of workspace members that
+
+Let's add the above members to the workspace as well. 
+
+    >>> wm1 = IWorkspaceMemberManagement(w['ws1'])
+
+Add the first user as a workspace manager:
+
+    >>> wm1.addManager(pm.getMemberById('user1'))
+
+And the second as a regular workspace member:
+
+    >>> wm1.addMember(pm.getMemberById('user2'))
+
+Now check the XML view that lists all members of a workspace. Need to add
+the Workspace Member role to the currently logged-in user in order to see
+the view.
+
+    >>> listView = w.restrictedTraverse("ws1/@@workspace-members.xml")
+    >>> xml = StringIO(listView())
+    >>> parser = XMLParser(remove_blank_text=True)
+    >>> parser.setElementClassLookup(ObjectifyElementClassLookup())
+    >>> xml = parse(xml, parser).getroot()
+
+
+Does the xml validate against our schema? (BJS - I removed this line: "validator.validateString(listView())"
+below because the validator fails if <response> is not the root tag right now)
+
+  >>> from Products.COL3.tests.xml_validator import XMLValidator, wrapFragmentWithTNCResponse
+  >>> validator = XMLValidator()
+  >>> validator.validateString(wrapFragmentWithTNCResponsetostring(response)) # doctest: -REPORT_NDIFF
+
+The top level tag is <members>:
+
+    >>> xml.tag
+    'members'
+
+It contains one <member> tag for each assigned member. Each member tag
+contains the tags <firstname>, <lastname> and <email> for each member of the
+workspace, including the managers. Each <member> tag also includes the user
+id in the "id" attribute and, if the user is a manager, the "manager"
+attribute is set to "True":
+
+    >>> [member_tag.firstname.text for member_tag in xml.member]
+    ['New', 'New', 'New']
+    >>> [member_tag.lastname.text for member_tag in xml.member]
+    ['User0', 'User1', 'User2']
+    >>> [member_tag.email.text for member_tag in xml.member]
+    ['user0@example.com', 'user1@example.com', 'user2@example.com']
+    >>> [sorted(member_tag.attrib.items()) for member_tag in xml.member]
+    [[('id', 'user0'), ('manager', 'True')],
+     [('id', 'user1'), ('manager', 'True')],
+     [('id', 'user2')]]
+
+Of course, this view can only be seen by authorized users
+
+    >>> self.logout()
+    >>> w.restrictedTraverse("ws1/@@workspace-members.xml") # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    Unauthorized: ...

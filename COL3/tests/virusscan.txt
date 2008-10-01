@@ -1,0 +1,107 @@
+-*- doctest -*-
+
+Tests for the virus scanning support
+====================================
+
+COL3 must interact with external virus scanners. Since the content of the blob
+repository is opaque, we create a tree of hardlinks mirroring the site
+structure and using the original file names.
+
+First, some definitions
+
+    >>> import os, transaction
+    >>> from DateTime.DateTime import DateTime
+    >>> from plone.app.blob.tests import makeFileUpload
+    >>> from Products.COL3.Extensions.virusscan import do_prepare, do_report
+    >>> def tr(obj, path):
+    ...     return obj.unrestrictedTraverse(path)
+    >>> portal = self.portal
+    >>> self.setRoles(['Member','Community Member'])
+
+But first, let's create some content. Workspace files:
+
+    >>> _ = portal.workspaces.invokeFactory('Workspace', 'ws')
+    >>> _ = portal.workspaces['ws'].documents.invokeFactory('COLFile', 'aFile')
+    >>> f = makeFileUpload('some text', 'text.txt')
+    >>> tr(portal, 'workspaces/ws/documents/aFile').update(file=f)
+    >>> _ = portal.workspaces['ws'].documents.invokeFactory('COLFile', 'aVirus')
+    >>> f = makeFileUpload('some virus', 'virus.exe')
+    >>> tr(portal, 'workspaces/ws/documents/aVirus').update(file=f)
+
+And a library file:
+
+    >>> _ = portal.library.invokeFactory('LibraryFile', 'lf')
+    >>> f = makeFileUpload('some other text', 'text.dat')
+    >>> portal.library['lf'].update(file=f)
+
+Since virus scanning operates on the commited locations of files, we need to
+commit this transaction:
+
+    >>> t = transaction.get()
+    >>> t.note('please undo')
+    >>> t.commit()
+
+Now let's prepare a structure for virus scanning.
+
+    >>> scandir = do_prepare(portal)
+    Generated scan structure at: ...
+
+It creates a "MANIFEST" file on the root of the structure, listing all the
+files for virus scanning, with the 'serial' (or 'tid') of each blob that holds
+it.
+
+    >>> manifest = open(os.path.join(scandir, 'MANIFEST'))
+    >>> entries = list(manifest)
+    >>> print '\n'.join(entry.strip().replace(os.path.sep, '/')
+    ...                 for entry in entries)
+    plone/library/lf/text.dat|0x...
+    plone/workspaces/ws/documents/aFile/text.txt|0x...
+    plone/workspaces/ws/documents/aVirus/virus.exe|0x...
+
+We can see that those files hold the content we had set on the respective
+COLFiles:
+
+    >>> paths = [entry.split('|')[0] for entry in entries]
+    >>> print '\n'.join(open(os.path.join(scandir, path), 'rb').read()
+    ...                 for path in paths)
+    some other text
+    some text
+    some virus
+
+A Virus scanner is supposed to run over this structure and remove all files
+that contain viruses. Let's remove our 'virus' file:
+
+    >>> len([os.remove(os.path.join(scandir, path))
+    ...      for path in paths if 'Virus' in path])
+    1
+
+However, between the time the structure is created to run the scan and the
+time we'll take notice of the virus scan, a new file might have already been
+uploaded. Let's simulate that
+
+    >>> f = makeFileUpload('some newer text', 'text.txt')
+    >>> tr(portal, 'workspaces/ws/documents/aFile').update(file=f)
+    >>> t = transaction.get()
+    >>> t.note('please undo')
+    >>> t.commit()
+
+Now let's run the report:
+
+    >>> _ = do_report(portal, scandir)
+
+This generates a 'report.txt' file within the scan directory. Let's see what
+it has to say:
+
+    >>> print file(os.path.join(scandir, 'report.txt')).read()
+    Report from virus scan run:
+    ---------------------------
+    /plone/workspaces/ws/documents/aFile: content updated since scan (0x..., 0x...)
+    /plone/workspaces/ws/documents/aVirus: infected!
+    <BLANKLINE>
+
+Cleaning up:
+
+    >>> db = portal._p_jar.db()
+    >>> _ = [db.undo(entry['id']) for entry in db.undoLog(last=-2)]
+    >>> transaction.commit()
+    

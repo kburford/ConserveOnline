@@ -1,0 +1,2 @@
+<!-- move or copy this file into etc/package-includes of your Zope instance -->
+<include package="COL3" />

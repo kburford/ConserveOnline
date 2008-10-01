@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="monthly.html" type="calendar" title="January 2008" section="workspaces"/>
+  <menus>
+    <addmenu>
+      <entry href="event.html">Add Event</entry>
+    </addmenu>
+    <utilitymenu>
+      <entry href="monthly.html" current="current">Monthly</entry>
+      <entry href="listing.html">Listing</entry>
+    </utilitymenu>
+  </menus>
+  <calendar current="2008-01-05">
+    <navigation>
+      <next href="/workspaces/birds/calendar/monthly.html?ym=200802">2008-02-01</next>
+      <previous href="/workspaces/birds/calendar/monthly.html?ym=200712">2007-12-01</previous>
+    </navigation>
+    <calendarlinks>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200712">2007</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200801" current="current">Jan</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200802">Feb</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200803">Mar</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200804">Apr</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200805">May</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200806">Jun</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200807">Jul</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200808">Aug</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200809">Sep</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200810">Oct</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200811">Nov</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200812">Dec</calendarlink>
+      <calendarlink href="/workspaces/birds/calendar/monthly.html?ym=200901">2009</calendarlink>
+    </calendarlinks>
+    <events>
+      <event href="/url/to/event">
+        <title>Some Event</title>
+        <startDate>2008-01-02T13:10:00+00:00</startDate>
+        <endDate>2008-01-05T15:00:00+00:00</endDate>
+      </event>
+      <event href="/url/to/event">
+        <title>Some Event 2</title>
+        <startDate>2008-01-02T13:10:00+00:00</startDate>
+        <endDate>2008-01-05T15:00:00+00:00</endDate>
+      </event>
+      <event href="/url/to/event">
+        <title>Some Event 3</title>
+        <startDate>2008-01-02T13:10:00+00:00</startDate>
+        <endDate>2008-01-05T15:00:00+00:00</endDate>
+      </event>
+    </events>
+  </calendar>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry href="/workspaces/california-birds/documents/">Calendar</entry>
+    <entry>January 2008</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>calendar</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+</response>

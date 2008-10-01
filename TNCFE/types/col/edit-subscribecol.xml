@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="editsubscription.html" type="site" title="Update Your ConserveOnline Subscription" section="subscribe"/>
+    <workspaces title="My Workspaces">
+        <workspace href="http://www.google.com">
+            <title>Google</title>
+        </workspace>
+        <workspace href="http://www.yahoo.com">
+            <title>Yahoo!</title>
+        </workspace>
+        
+        <workspace href="http://www.apple.com">
+            <title>Apple</title>
+        </workspace>
+        
+        <workspace href="http://www.pampelmoose.com">
+            <title>Pampelmoose!</title>
+        </workspace>
+    </workspaces>
+
+    <formcontroller action=".">
+        <field name="form.country" widget="selection">
+            <label>Country</label>
+            <value vocabulary="countries">GRN</value>
+        </field>
+        <field name="form.biogeographic_realm" widget="selection">
+            <label>Biogeographic realm</label>
+            <value vocabulary="biogeographic_realms">antarctic</value>
+        </field>
+        <field name="form.habitat" widget="checkboxgroup">
+            <label>Habitat type</label>
+            <value vocabulary="habitats"/>
+        </field>
+        <field name="form.conservation" widget="checkboxgroup">
+            <label>Conservation action</label>
+            <value vocabulary="conservation"/>
+        </field>
+        <field name="form.directthreat" widget="checkboxgroup">
+            <label>Direct threat</label>
+            <value vocabulary="directthreat"/>
+        </field>
+        <field name="form.monitoring" widget="checkboxgroup">
+            <label>Monitoring type</label>
+            <value vocabulary="monitoring"/>
+        </field>
+        <field name="form.keywords" widget="text">
+            <label>Keywords</label>
+            <description>Multiple keywords can be entered separated by commas, e.g. 'The Nature Conservancy, weather, pandas'</description>
+            <value>Polar Bears</value>
+        </field>
+        
+        <field name="form.delivery" required="required" widget="radiogroup">
+            <label>Preferred Delivery Method</label>
+            <value>
+                <option  value="0">RSS</option>
+                <option value="1" selected="1">Email </option>
+            </value>
+            <description>If email is selected, the email address in your profile (kyle@example.com) will be used</description>
+        </field>
+        
+        <submit name="submit">Subscribe</submit>
+        <submit name="cancel">Cancel</submit>
+    </formcontroller>
+
+
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry>Add Subscription</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <email>kyle@example.com</email>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>0</isadmin>
+    </user>
+</response>

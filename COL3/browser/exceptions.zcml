@@ -1,0 +1,55 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="col3"
+    >
+
+  <browser:page
+      for="zope.interface.common.interfaces.IException"
+      name="breadcrumbs_view"
+      class=".exceptions.ExceptionBreadcrumbs"
+      permission="zope.Public"
+      allowed_attributes="breadcrumbs"
+      />
+
+  <!-- This exception view redirects to the "unauthorized" page,
+       registered after this one -->
+
+  <browser:page
+      for="zope.security.interfaces.IUnauthorized"
+      name="index.html"
+      class=".exceptions.UnauthorizedRedirect"
+      permission="zope.Public"
+      layer="..skins.interfaces.ICOL3Skin"
+      />
+
+  <browser:page
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      name="unauthorized"
+      class=".exceptions.UnauthorizedPage"
+      permission="zope.Public"
+      layer="..skins.interfaces.ICOL3Skin"
+      />
+
+  <!-- This exception view handles 404s/NotFounds -->
+
+  <browser:page
+      for="zope.publisher.interfaces.INotFound"
+      name="index.html"
+      class=".exceptions.NotFoundPage"
+      permission="zope.Public"
+      layer="..skins.interfaces.ICOL3Skin"
+      />
+
+  <!-- This exception view handles all the rest -->
+
+  <browser:page
+      for="zope.interface.common.interfaces.IException"
+      name="index.html"
+      class=".exceptions.ExceptionPage"
+      permission="zope.Public"
+      layer="..skins.interfaces.ICOL3Skin"
+      />
+
+</configure>

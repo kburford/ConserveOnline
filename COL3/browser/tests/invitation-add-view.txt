@@ -1,0 +1,260 @@
+=====================
+Workspace Invitations
+=====================
+
+These tests ensure expected functionality for the view classes used to handle
+member invitations into workspaces.
+
+First, some imports and useful definitions:
+
+  >>> from lxml.etree import XMLParser, parse
+  >>> from lxml.objectify import ObjectifyElementClassLookup
+  >>> from cStringIO import StringIO
+  >>> from time import sleep
+  >>> parser = XMLParser(remove_blank_text=True)
+  >>> parser.setElementClassLookup(ObjectifyElementClassLookup())
+  >>> from Products.CMFCore.utils import getToolByName
+  >>> registration_tool = getToolByName(app.plone, 'portal_registration') 
+
+Invitation Add Workspace View
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let's create a workspace to add invitations and set the e-mail of the test
+user:
+
+  >>> portal = self.portal
+  >>> self.setRoles(['Member','Community Member'])
+  >>> portal.workspaces.invokeFactory("Workspace", "ws") and None
+  >>> workspace = portal.workspaces.ws
+  >>> me = app.plone.portal_membership.getAuthenticatedMember()
+  >>> me.setProperties(fullname="Test User", email="test@example.com")
+  >>> workspace._setupWorkspaceSecurity()
+  >>> self.login() # acquire workspace manager roles
+
+Now let's create the browser object we'll be using, and log into the site to
+get the proper credential cookies.
+
+  >>> from Products.Five.testbrowser import Browser
+  >>> browser = Browser()
+  >>> browser.handleErrors = False
+  >>> browser.open('http://localhost/++skin++col/plone/login?__ac_name=test_user_1_&__ac_password=secret')
+
+The "Add Invitation" AJAX view is a form that has one text field that takes a
+comma separated list of e-mails.
+
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/add-invitation.html')
+  >>> browser.getControl(name='form.memberEmails').value = "foo@example.com,bar#example.com,alan@example.com,paul@example.com" 
+  >>> browser.getControl(name='form.actions.invite').click()
+
+Verify the correct values were parsed:
+
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+
+The top level tag is <status>:
+
+  >>> xml.tag
+  'status'
+
+Directly inside it there is an <accepted> tag with the number of e-mails that
+were correctly invited. Since we provided an invalid e-mail (bar#example.com)
+Only 3 e-mails should have been accepted:
+
+  >>> xml.accepted.text
+  '3'
+  
+It should also contain a single <invalid> tag with the invalid e-mail inside an <errors> tag:
+
+  >>> xml.errors.invalid.text
+  'bar#example.com'
+
+This should result in the invitations tool holding 3 new invitations:
+
+  >>> invtool = getToolByName(app.plone, 'workspace_invitations')
+  >>> invitations = list(invtool.getInvitationsForWorkspace(workspace))
+  >>> len(invitations)
+  3
+
+If we try to invite an e-mail that's already invited or already a member, it
+will show up as an <invite> or <member> tag under the <errors> tag. 
+
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/add-invitation.html')
+  >>> browser.getControl(name='form.memberEmails').value = "alan@example.com,test@example.com" 
+  >>> browser.getControl(name='form.actions.invite').click()
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+  >>> xml.accepted.text
+  '0'
+  >>> xml.errors.invite.text
+  'alan@example.com'
+  >>> xml.errors.member.text
+  'test@example.com'
+
+Listing invitations
+~~~~~~~~~~~~~~~~~~~
+
+Now we can query the list of invitations that are outstanding for a workspace.
+
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/workspace-invitations.xml')
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+
+The returned XML should contain an <invitations> tag with as many <invitation>
+tags as there are valid invitations.
+
+  >>> xml.tag
+  'invitations'
+  >>> sorted(invtag.email.text for invtag in xml.invitation)
+  ['alan@example.com', 'foo@example.com', 'paul@example.com']
+
+Each of these contains the invitation id as the "iid" attribute, the e-mail of
+the invited member in an <email> tag and the date of when the invitation was
+sent in ISO 8601 format in a <lastcontact> tag:
+
+  >>> [invtool[invtag.attrib['iid']].lastSent.ISO8601() == 
+  ...  invtag.lastcontact.text
+  ...  for invtag in xml.invitation]
+  [True, True, True]
+
+If there are users in the system associated with this some of these e-mails,
+the system will provide the first name and last name of each user, as well as
+a link to the user profile tooltip. Let's create an user matching one of the
+above e-mail addresses:
+
+  >>> properties = dict(username='user1',
+  ...                   fullname='New User1',
+  ...                   email="foo@example.com",
+  ...                   type_of_organization="Comercial",
+  ...                   organization="Enfold Systems",
+  ...                   country="Brazil",
+  ...                  )
+  >>> registration_tool.addMember('user1',
+  ...                             'somepasswd',
+  ...                             properties=properties.copy()               
+  ...                            ) and None
+
+Now if we query the profile listing view again, the entry with the e-mail
+above should also have <firstname>, <lastname> and <profile> tags:
+
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/workspace-invitations.xml')
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+  >>> fullInvitation, = [invtag for invtag in xml.invitation
+  ...                    if getattr(invtag, 'profile', None) is not None]
+
+  >>> fullInvitation.firstname.text
+  'New'
+  >>> fullInvitation.lastname.text
+  'User1'
+  
+The <profile> tag points to the profile tooltip:
+
+  >>> fullInvitation.profile.attrib['href']
+  'http://localhost/++skin++col/plone/portal_membership/profile-tooltip/user1'
+
+
+Cancelling invitations
+~~~~~~~~~~~~~~~~~~~~~~
+
+The "Cancel Invitation" AJAX view is a form that has one text field that takes
+a comma separated list of invitation IDs and cancel them. For example, let's
+take the invitation ids of paul@example.com and alan@example.com to cancel
+them:
+
+  >>> cancelInvIDs = [invtag.attrib['iid'] for invtag in xml.invitation
+  ...                 if invtag.email.text in ('paul@example.com',
+  ...                                          'alan@example.com')]
+  >>> len(cancelInvIDs)
+  2
+
+Let's also add an invalid invitation id to try to cancel and see what happens:
+
+  >>> cancelInvIDs.append('not-an-invitation')
+
+Now we fill the form with the comma separated list of ids to cancel and submit it.
+
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/cancel-invitations.html')
+  >>> browser.getControl(name='form.invitationIds').value = ','.join(cancelInvIDs)
+  >>> browser.getControl(name='form.actions.cancelInvitations').click()
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+
+Verify the correct values were parsed:
+
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+
+The top level tag is <status>:
+
+  >>> xml.tag
+  'status'
+
+Directly inside it there is an <accepted> tag with the count of InvitationIds
+whose cancelations were accepted.
+
+  >>> xml.accepted.text
+  '2'
+
+There should also be an <errors> tag with one <invalid> tag per id that wasn't
+accepted for cancelation:
+
+  >>> xml.errors.invalid[0].text
+  'not-an-invitation'
+
+If we access the list of invitations again, we see the invitations we
+cancelled are no longer there:
+
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/workspace-invitations.xml')
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+  >>> [invtag.email.text for invtag in xml.invitation]
+  ['foo@example.com']
+
+
+Re-sending invitations
+~~~~~~~~~~~~~~~~~~~~~~
+
+The "Re-send Invitation" AJAX view is a form that has one text field that
+takes a comma separated list of invitation IDs and re-sends them to their
+intended recipients. Let's re-send the invitation to 'foo@example.com' and to
+an invalid invitation id.
+
+  >>> (fooInvId, fooSentDate), = [(invtag.attrib['iid'], invtag.lastcontact)
+  ...                             for invtag in xml.invitation
+  ...                             if invtag.email.text == 'foo@example.com']
+  >>> resendInvIDs = [fooInvId, 'another-non-invitation']
+  >>> sleep(1) # time to let the 'lastcontact' date drift
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/re-send-invitations.html')
+  >>> browser.getControl(name='form.invitationIds').value = ','.join(resendInvIDs)
+  >>> browser.getControl(name='form.actions.reSendInvitations').click()
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+
+Verify the correct values were parsed:
+
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+
+The top level tag is <status>:
+
+  >>> xml.tag
+  'status'
+
+Directly inside it there is an <accepted> tag with the count of InvitationIds
+which were re-sent.
+
+  >>> xml.accepted.text
+  '1'
+
+There should also be an <errors> tag with one <invalid> tag per id that wasn't
+accepted for re-sending:
+
+  >>> xml.errors.invalid[0].text
+  'another-non-invitation'
+
+If we access the list of invitations again, we see the invitation we
+re-sent should have a later re-send date:
+
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/workspace-invitations.xml')
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+  >>> (fooNewInvId, fooNewSentDate), = [(invtag.attrib['iid'], invtag.lastcontact)
+  ...                                   for invtag in xml.invitation
+  ...                                   if invtag.email.text == 'foo@example.com']
+
+The invitation ID shouldn't change, but it's "lastsent" date should be later:
+
+  >>> fooInvId == fooNewInvId
+  True
+  >>> fooSentDate < fooNewSentDate # ISO8601() sorts lexicographically 
+  True

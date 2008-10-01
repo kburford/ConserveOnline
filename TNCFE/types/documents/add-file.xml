@@ -1,0 +1,291 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="add.html" type="file" title="Add a File" section="workspaces"/>
+  <formcontroller action=".">
+    <field name="form.file" widget="file" required="required">
+      <label>File</label>
+    </field>
+    <field name="form.title" widget="text" required="required">
+      <label>Title</label>
+    </field>
+    <field name="form.description" widget="textarea" required="required">
+      <label>Description</label>
+    </field>
+    <!-- labels changed to keywords 01.08.08 -->
+    <field name="form.labels" widget="labels" required="required">
+      <label>Keywords</label>
+    </field>
+    <field name="form.document_type" widget="checkboxgroup">
+      <label>Purpose</label>
+      <value vocabulary="documenttypes"/>
+      <description>Describes the purpose of the document, if applicable. Check all that apply.</description>
+    </field>
+    <field name="form.is_private" widget="radiogroup" required="required">
+      <label>Private?</label>
+      <value>
+        <option selected="selected" value="False">No</option>
+        <option value="True">Yes (only workspace members can see the file)</option>
+      </value>
+    </field>
+    <submit name="submit">Save</submit>
+    <submit name="cancel">Cancel</submit>
+  </formcontroller>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry href="/workspaces/california-birds/documents/">Files &amp; Pages</entry>
+    <entry>Add a File</entry>
+  </breadcrumbs>
+  <labels>
+    <item>Adult</item>
+    <item>Aeroplane</item>
+    <item>Air</item>
+    <item>Aircraft Carrier</item>
+    <item>Airforce</item>
+    <item>Airport</item>
+    <item>Album</item>
+    <item>Alphabet</item>
+    <item>Apple</item>
+    <item>Arm</item>
+    <item>Army</item>
+    <item>Baby</item>
+    <item>Baby</item>
+    <item>Backpack</item>
+    <item>Balloon</item>
+    <item>Banana</item>
+    <item>Bank</item>
+    <item>Barbecue</item>
+    <item>Bathroom</item>
+    <item>Bathtub</item>
+    <item>Bed</item>
+    <item>Bed</item>
+    <item>Bee</item>
+    <item>Bible</item>
+    <item>Bible</item>
+    <item>Bird</item>
+    <item>Bomb</item>
+    <item>Book</item>
+    <item>Boss</item>
+    <item>Bottle</item>
+    <item>Bowl</item>
+    <item>Box</item>
+    <item>Boy</item>
+    <item>Brain</item>
+    <item>Bridge</item>
+    <item>Butterfly</item>
+    <item>Button</item>
+    <item>Cappuccino</item>
+    <item>Car</item>
+    <item>Car-race</item>
+    <item>Carpet</item>
+    <item>Carrot</item>
+    <item>Cave</item>
+    <item>Chair</item>
+    <item>Chess Board</item>
+    <item>Chief</item>
+    <item>Child</item>
+    <item>Chisel</item>
+    <item>Chocolates</item>
+    <item>Church</item>
+    <item>Church</item>
+    <item>Circle</item>
+    <item>Circus</item>
+    <item>Circus</item>
+    <item>Clock</item>
+    <item>Clown</item>
+    <item>Coffee</item>
+    <item>Coffee-shop</item>
+    <item>Comet</item>
+    <item>Compact Disc</item>
+    <item>Compass</item>
+    <item>Computer</item>
+    <item>Crystal</item>
+    <item>Cup</item>
+    <item>Cycle</item>
+    <item>Data Base</item>
+    <item>Desk</item>
+    <item>Diamond</item>
+    <item>Dress</item>
+    <item>Drill</item>
+    <item>Drink</item>
+    <item>Drum</item>
+    <item>Dung</item>
+    <item>Ears</item>
+    <item>Earth</item>
+    <item>Egg</item>
+    <item>Electricity</item>
+    <item>Elephant</item>
+    <item>Eraser</item>
+    <item>Explosive</item>
+    <item>Eyes</item>
+    <item>Family</item>
+    <item>Fan</item>
+    <item>Feather</item>
+    <item>Festival</item>
+    <item>Film</item>
+    <item>Finger</item>
+    <item>Fire</item>
+    <item>Floodlight</item>
+    <item>Flower</item>
+    <item>Foot</item>
+    <item>Fork</item>
+    <item>Freeway</item>
+    <item>Fruit</item>
+    <item>Fungus</item>
+    <item>Game</item>
+    <item>Garden</item>
+    <item>Gas</item>
+    <item>Gate</item>
+    <item>Gemstone</item>
+    <item>Girl</item>
+    <item>Gloves</item>
+    <item>God</item>
+    <item>Grapes</item>
+    <item>Guitar</item>
+    <item>Hammer</item>
+    <item>Hat</item>
+    <item>Hieroglyph</item>
+    <item>Highway</item>
+    <item>Horoscope</item>
+    <item>Horse</item>
+    <item>Hose</item>
+    <item>Ice</item>
+    <item>Ice-cream</item>
+    <item>Insect</item>
+    <item>Jet fighter</item>
+    <item>Junk</item>
+    <item>Kaleidoscope</item>
+    <item>Kitchen</item>
+    <item>Knife</item>
+    <item>Leather jacket</item>
+    <item>Leg</item>
+    <item>Library</item>
+    <item>Liquid</item>
+    <item>Magnet</item>
+    <item>Man</item>
+    <item>Map</item>
+    <item>Maze</item>
+    <item>Meat</item>
+    <item>Meteor</item>
+    <item>Microscope</item>
+    <item>Milk</item>
+    <item>Milkshake</item>
+    <item>Mist</item>
+    <item>Money $$$$</item>
+    <item>Monster</item>
+    <item>Mosquito</item>
+    <item>Mouth</item>
+    <item>Nail</item>
+    <item>Navy</item>
+    <item>Necklace</item>
+    <item>Needle</item>
+    <item>Onion</item>
+    <item>PaintBrush</item>
+    <item>Pants</item>
+    <item>Parachute</item>
+    <item>Passport</item>
+    <item>Pebble</item>
+    <item>Pendulum</item>
+    <item>Pepper</item>
+    <item>Perfume</item>
+    <item>Pillow</item>
+    <item>Plane</item>
+    <item>Planet</item>
+    <item>Pocket</item>
+    <item>Post-office</item>
+    <item>Potato</item>
+    <item>Printer</item>
+    <item>Prison</item>
+    <item>Pyramid</item>
+    <item>Radar</item>
+    <item>Rainbow</item>
+    <item>Record</item>
+    <item>Restaurant</item>
+    <item>Rifle</item>
+    <item>Ring</item>
+    <item>Robot</item>
+    <item>Rock</item>
+    <item>Rocket</item>
+    <item>Roof</item>
+    <item>Room</item>
+    <item>Rope</item>
+    <item>Saddle</item>
+    <item>Salt</item>
+    <item>Sandpaper</item>
+    <item>Sandwich</item>
+    <item>Satellite</item>
+    <item>School</item>
+    <item>Sex</item>
+    <item>Ship</item>
+    <item>Shoes</item>
+    <item>Shop</item>
+    <item>Shower</item>
+    <item>Signature</item>
+    <item>Skeleton</item>
+    <item>Slave</item>
+    <item>Snail</item>
+    <item>Software</item>
+    <item>Solid</item>
+    <item>Space Shuttle</item>
+    <item>Spectrum</item>
+    <item>Sphere</item>
+    <item>Spice</item>
+    <item>Spiral</item>
+    <item>Spoon</item>
+    <item>Sports-car</item>
+    <item>Spot Light</item>
+    <item>Square</item>
+    <item>Staircase</item>
+    <item>Star</item>
+    <item>Stomach</item>
+    <item>Sun</item>
+    <item>Sunglasses</item>
+    <item>Surveyor</item>
+    <item>Swimming Pool</item>
+    <item>Sword</item>
+    <item>Table</item>
+    <item>Tapestry</item>
+    <item>Teeth</item>
+    <item>Telescope</item>
+    <item>Television</item>
+    <item>Tennis racquet</item>
+    <item>Thermometer</item>
+    <item>Tiger</item>
+    <item>Toilet</item>
+    <item>Tongue</item>
+    <item>Torch</item>
+    <item>Torpedo</item>
+    <item>Train</item>
+    <item>Treadmill</item>
+    <item>Triangle</item>
+    <item>Tunnel</item>
+    <item>Typewriter</item>
+    <item>Umbrella</item>
+    <item>Vacuum</item>
+    <item>Vampire</item>
+    <item>Videotape</item>
+    <item>Vulture</item>
+    <item>Water</item>
+    <item>Weapon</item>
+    <item>Web</item>
+    <item>Wheelchair</item>
+    <item>Window</item>
+    <item>Woman</item>
+    <item>Worm</item>
+  </labels>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>documents</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>true</isadmin>
+  </user>
+</response>

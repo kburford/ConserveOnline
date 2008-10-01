@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<tool-setup>
+ <required tool_id="notification_catalog"
+           class="Products.CMFPlone.CatalogTool.CatalogTool"/>
+ <required tool_id="workspace_invitations"
+           class="Products.COL3.tools.invitations.InvitationsTool"/>
+ <required tool_id="workspace_join_requests"
+           class="Products.COL3.tools.joinrequests.JoinRequestsTool"/>
+ <required tool_id="crossreference_tool"
+           class="Products.COL3.tools.crossreference.CrossRefTool"/>
+</tool-setup>

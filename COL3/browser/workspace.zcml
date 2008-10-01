@@ -1,0 +1,102 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="col3"
+    >
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceContainer"
+        class=".workspacebrowsing.WorkspaceListingPage"
+        name="all.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="Products.COL3.interfaces.workspace.IWorkspaceContainer"
+        name="byauthuser.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceContainer"
+        class=".workspacebrowsing.WorkspaceByCountryPage"
+        name="bycountry.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceContainer"
+        class=".workspacebrowsing.WorkspaceWithCountryPage"
+        name="withcountry-workspaces.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceContainer"
+        class=".workspacebrowsing.WSBrowseBySearchtermPage"
+        name="bysearchterm.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceContainer"
+        class=".workspacebrowsing.WSBrowseWithSearchtermPage"
+        name="withsearchterm-workspaces.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceContainer"
+        class=".workspacebrowsing.BrowseMyWorkspacesPage"
+        name="byauthuser.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".rss.FilesPages"
+        name="feed-files-pages.xml"
+        template="rss.xml"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".rss.Events"
+        name="feed-events.xml"
+        template="rss.xml"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".rss.Discussions"
+        name="feed-discussions.xml"
+        template="rss.xml"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".rss.All"
+        name="feed-all.xml"
+        template="rss.xml"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workspace.WorkspaceSubscriptionPage"
+        name="subscribe.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+    
+</configure>

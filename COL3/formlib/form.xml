@@ -1,0 +1,24 @@
+<formcontroller action="." method="POST"
+                xmlns:tal="http://xml.zope.org/namespaces/tal"
+                tal:attributes="action view/actionURL">
+    <error tal:define="status view/status"
+                    tal:condition="status"
+                    tal:content="status">Form status message</error>
+    <field tal:repeat="widget view/widgets"
+           tal:attributes="name widget/name;
+	                   widget widget/xmltype;
+			   required python:widget.required and 1 or nothing">
+           <label tal:content="widget/label" />
+           <description tal:define="description widget/hint;"
+	                tal:condition="description"
+			tal:content="description" />
+	   <value tal:replace="structure widget" />
+           <error tal:define="error widget/error;"
+	                tal:condition="error"
+			tal:content="error" />
+    </field>
+    <submit type="submit" name="join.cancel"
+                 tal:repeat="action view/availableActionsInfo"
+                 tal:attributes="name action/name;"
+                 tal:content="action/label">Cancel this form</submit>
+</formcontroller>

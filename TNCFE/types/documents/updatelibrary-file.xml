@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response xmlns:xi="http://www.w3.org/2001/XInclude">
+    <view name="addtolibrary-file.html" type="file"
+        title="Update Library: Preserving the Habitat of the California Condor" section="workspaces"/>
+    <formcontroller action=".">
+        <field name="form.authors" widget="authors" required="required">
+            <label>Authors</label>
+            <value>
+                <option>Adams, Kathy</option>
+                <option>Runyan, Alan</option>
+                <option>Everitt, Paul</option>
+                <option>Adams, Jonathan</option>
+            </value>
+        </field>
+        <field name="form.abstract" widget="textarea" required="required">
+            <label>Abstract</label>
+            <description>Up to 1000 characters.</description>
+        </field>
+        <field name="form.language" widget="selection" required="required">
+            <label>Language</label>
+            <value vocabulary="languages">en</value>
+        </field>
+        <field name="form.dateauthored" widget="calendar" required="required">
+            <label>Date authored</label>
+            <description>Select Year : Month : Day</description>
+            <value>2006-11-28T08:38:30</value>
+        </field>
+        <field name="form.country" widget="selection" required="required">
+            <label>Country</label>
+            <value vocabulary="countries">BEL</value>
+        </field>
+        <field name="form.biogeographic_realm" widget="selection" required="required">
+            <label>Biogeographic realm</label>
+            <value vocabulary="biogeographic_realms">australasia</value>
+        </field>
+        <field name="form.habitat" widget="checkboxgroup">
+            <label>Habitat type</label>
+            <value vocabulary="habitats"/>
+            <description>Check all that apply.</description>
+        </field>
+        <field name="form.conservation" widget="checkboxgroup">
+            <label>Conservation action</label>
+            <value vocabulary="conservation"/>
+            <description>Check all that apply.</description>
+        </field>
+        <field name="form.directthreat" widget="checkboxgroup">
+            <label>Direct threat</label>
+            <value vocabulary="directthreat"/>
+            <description>Check all that apply.</description>
+        </field>
+        <field name="form.organization" widget="text">
+            <label>Organization</label>
+            <description>Examples: The Nature Conservancy, World Wildlife Fund, IUCN.</description>
+        </field>
+        <field name="form.monitoring" widget="checkboxgroup">
+            <label>Monitoring type</label>
+            <value vocabulary="monitoring"/>
+            <description>The methods used to determine whether the conservation actions described in
+                this document are succeeding. Check all that apply.</description>
+        </field>
+        <field name="form.keywords" widget="text">
+            <label>Other Search Terms</label>
+            <description>Examples: biodiversity, freshwater, Natural Heritage Programs, panthera.
+                leo.</description>
+        </field>
+        <field name="form.license" widget="selection">
+            <label>License</label>
+            <description>The default license, from the Creative Commons license set, for content in
+                this workspace.</description>
+            <value vocabulary="licenses">a-nc</value>
+        </field>
+        <field name="form.gisdata" widget="file">
+            <label>GIS Metadata</label>
+            <description>To add or update GIS specific metadata in ASCII text format to this file,  click the browse button to locate the metadata file on your hard drive.</description>
+        </field>
+        <submit name="submit">Add</submit>
+        <submit name="cancel">Cancel</submit>
+    </formcontroller>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/workspaces/">Workspaces</entry>
+        <entry href="/workspaces/california-birds/">California Birds</entry>
+        <entry href="/workspaces/california-birds/documents/">Files &amp; Pages</entry>
+        <entry>Update Library: Preserving the Habitat of the California Condor</entry>
+    </breadcrumbs>
+    <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+        <title>California Birds</title>
+        <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+        <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+        <private>false</private>
+        <section>documents</section>
+    </workspace>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+</response>

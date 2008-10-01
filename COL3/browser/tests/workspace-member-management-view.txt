@@ -1,0 +1,202 @@
+Workspace Membership management view
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These tests ensure expected functionality for the AJAX view used to manage
+workspace members, demoting or promoting them as workspace managers, and
+removing them from the workspace (adding users to a workspace can only be done
+by sending invitations and having users accept them).
+
+First, some imports and useful definitions:
+
+  >>> from lxml.etree import XMLParser, parse
+  >>> from lxml.objectify import ObjectifyElementClassLookup
+  >>> from cStringIO import StringIO
+  >>> parser = XMLParser(remove_blank_text=True)
+  >>> parser.setElementClassLookup(ObjectifyElementClassLookup())
+  >>> from Products.CMFCore.utils import getToolByName
+  >>> from Products.COL3.interfaces.workspace import IWorkspaceMemberManagement
+  >>> pm = getToolByName(app.plone, 'portal_membership')
+
+Let's create a workspace:
+
+  >>> self.setRoles(['Member','Community Member'])
+  >>> app.plone.workspaces.invokeFactory("Workspace", "ws") and None
+  >>> workspace = app.plone.workspaces['ws']
+  >>> self.login()
+
+And add some members to promote, demote and delete:
+
+  >>> from Products.CMFCore.interfaces import IRegistrationTool
+  >>> properties = dict(username='user1',
+  ...                   fullname='New User1',
+  ...                   email="user1@example.com",
+  ...                   type_of_organization="Comercial",
+  ...                   organization="Enfold Systems",
+  ...                   country="Brazil",
+  ...                  )
+  >>> registration_tool = getToolByName(app.plone, 'portal_registration')
+  >>> registration_tool.addMember('user1',
+  ...                             'somepasswd',
+  ...                             properties=properties.copy()               
+  ...                            ) and None
+  >>> app.plone.manage_setLocalRoles('user1', ['Community Member'])
+  >>> properties.update(username='user2', fullname='New User2',
+  ...                   email="user2@example.com")
+  >>> registration_tool.addMember('user2',
+  ...                             'somepasswd',
+  ...                             properties=properties.copy()               
+  ...                            ) and None
+  >>> app.plone.manage_setLocalRoles('user2', ['Community Member'])
+  >>> properties.update(username='user3', fullname='New User3',
+  ...                   email="user3@example.com")
+  >>> registration_tool.addMember('user3',
+  ...                             'somepasswd',
+  ...                             properties=properties.copy()               
+  ...                            ) and None
+  >>> app.plone.manage_setLocalRoles('user3', ['Community Member'])
+  >>> properties.update(username='user4', fullname='New User4',
+  ...                   email="user4@example.com")
+  >>> registration_tool.addMember('user4',
+  ...                             'somepasswd',
+  ...                             properties=properties.copy()               
+  ...                            ) and None
+  >>> app.plone.manage_setLocalRoles('user4', ['Community Member'])
+  >>> properties.update(username='user5', fullname='New User5',
+  ...                   email="user5@example.com")
+  >>> registration_tool.addMember('user5',
+  ...                             'somepasswd',
+  ...                             properties=properties.copy()               
+  ...                            ) and None
+  >>> app.plone.manage_setLocalRoles('user5', ['Community Member'])
+  >>> properties.update(username='user6', fullname='New User6',
+  ...                   email="user6@example.com")
+  >>> registration_tool.addMember('user6',
+  ...                             'somepasswd',
+  ...                             properties=properties.copy()               
+  ...                            ) and None
+  >>> app.plone.manage_setLocalRoles('user7', ['Community Member'])
+  >>> properties.update(username='user7', fullname='New User7',
+  ...                   email="user7@example.com")
+  >>> registration_tool.addMember('user7',
+  ...                             'somepasswd',
+  ...                             properties=properties.copy()               
+  ...                            ) and None
+  >>> app.plone.manage_setLocalRoles('user7', ['Community Member'])
+
+User1 and User2 will be managers at first, User3 through User6 will be a
+regular members:
+
+  >>> wm = IWorkspaceMemberManagement(workspace)
+  >>> wm.addManager(pm.getMemberById('user1'))
+  >>> wm.addManager(pm.getMemberById('user2'))
+  >>> wm.addMember(pm.getMemberById('user3'))
+  >>> wm.addMember(pm.getMemberById('user4'))
+  >>> wm.addMember(pm.getMemberById('user5'))
+  >>> wm.addMember(pm.getMemberById('user6'))
+
+Now let's create the browser object we'll be using, and log into the site to
+get the proper credential cookies.
+
+  >>> from Products.Five.testbrowser import Browser
+  >>> browser = Browser()
+  >>> browser.handleErrors = False
+  >>> browser.open('http://localhost/++skin++col/plone/login?__ac_name=test_user_1_&__ac_password=secret')
+
+The "Member management" AJAX view is a form that has three fields. One for
+promoting regular members to managers, one for demoting them back to members
+and one for removing members from the workspace. Each field takes a list of
+comma separated userids. We'll demote Users 1 and 2, promote 3 and 4, and
+remove 5 and 6. 
+
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/manage-workspace-members.html')
+  >>> browser.getControl(name='form.removeMembers').value = "user5,user6"
+  >>> browser.getControl(name='form.promoteMembers').value = "user3,user4"
+  >>> browser.getControl(name='form.demoteMembers').value = "user1,user2" 
+  >>> browser.getControl(name='form.actions.manageMembership').click()
+
+Verify the correct values were parsed:
+
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+
+The top level tag is <status>:
+
+  >>> xml.tag
+  'status'
+
+Directly inside it there is an <accepted> tag with the count of UserIds whose
+changes where accepted.
+
+  >>> xml.accepted.text
+  '6'
+
+The previous submission should result in the requested changes. Only users 1
+through 4 should remain workspace members (besides the test user):
+
+  >>> sorted(member.getId() for member in wm.listAllMembers())
+  ['test_user_1_', 'user1', 'user2', 'user3', 'user4']
+  
+Of these, the test user and users 3 and 4 should be managers now:
+
+  >>> sorted(member.getId() for member in wm.listManagerMembers())
+  ['test_user_1_', 'user3', 'user4']
+
+When would a change not be accepted? One reason for a change to be rejected is
+if you try to remove or demote the currently authenticated user, as you'd risk
+removing the last workspace manager.
+
+#  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/manage-workspace-members.html')
+#  >>> browser.getControl(name='form.removeMembers').value = "test_user_1_"
+#  >>> browser.getControl(name='form.actions.manageMembership').click()
+#  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+#  >>> xml.accepted.text
+#  '0'
+
+#In this case, you get an <invalid> tag within an <errors> tag. This <invalid>
+#tag contains the invalid userid, don't get invalid anymore XXX - Need to take a closer look at this
+
+#  >>> xml.errors.removal.text
+#  'test_user_1_'
+
+(Same thing but trying to demote the user instead of removing).
+
+#  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/manage-workspace-members.html')
+#  >>> browser.getControl(name='form.demoteMembers').value = "test_user_1_"
+#  >>> browser.getControl(name='form.actions.manageMembership').click()
+#  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+#  >>> xml.accepted.text
+#  '1'
+
+#  >>> xml.errors.demotion.text
+#  'test_user_1_'
+
+Other invalid changes are silently rejected because the AJAX UI shouldn't be
+trying to do them anyway. Things like demoting non-managers or non-members,
+promoting already-managers or non-members, or removing non-members.
+
+  >>> self.login('user3')
+  >>> browser.open('http://localhost/++skin++col/plone/workspaces/ws/manage-workspace-members.html')
+  >>> browser.getControl(name='form.removeMembers').value = "user7"
+  >>> browser.getControl(name='form.promoteMembers').value = "user3,user4,user5"
+  >>> browser.getControl(name='form.demoteMembers').value = "user1,user2,user6"
+  >>> browser.getControl(name='form.actions.manageMembership').click()
+  >>> xml = parse(StringIO(browser.contents), parser).getroot()
+  >>> xml.accepted.text
+  '0'
+  >>> sorted(tag.text for tag in xml.errors.removal)
+  ['user7']
+  >>> sorted(tag.text for tag in xml.errors.promotion)
+  ['user3', 'user4', 'user5']
+  >>> sorted(tag.text for tag in xml.errors.demotion)
+  ['user1', 'user2', 'user6']
+
+This view is only accessible for workspace managers. For instance, if we were
+to forcibly demote the test user from its workspace management duties, the
+view would no longer be accessible:
+
+  >>> view = app.restrictedTraverse('/++skin++col/plone/workspaces/ws/manage-workspace-members.html')
+  >>> wm.demoteMemberById('test_user_1_')
+  >>> self.login()
+  >>> view = app.restrictedTraverse('/++skin++col/plone/workspaces/ws/manage-workspace-members.html') # doctest: +ELLIPSIS
+  Traceback (most recent call last):
+  ...
+  Unauthorized: ...

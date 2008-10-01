@@ -1,0 +1,144 @@
+-*- doctest -*-
+
+Tests for BatchFragment
+=======================
+
+    >>> from elementtree.ElementTree import tostring
+    >>> from Products.COL3.tests.test_batch import DummyBatchFragment
+    >>> from Products.COL3.tests.test_batch import make_request
+
+    >>> request = make_request()
+    >>> batch = DummyBatchFragment(None, request)
+    >>> print tostring(batch.asElement()) #doctest:+XMLDATA
+    <?xml version="1.0"?>
+    <batch end="20" start="1" total="20">
+      <cols>
+        <col href="http://foo?start:int=0&amp;sort_on=title&amp;sort_order=asc" id="title">Title</col>
+        <col href="http://foo?start:int=0&amp;sort_on=type&amp;sort_order=asc" id="type">Type</col>
+        <col href="http://foo?start:int=0&amp;sort_on=author&amp;sort_order=asc" id="author">Author</col>
+        <col href="http://foo?start:int=0&amp;sort_on=created&amp;sort_order=desc" id="created">Created</col>
+        <col href="http://foo?start:int=0&amp;sort_on=modified&amp;sort_order=desc" id="modified">Date</col>
+      </cols>
+      <pages>
+        <page current="current" href="http://foo?start:int=0">1</page>
+      </pages>
+      <letters>
+        <letter href="http://foo?start:int=0&amp;title=A">A</letter>
+        <letter href="http://foo?start:int=0&amp;title=B">B</letter>
+        <letter href="http://foo?start:int=0&amp;title=C">C</letter>
+        <letter href="http://foo?start:int=0&amp;title=D">D</letter>
+        <letter href="http://foo?start:int=0&amp;title=E">E</letter>
+        <letter href="http://foo?start:int=0&amp;title=F">F</letter>
+        <letter href="http://foo?start:int=0&amp;title=G">G</letter>
+        <letter href="http://foo?start:int=0&amp;title=H">H</letter>
+        <letter href="http://foo?start:int=0&amp;title=I">I</letter>
+        <letter href="http://foo?start:int=0&amp;title=J">J</letter>
+        <letter href="http://foo?start:int=0&amp;title=K">K</letter>
+        <letter href="http://foo?start:int=0&amp;title=L">L</letter>
+        <letter href="http://foo?start:int=0&amp;title=M">M</letter>
+        <letter href="http://foo?start:int=0&amp;title=N">N</letter>
+        <letter href="http://foo?start:int=0&amp;title=O">O</letter>
+        <letter href="http://foo?start:int=0&amp;title=P">P</letter>
+        <letter href="http://foo?start:int=0&amp;title=Q">Q</letter>
+        <letter href="http://foo?start:int=0&amp;title=R">R</letter>
+        <letter href="http://foo?start:int=0&amp;title=S">S</letter>
+        <letter href="http://foo?start:int=0&amp;title=T">T</letter>
+        <letter href="http://foo?start:int=0&amp;title=U">U</letter>
+        <letter href="http://foo?start:int=0&amp;title=V">V</letter>
+        <letter href="http://foo?start:int=0&amp;title=W">W</letter>
+        <letter href="http://foo?start:int=0&amp;title=X">X</letter>
+        <letter href="http://foo?start:int=0&amp;title=Y">Y</letter>
+        <letter href="http://foo?start:int=0&amp;title=Z">Z</letter>
+      </letters>
+      <pagesize>
+        <size href="http://foo?start:int=0&amp;sze=10">10</size>
+        <size current="current" href="http://foo?start:int=0&amp;sze=20">20</size>
+        <size href="http://foo?start:int=0&amp;sze=50">50</size>
+        <size href="http://foo?start:int=0&amp;sze=100">100</size>
+      </pagesize>
+      <navigation>
+	<next href="http://foo?start:int=20">Next</next>
+      </navigation>
+      <items>
+        <item>
+          <title>item 0</title>
+          <description>description 0</description>
+        </item>
+        <item>
+          <title>item 1</title>
+          <description>description 1</description>
+        </item>
+        <item>
+          <title>item 2</title>
+          <description>description 2</description>
+        </item>
+        <item>
+          <title>item 3</title>
+          <description>description 3</description>
+        </item>
+        <item>
+          <title>item 4</title>
+          <description>description 4</description>
+        </item>
+        <item>
+          <title>item 5</title>
+          <description>description 5</description>
+        </item>
+        <item>
+          <title>item 6</title>
+          <description>description 6</description>
+        </item>
+        <item>
+          <title>item 7</title>
+          <description>description 7</description>
+        </item>
+        <item>
+          <title>item 8</title>
+          <description>description 8</description>
+        </item>
+        <item>
+          <title>item 9</title>
+          <description>description 9</description>
+        </item>
+        <item>
+          <title>item 10</title>
+          <description>description 10</description>
+        </item>
+        <item>
+          <title>item 11</title>
+          <description>description 11</description>
+        </item>
+        <item>
+          <title>item 12</title>
+          <description>description 12</description>
+        </item>
+        <item>
+          <title>item 13</title>
+          <description>description 13</description>
+        </item>
+        <item>
+          <title>item 14</title>
+          <description>description 14</description>
+        </item>
+        <item>
+          <title>item 15</title>
+          <description>description 15</description>
+        </item>
+        <item>
+          <title>item 16</title>
+          <description>description 16</description>
+        </item>
+        <item>
+          <title>item 17</title>
+          <description>description 17</description>
+        </item>
+        <item>
+          <title>item 18</title>
+          <description>description 18</description>
+        </item>
+        <item>
+          <title>item 19</title>
+          <description>description 19</description>
+        </item>
+      </items>
+    </batch>

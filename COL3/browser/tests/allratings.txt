@@ -1,0 +1,91 @@
+================
+All Ratings View
+================
+
+This is to quickly test the "review" fragment for the view all ratings
+view for library files.  I'm not gonig to test the common views fragments or
+the "View" fragment as they're profusely tested everywhere else and are
+uninteresting here
+
+First a couple of imports
+
+  >>> from Products.CMFCore.utils import getToolByName
+  >>> from contentratings.interfaces import IUserRating
+  >>> from Products.COL3.content.library import LibraryFile
+  >>> from Products.COL3.browser.library import ViewLibraryRecommendationsFragment
+
+
+First, let's create some unique users to add recommendations with
+
+  >>> pmem = getToolByName(self.portal, 'portal_membership')
+  >>> pmem.addMember('bjstest', '12345', ['Community Member'], [])
+  >>> me = pmem.getMemberById('bjstest')
+  >>> self.login(me.id)
+  >>> newprops = {'description':'I have a long history of stuff!!!',
+  ...             'fullname': 'Bernard Schreiber',
+  ...             'organization':'Enfold Systems',
+  ...             'email':'bschreiber@foo.com',
+  ...             'country':'United States Of America',
+  ...             'firstname':'Bernard',
+  ...             'lastname':'Schreiber',
+  ...             'type_of_organization':'Import/Export',}
+  >>> me.setMemberProperties(newprops)
+  >>> pmem.addMember('bidoltest', '12345', ['Community Member'], [])
+  >>> me2 = pmem.getMemberById('bidoltest')
+  >>> self.login(me2.id)
+  >>> newprops = {'description':'I have a long history of rockin out!!!',
+  ...             'fullname': 'Bill Idol',
+  ...             'organization':'Generation X',
+  ...             'email':'bidol@foo.com',
+  ...             'country':'United States Of America',
+  ...             'firstname':'Billy',
+  ...             'lastname':'Idol',
+  ...             'type_of_organization':'Import/Export',}
+  >>> me2.setMemberProperties(newprops)
+  >>> pmem.addMember('rdaltreytest', '12345', ['Community Member'], [])
+  >>> me3 = pmem.getMemberById('rdaltreytest')
+  >>> self.login(me3.id)
+  >>> newprops = {'description':'I have a long history of rockin out!!!',
+  ...             'fullname': 'Roger Daltrey',
+  ...             'organization':'The Who',
+  ...             'email':'rdaltrey@foo.com',
+  ...             'country':'United States Of America',
+  ...             'firstname':'Roger',
+  ...             'lastname':'Daltrey',
+  ...             'type_of_organization':'Import/Export',}
+  >>> me3.setMemberProperties(newprops)
+
+Now let's create a library file and attempte to add some ratings, when viewing the reviews
+they should be in the reverse chronological order, last added first etc.
+
+  >>> self.setRoles(['Member','Community Member'])
+  >>> self.login()
+  >>> fileid = app.plone.library.invokeFactory('LibraryFile', 'libfile')
+  >>> libfile = app.plone.library[fileid]
+  >>> adaptedfile = IUserRating(libfile)
+  >>> rating = adaptedfile.rate(5, 'bjstest', title='BJSTEST', text='BJSTEST Text')
+  >>> rating = adaptedfile.rate(1, 'bidoltest', title='BIDOLTEST', text='BIDOLTEST Text')
+  >>> rating = adaptedfile.rate(1, 'rdaltreytest', title='RDALTREYTEST', text='RDALTREYTEST Text')
+  >>> len(adaptedfile.all_user_ratings())
+  3
+
+  >>> viewratings_frag = ViewLibraryRecommendationsFragment(libfile, app.REQUEST)
+  >>> viewratings_node = viewratings_frag.asElement()
+  >>> reviews = viewratings_node.findall('review')
+  >>> len(reviews)
+  3
+
+  >>> [r.find('title').text for r in reviews]
+  [u'RDALTREYTEST', u'BIDOLTEST', u'BJSTEST']
+
+  >>> from elementtree.ElementTree import tostring
+  >>> print tostring(reviews[0]) # doctest: +XMLDATA +ELLIPSIS
+  <review>
+    <rating>10</rating>
+    <title>RDALTREYTEST</title>
+    <comment>RDALTREYTEST Text</comment>
+    <reviewer>Roger Daltrey</reviewer>
+    <username>rdaltreytest</username>
+    <modified>...</modified>
+    <bio href="http://nohost/plone/view-profile.html?userid=rdaltreytest" />
+  </review>

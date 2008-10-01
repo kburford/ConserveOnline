@@ -1,0 +1,204 @@
+=====================
+Ploneboard View Tests
+=====================
+
+Tests the various view fragments for the ploneboard implementation
+
+Test the TopicAddFragment
+
+First setup a temp workspace
+
+    >>> print 'foo'
+    'bar'
+    >>> portal = self.portal
+    >>> from elementtree.ElementTree import tostring
+    >>> self.setRoles(['Member','Community Member'])
+    >>> portal.workspaces.invokeFactory("Workspace", "bjsws") and None
+	>>> from Products.CMFCore.utils import getToolByName
+    >>> pcat = getToolByName(self.portal, 'portal_catalog')
+    >>> workspaces = pcat.searchResults(portal_type='Workspace')
+    >>> len(workspaces)
+    1
+    >>> ws = workspaces[0].getObject()
+    >>> ws['discussion'].invokeFactory("PloneboardConversation",
+    ...                                id="bjswsconv1",
+    ...                                title="Test Conversation One")
+    'bjswsconv1'
+	>>> conversations = pcat.searchResults(portal_type='PloneboardConversation')
+	>>> len(conversations)
+	1
+	>>> conv = conversations[0].getObject()
+	>>> conv.addComment(title='Conv1 Comment One', 
+	...                 text='Conv1 Hello Cleveland', 
+	...                 creator='admin', 
+	...                 files=None)
+	<PloneboardComment: title=u'Conv1 Comment One';>
+	
+	>>> conv = conversations[0].getObject()
+    >>> conv.addComment(title='Conv1 Comment Two', 
+    ...                 text='Conv1 Hello Dolly', 
+    ...                 creator='admin', 
+    ...                 files=None)
+    <PloneboardComment: title=u'Conv1 Comment Two';>
+	
+    >>> ws['discussion'].invokeFactory("PloneboardConversation",
+    ...                                id="bjswsconv2",
+    ...                                title="Test Conversation Two")
+    'bjswsconv2'
+    
+	>>> conversations = pcat.searchResults(portal_type='PloneboardConversation')
+	>>> len(conversations)
+	2
+	>>> conv = conversations[1].getObject()
+	>>> conv.addComment(title='Conv2 Comment One', 
+	...                 text='Hello Cleveland 2', 
+	...                 creator='admin', 
+	...                 files=None)
+	<PloneboardComment: title=u'Conv2 Comment One';>
+	
+	>>> conv.addComment(title='Conv2 Comment Two', 
+	...                 text='Conv2 Hello Dolly 2', 
+	...                 creator='admin', 
+	...                 files=None)
+	<PloneboardComment: title=u'Conv2 Comment Two';>
+	
+	>>> conv.addComment(title='Conv2 Comment Three', 
+	...                 text='Conv2 Hello There 2', 
+	...                 creator='admin', 
+	...                 files=None)
+	<PloneboardComment: title=u'Conv2 Comment Three';>
+	
+	>>> conv.addComment(title='Conv2 Comment Four', 
+	...                 text='Conv2 Hello Hello 2', 
+	...                 creator='admin', 
+	...                 files=None)
+	<PloneboardComment: title=u'Conv2 Comment Four';>
+	
+    >>> ws['discussion'].invokeFactory("PloneboardConversation",
+    ...                                id="bjswsconv3",
+    ...                                title="Test Conversation Three")
+    'bjswsconv3'
+    
+    >>> conversations = pcat.searchResults(portal_type='PloneboardConversation')
+    >>> len(conversations)
+    3
+    >>> conv = conversations[1].getObject()
+    >>> conv.addComment(title='Conv3 Comment One', 
+    ...                 text='Hello Cleveland 33', 
+    ...                 creator='admin', 
+    ...                 files=None)
+    <PloneboardComment: title=u'Conv3 Comment One';>
+    
+    >>> conv.addComment(title='Conv3 Comment Two', 
+    ...                 text='Conv3 Hello Dolly 2', 
+    ...                 creator='admin', 
+    ...                 files=None)
+    <PloneboardComment: title=u'Conv3 Comment Two';>
+
+    >>> conv.addComment(title='Conv3 Comment Three', 
+    ...                 text='Conv3 Hello There 2', 
+    ...                 creator='admin', 
+    ...                 files=None)
+    <PloneboardComment: title=u'Conv3 Comment Three';>
+	
+    >>> conv.addComment(title='Conv3 Comment Four', 
+    ...                 text='Conv3 Hello Hello 2', 
+    ...                 creator='admin', 
+    ...                 files=None)
+    <PloneboardComment: title=u'Conv3 Comment Four';>
+
+    >>> conv.addComment(title='Conv3 Comment Five', 
+    ...                 text='Conv3 Hello Hello 2', 
+    ...                 creator='admin', 
+    ...                 files=None)
+    <PloneboardComment: title=u'Conv3 Comment Five';>
+
+Now Test TopicAddFragment
+
+    >>> from elementtree.ElementTree import tostring
+	>>> from Products.COL3.browser.discussion import DiscussionBatchProvider
+	>>> from Products.COL3.browser.batch import BatchFragmentFactory
+	>>> batchfragment = BatchFragmentFactory(DiscussionBatchProvider, size=2)
+	>>> batch = batchfragment(ws['discussion'], app.REQUEST)
+    >>> provider = batch.provider(ws['discussion'], app.REQUEST)
+    >>> batchelem = batch.asElement()
+    >>> print batchelem.attrib['end']
+    2
+    >>> print batchelem.attrib['start']
+    1
+    >>> print batchelem.attrib['total']
+    3
+    >>> pages = batchelem.find('pages')
+    >>> tostring(pages) #doctest: +XMLDATA
+    <pages>
+        <page current="current" href="?start:int=0">1</page>
+        <page href="?start:int=2">2</page>
+    </pages>
+    >>> nav = batchelem.find('navigation')
+    >>> tostring(nav) #doctest: +XMLDATA
+    <navigation>
+        <next href="?start:int=2">Next</next>
+    </navigation>
+    >>> items = batchelem.findall('items/item')
+    >>> len(items)
+    2
+    >>> item = items[0]
+    >>> print item.find('title').text
+    Test Conversation One
+    >>> print item.find('author').text
+    test_user_1_
+    >>> tostring(items[1]) #doctest: +XMLDATA
+    <item href="http://nohost/plone/workspaces/bjsws/discussion/bjswsconv3">
+        <title>Test Conversation Three</title>
+        <author>test_user_1_</author>
+        <lastcomment>
+            <author/>
+            <created/>
+        </lastcomment>
+        <replies>0</replies>
+    </item>
+    >>> item = items[1]
+    >>> print item.find('title').text
+    Test Conversation Three
+    >>> print item.find('author').text
+    test_user_1_
+    >>> from Products.COL3.browser.discussion import DiscussionsMostPopular
+    >>> mostpopular = DiscussionsMostPopular(ws['discussion'], app.REQUEST)
+    >>> mostpopularelem = mostpopular.asElement()
+    >>> topics = mostpopularelem.findall('topic')
+    >>> len(topics)
+    3
+    >>> for topic in topics:
+    ...     print topic.attrib['href']
+    ...     print topic.find('title').text
+    ...     print topic.find('author').attrib['href']
+    ...     print topic.find('author').text
+    ...     print topic.find('replies').text
+    ...     print topic.find('lastcomment/author').attrib['href']
+    ...     print topic.find('lastcomment/author').text
+    http://nohost/plone/workspaces/bjsws/discussion/bjswsconv2
+    Test Conversation Two
+    /profile/test_user_1_
+    test_user_1_
+    9
+    /profile/test_user_1_
+    test_user_1_
+    http://nohost/plone/workspaces/bjsws/discussion/bjswsconv1
+    Test Conversation One
+    /profile/test_user_1_
+    test_user_1_
+    2
+    /profile/test_user_1_
+    test_user_1_
+    http://nohost/plone/workspaces/bjsws/discussion/bjswsconv3
+    Test Conversation Three
+    /profile/test_user_1_
+    test_user_1_
+    0
+    /profile/
+    <BLANKLINE>
+    >>> from Products.COL3.browser.discussion import CommentViewFragment
+    >>> discussion = ws['discussion']
+    >>> viewcommentview = CommentViewFragment(discussion, app.REQUEST)
+    >>> tostring(viewcommentview.asElement())
+    '<view name="view.html" section="workspaces" title="Discussions" type="comment" />'

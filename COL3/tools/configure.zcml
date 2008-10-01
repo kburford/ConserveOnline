@@ -1,0 +1,44 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <!-- finish the setup of the invitations tool -->
+  <subscriber
+      for="Products.COL3.interfaces.tools.IInvitationManager
+           zope.app.container.interfaces.IObjectAddedEvent"
+      handler=".invitations.invitationManagerAddedHandler"
+      />
+
+  <!-- catalog and uncatalog invitations in the tool -->
+  <subscriber
+      for="Products.COL3.interfaces.tools.IInvitation
+           zope.app.container.interfaces.IObjectAddedEvent"
+      handler=".invitations.invitationAddedHandler"
+      />
+
+  <subscriber
+      for="Products.COL3.interfaces.tools.IInvitation
+           OFS.interfaces.IObjectWillBeRemovedEvent"
+      handler=".invitations.invitationWillBeRemovedHandler"
+      />
+
+  <!-- finish the setup of the join requests tool -->
+  <subscriber
+      for="Products.COL3.interfaces.tools.IJoinRequestsManager
+           zope.app.container.interfaces.IObjectAddedEvent"
+      handler=".joinrequests.joinRequestsManagerAddedHandler"
+      />
+
+  <!-- catalog and uncatalog join-requests in the tool -->
+  <subscriber
+      for="Products.COL3.interfaces.tools.IJoinRequest
+           zope.app.container.interfaces.IObjectAddedEvent"
+      handler=".joinrequests.joinRequestAddedHandler"
+      />
+
+  <subscriber
+      for="Products.COL3.interfaces.tools.IJoinRequest
+           OFS.interfaces.IObjectWillBeRemovedEvent"
+      handler=".joinrequests.joinRequestWillBeRemovedHandler"
+      />
+
+</configure>

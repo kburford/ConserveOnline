@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="view.html" type="topic" title="Some Sample Topic" section="workspaces"/>
+  <quoted_reply>
+    <author>someuserid</author>
+    <text>
+      <div xmlns="http://www.w3.org/1999/xhtml">
+        <p>
+          <b>a;dklf;zkvcmb</b>Duis autem vel eum iriure dolor .</p>
+      </div>
+    </text>
+  </quoted_reply>
+  <formcontroller action="/some/absolute/path">
+    <field name="form.text" widget="editor">
+      <label>Reply</label>
+      <value>
+        <div xmlns="http://www.w3.org/1999/xhtml">
+          <p>
+            <b>a;dklf;zkvcmb</b>Duis autem vel eum iriure dolor .</p>
+        </div>
+      </value>
+    </field>
+    <submit name="submit">Save</submit>
+    <submit name="cancel">Cancel</submit>
+  </formcontroller>
+  <resource href="/workspaces/birds/discussion/topic1" uuid="71f057f15cd93a338e10e5ea6de6f2d1">
+    <type title="Discussion Topic">PloneboardTopic</type>
+    <author href="/profile/admin">Alan Runyan</author>
+    <url>/workspaces/birds/discussion/topic1</url>
+    <created>2007-08-20T13:52:23-05:00</created>
+    <modified>2007-08-20T13:52:23-05:00</modified>
+    <creator>admin</creator>
+    <size>1</size>
+    <is_private>false</is_private>
+    <id>topic1</id>
+    <title>Some Discussion Topic</title>
+    <text>
+      <div xmlns="http://www.w3.org/1999/xhtml">
+        <p>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat,
+          vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio
+          dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla
+          facilisi.</p>
+        <p>This is <em>Some Text</em>.</p>
+        <p>Another paragraph.</p>
+      </div>
+    </text>
+    <constrainTypesMode>0</constrainTypesMode>
+    <locallyAllowedTypes>Document; Event; Favorite; File; Folder; Image; Link; News Item; Topic;
+      Ploneboard; workspace; workspace Vault; workspaces Container</locallyAllowedTypes>
+    <immediatelyAddableTypes>Document; Event; Favorite; File; Folder; Image; Link; News Item; Topic;
+      Ploneboard; workspace; workspace Vault; workspaces Container</immediatelyAddableTypes>
+    <subject/>
+    <relatedItems/>
+    <location/>
+    <language/>
+    <effectiveDate/>
+    <expirationDate/>
+    <creation_date>2007-08-20T13:52:23-05:00</creation_date>
+    <modification_date>2007-08-20T13:52:23-05:00</modification_date>
+    <creators>admin</creators>
+    <contributors/>
+    <rights/>
+    <allowDiscussion>false</allowDiscussion>
+    <excludeFromNav>false</excludeFromNav>
+    <nextPreviousEnabled>false</nextPreviousEnabled>
+  </resource>
+  <batch total="929" start="21" end="40">
+    <pages>
+      <page current="current" href="#">1</page>
+      <page href="#">2</page>
+      <page href="#">3</page>
+    </pages>
+    <items>
+      <item href="/url/to/discussion/topic/comment">
+        <title>Some Comment</title>
+        <text>
+          <div xmlns="http://www.w3.org/1999/xhtml">
+            <p>Text of <em>emphasized</em> replies.</p>
+          </div>
+        </text>
+        <author href="/people/runyaga">Alan Runyan</author>
+        <modified>2007-08-20T13:52:23-05:00</modified>
+      </item>
+      <item href="/url/to/discussion/topic/comment">
+        <title>Some Comment</title>
+        <text>
+          <div xmlns="http://www.w3.org/1999/xhtml">
+            <p>Text of <em>emphasized</em> reply.</p>
+          </div>
+        </text>
+        <author href="/people/runyaga">Alan Runyan</author>
+        <modified>2007-08-20T13:52:23-05:00</modified>
+      </item>
+      <item href="/url/to/discussion/topic/comment">
+        <title>Some Comment</title>
+        <text>
+          <div xmlns="http://www.w3.org/1999/xhtml">
+            <p>Text of <em>emphasized</em> reply.</p>
+          </div>
+        </text>
+        <author href="/people/runyaga">Alan Runyan</author>
+        <modified>2007-08-20T13:52:23-05:00</modified>
+      </item>
+    </items>
+  </batch>
+  <menus>
+    <actionmenu>
+      <entry href="edit.html">Edit</entry>
+      <entry href="delete.html">Delete</entry>
+    </actionmenu>
+  </menus>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry href="/workspaces/california-birds/documents/">Discussion</entry>
+    <entry>View Topic</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>discussions</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+  </user>
+</response>

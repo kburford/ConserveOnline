@@ -1,0 +1,200 @@
+=============
+Ratings Tests
+=============
+
+Initially, lets create a LibraryFile item to play with::
+
+    >>> from Products.CMFPlone.utils import _createObjectByType
+    >>> content= _createObjectByType('LibraryFile', self.portal.library, 'lf1')
+
+Check that the LibraryFile class and instance provides the expected ratable
+interface::
+
+    >>> from Products.COL3.content.library import LibraryFile
+    >>> from Products.COL3.rating.interfaces import IRecommendationRatable
+    >>> IRecommendationRatable.implementedBy(LibraryFile)
+    True
+    >>> IRecommendationRatable.providedBy(content)
+    True
+
+Just to make sure, the object should also be annotable::
+
+    >>> from zope.annotation.interfaces import IAttributeAnnotatable
+    >>> IAttributeAnnotatable.providedBy(content)
+    True
+
+The Library itself should not be ratable::
+
+    >>> IRecommendationRatable.providedBy(self.portal.library)
+    False
+
+The category registered via ZCML should be available::
+
+    >>> from contentratings.interfaces import IUserRating
+    >>> adapted = IUserRating(content)
+    >>> adapted # doctest: +ELLIPSIS
+    <contentratings.category.RatingCategoryAdapter ...>
+    >>> adapted.title
+    u'Recommendation Rating Category'
+
+Now let's play with the rating category::
+
+    >>> category = adapted.category
+    >>> category # doctest: +ELLIPSIS
+    <contentratings.category.RatingsCategoryFactory ...>
+    >>> category.storage
+    <class 'Products.COL3.rating.storage.RecommendationRatingStorage'>
+
+First check that the expected interfaces are being implemented::
+
+    >>> from contentratings.interfaces import IRatingStorage
+    >>> IRatingStorage.implementedBy(category.storage)
+    True
+    >>> from Products.COL3.rating.interfaces import IRecommendationRating
+    >>> IRecommendationRating.implementedBy(category.storage)
+    True
+
+Let's test the RatingCategoryAdapter now, to see if we can get a rating
+manager::
+
+    >>> from contentratings.category import RatingCategoryAdapter
+    >>> manager = RatingCategoryAdapter(category, content)
+
+Creating the manager should have assigned the category, context, and
+created a storage::
+
+    >>> from Products.COL3.rating.storage import RecommendationRatingStorage
+    >>> manager.category is category
+    True
+    >>> isinstance(manager.storage, RecommendationRatingStorage)
+    True
+    >>> manager.context is content
+    True
+
+The adaptation stores and instance of the rating storage as an
+annotation on the content object. We need to verify that storage,
+and examine how the annotation can be controlled. There is a default
+annotation key where annotations are stored::
+
+    >>> from zope.annotation.interfaces import IAnnotations
+    >>> annotations = IAnnotations(content)
+    >>> key = 'contentratings.userrating'
+    >>> key in annotations.keys()
+    True
+
+An instance of the storage should be contained in the annotation::
+
+    >>> storage = annotations[key]
+    >>> isinstance(storage, RecommendationRatingStorage)
+    True
+    >>> manager.storage == storage
+    True
+
+This rating manager should have introspected the IRatingType API provided
+by our RecommendationRatingStorage (IRecommendationRating) and should be
+providing that API transparently::
+
+    >>> IRecommendationRating.implementedBy(RatingCategoryAdapter)
+    False
+    >>> IRecommendationRating.providedBy(storage)
+    True
+    >>> IRecommendationRating.providedBy(manager)
+    True
+    >>> from zope.interface.verify import verifyObject
+    >>> verifyObject(IRecommendationRating, manager)
+    True
+
+The manager also provides some attributes proxied from the category::
+
+    >>> manager.title == category.title
+    True
+    >>> category.title = u'changed'
+    >>> manager.title
+    u'changed'
+
+We can use the manager to create user ratings::
+
+    >>> rate1 = manager.rate(5, 'user1', 'title1', 'text1')
+    >>> rate2 = manager.rate(3, 'user2', 'title2', 'text2')
+    >>> rate3 = manager.rate(1, 'user3', 'title3', 'text3')
+
+Check some basic rating stuff::
+
+    >>> manager.numberOfRatings
+    3
+    >>> manager.averageRating
+    3.0
+    >>> manager.userRating('user1') == rate1
+    True
+    >>> manager.userRating('user2') == rate2
+    True
+    >>> manager.userRating('user3') == rate3
+    True
+    >>> manager.userRating('invalid') == None
+    True
+    >>> manager.most_recent == rate3
+    True
+    >>> rate1.rating_title
+    'title1'
+    >>> rate1.userid
+    'user1'
+    >>> rate2.rating_text
+    'text2'
+    >>> rate3.timestamp # doctest: +ELLIPSIS
+    datetime.datetime(...)
+    >>> rate1 # doctest: +ELLIPSIS
+    <RecommendationRating 5.0 by 'user1' ...>
+
+It's also possible to get all the userids of the raters::
+    >>> list(manager.all_raters())
+    ['user1', 'user2', 'user3']
+
+Aswell the ratings objects themselves::
+
+    >>> list(manager.all_user_ratings()) # doctest: +ELLIPSIS
+    [<RecommendationRating 5.0 by 'user1' ...>,
+     <RecommendationRating 3.0 by 'user2' ...>,
+     <RecommendationRating 1.0 by 'user3' ...>]
+
+Users can change their ratings without raising the number of ratings,
+but keeping the average updated::
+
+    >>> rate2 = manager.rate(0, 'user2', 'foo', 'bar')
+    >>> manager.numberOfRatings
+    3
+    >>> manager.averageRating
+    2.0
+
+Ratings with bad content aren't taken into account for the total
+number and averave of ratings::
+
+    >>> rate3 = manager.rate(1, 'user3', badcontent=True)
+    >>> manager.numberOfRatings
+    2
+    >>> manager.averageRating
+    2.5
+
+When removed, the bad ratings should keep the stats updated::
+
+    >>> manager.remove_rating('user3')
+    >>> manager.numberOfRatings
+    2
+    >>> manager.averageRating
+    2.5
+
+Ratings can also be removed by the users::
+
+    >>> manager.remove_rating('user2')
+    >>> manager.numberOfRatings
+    1
+    >>> manager.averageRating
+    5.0
+    >>> 'user2' not in list(manager.all_raters())
+    True
+    >>> manager.remove_rating('user1')
+    >>> manager.numberOfRatings
+    0
+    >>> manager.averageRating
+    0.0
+    >>> list(manager.all_raters())
+    []

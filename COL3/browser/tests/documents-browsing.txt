@@ -1,0 +1,140 @@
+=============================
+Browsing Workspace Documents
+=============================
+
+Workspace documents can be browsed in a number of ways.
+
+First, some preparations:
+
+    >>> import sys
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring as ettostring
+    >>> from lxml.etree import XML, tostring as lxtostring
+    >>> from Products.ATContentTypes.tests.utils import FakeRequestSession
+    >>> from Products.COL3.browser.wsdocumenttool import WSDocsByKeywordBatchFragment
+    >>> from Products.COL3.browser.wsdocumenttool import WSDocsMatchingKeywordBatchFragment
+    >>> from Products.COL3.interfaces.workspace import IWorkspace
+    >>> from Products.COL3.tests.xml_validator import XMLValidator
+    >>> validator = XMLValidator()
+    >>> def tostring(elem):
+    ...     return lxtostring(XML(ettostring(elem)), pretty_print=True)
+    >>> def prepWorkspaceAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     workspace = app.plone.workspaces['workspace'].unrestrictedTraverse('++skin++col')
+    ...     return workspace, workspace.REQUEST
+    >>> self.setRoles(['Member','Community Member'])
+
+Now let's create a workspace which holds the documents folder.
+
+    >>> app.plone.workspaces.invokeFactory('Workspace', 'workspace') and None
+    >>> self.login() # aquire the Workspace Manager group and role
+
+This workspace already contains a 'documents' folder by default:
+
+    >>> from Products.COL3.interfaces.workspace import IWorkspaceDocumentsFolder
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> documents = workspace.documents
+    >>> IWorkspaceDocumentsFolder.providedBy(documents)
+    True
+
+Browsing by Keywords
+==================
+
+Let's create some pages and set some keywords on them to browse by keywords
+(formerly known as labels)
+
+    >>> documents.invokeFactory('COLPage', 'apage') and None
+    >>> page = documents['apage']
+    >>> page.update(labels=['My Keyword', 'My Other Keyword'])
+    >>> page.setTitle('ZZZZ')
+    >>> documents.invokeFactory('COLPage', 'anotherpage') and None
+    >>> page2 = documents['anotherpage']
+    >>> page2.update(labels=['My Keyword', 'My New Keyword'])
+    >>> page2.setTitle('BBBB')
+    >>> from Products.COL3.content.label import Labeller
+    >>> mylabeller = Labeller(documents)
+    >>> for r in mylabeller.listLabels():
+    ...     print r
+    My Keyword
+    My New Keyword
+    My Other Keyword
+    >>> labels = mylabeller.listLabelInfo()
+    >>> for label in labels:
+    ...     print label['search_parameter'] + '/' + label['label']
+    my keyword/My Keyword
+    my new keyword/My New Keyword
+    my other keyword/My Other Keyword
+    >>> browse_labels_batch = WSDocsByKeywordBatchFragment(documents, app.REQUEST)
+
+    >>> print tostring(browse_labels_batch.asElement()) #doctest:+XMLDATA
+    <batch end="3" start="1" total="3">
+    <cols>
+        <col dir="desc" href="http://nohost?start:int=0&amp;sort_on=keyword&amp;sort_order=desc" id="keyword">Keyword</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=count&amp;sort_order=asc" id="count"
+            >Count</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://nohost?start:int=0&amp;sort_on=keyword">1</page>
+    </pages>
+    <pagesize>
+      <size href="http://nohost?start:int=0&amp;sort_on=keyword&amp;sze=10">10</size>
+      <size current="current" href="http://nohost?start:int=0&amp;sort_on=keyword&amp;sze=20">20</size>
+      <size href="http://nohost?start:int=0&amp;sort_on=keyword&amp;sze=50">50</size>
+      <size href="http://nohost?start:int=0&amp;sort_on=keyword&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://foo/plone/workspaces/workspace/documents/withkeyword-documents.html?keyword=my keyword">
+            <count>2</count>
+            <keyword>My Keyword</keyword>
+        </item>
+        <item href="http://foo/plone/workspaces/workspace/documents/withkeyword-documents.html?keyword=my new keyword">
+            <count>1</count>
+            <keyword>My New Keyword</keyword>
+        </item>
+        <item href="http://foo/plone/workspaces/workspace/documents/withkeyword-documents.html?keyword=my other keyword">
+            <count>1</count>
+            <keyword>My Other Keyword</keyword>
+        </item>
+    </items>
+    </batch>
+    >>> app.REQUEST['sort_on'] = 'title'
+    >>> docs_with_label_batch = WSDocsMatchingKeywordBatchFragment(documents, app.REQUEST)
+    >>> app.REQUEST['label'] = 'my label'
+    >>> dwl_batchelem = docs_with_label_batch.asElement()
+    >>> for element in dwl_batchelem.findall('items/item/date'):
+    ...     element.text = ''
+    >>> (tostring(dwl_batchelem)).replace('\n','') #doctest:+XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+        <col dir="desc" href="http://nohost?start:int=0&amp;sort_on=title&amp;sort_order=desc" id="title">Title</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=mimetype&amp;sort_order=asc"
+            id="mimetype">Format</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=size&amp;sort_order=asc" id="size"
+            >Size</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=date&amp;sort_order=asc" id="date"
+            >Date</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://nohost?start:int=0&amp;sort_on=title">1</page>
+    </pages>
+    <pagesize>
+      <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+      <size current="current" href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+      <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+      <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://foo/plone/workspaces/workspace/documents/anotherpage/view.html">
+            <title>BBBB</title>
+            <mimetype>text</mimetype>
+            <date/>
+            <size>0</size>
+        </item>
+        <item href="http://foo/plone/workspaces/workspace/documents/apage/view.html">
+            <title>ZZZZ</title>
+            <mimetype>text</mimetype>
+            <date/>
+            <size>0</size>
+        </item>
+    </items>
+    </batch>

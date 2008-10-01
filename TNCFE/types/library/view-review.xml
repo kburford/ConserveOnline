@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="viewreview.html" type="libraryfile" title="View Reviews: Drupal" section="libraryfile"/>
+    <reviews>
+        <review>
+            <rating>40</rating>
+            <title>Sun ♥ Drupal</title>
+            <comment>There is a new Netbeans plugin which adds Drupal support to the Netbeans IDE!</comment>
+            <reviewer>Kathy Adams</reviewer>
+            <username>kadams</username>
+            <modified>2008-06-03T21:38:09-04:00</modified>
+            <bio href="http://conserveonline.org/view-profile.html?userid=kadams"/>
+        </review>
+        <review>
+            <rating>20</rating>
+            <title>What Is Drupal</title>
+            <comment>Drupal is open-source software distributed under the GPL ("GNU General Public License") and is maintained and developed by a community of thousands of users and developers. If you like what Drupal promises for you, please work with us to expand and refine Drupal to suit your specific needs.</comment>
+            <reviewer>John Test</reviewer>
+            <username>test_1</username>
+            <modified>2008-07-03T09:38:09-04:00</modified>
+            <bio href="http://conserveonline.org/view-profile.html?userid=test_1"/>
+        </review>
+    </reviews>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/library/">Library</entry>
+        <entry href="/library/somefile/">Drupal</entry>
+        <entry>View Reviews: Drupal</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>0</isadmin>
+    </user>
+</response>

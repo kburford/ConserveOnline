@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="disclaimer.html" type="site" title="Legal Disclosure and Terms of Use" section="site"/>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry>Legal Disclosure</entry>
+  </breadcrumbs>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+  </user>
+</response>

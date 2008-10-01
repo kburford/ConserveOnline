@@ -1,0 +1,114 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="col3"
+    >
+
+<!-- Configuration for workspace documents (images, files, pages...) -->
+
+    <!-- COLPage views -->
+    <browser:page
+        for="..interfaces.workspace.IWorkspaceDocumentsFolder"
+        class=".page.PageAddPage"
+        name="add-page.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.AddPortalContent"
+    />
+
+    <browser:page
+        for="..interfaces.page.IPage"
+        class=".page.PageEditPage"
+        name="edit.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.ModifyPortalContent"
+    />
+
+    <browser:page
+        for="..interfaces.page.IPage"
+        class=".page.PageViewPage"
+        name="view.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="..interfaces.page.IPage"
+        name="view.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+    <browser:page
+        for="..interfaces.page.IPage"
+        name="delete.html"
+        class=".page.PageDeleteViewPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.ModifyPortalContent"
+    />
+
+    <!-- COLFile views -->
+    <browser:page
+        for="..interfaces.workspace.IWorkspaceDocumentsFolder"
+        class=".file.FileAddPage"
+        name="add-file.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.AddPortalContent"
+    />
+
+   <!-- The default view for file is the regular inline downloading view from
+        Plone
+   -->
+
+    <browser:page
+        for="..interfaces.file.IFile"
+        class=".file.FileViewPage"
+        name="view.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="..interfaces.file.IFile"
+        class=".file.FileEditPage"
+        name="edit.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.ModifyPortalContent"
+    />
+
+    <browser:page
+        for="..interfaces.file.IFile"
+        name="delete.html"
+        class=".page.PageDeleteViewPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="cmf.ModifyPortalContent"
+    />
+
+    <browser:page
+        for="..interfaces.file.IGISDataFile"
+        name="download"
+        class=".file.GISFileDataView"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="..interfaces.file.IGISDataFile"
+        name="download"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+	<browser:page
+        for="Products.ATContentTypes.interface.document.IATDocument"
+        name="view-about.html"
+        class=".page.AboutPageViewPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="Products.ATContentTypes.interface.document.IATDocument"
+        name="view-about.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+</configure>

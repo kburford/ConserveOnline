@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="byfolder.html" type="documents" title="Browse Files &amp; Pages by Folder"
+    section="workspaces"/>
+  <batch total="929" start="21" end="40">
+    <pages>
+      <page current="current" href="#">1</page>
+      <page href="#">2</page>
+      <page href="#">3</page>
+    </pages>
+    <cols>
+      <col id="title" href="/server/url/to/sort/column" dir="asc">Title</col>
+      <col id="count" href="/server/url/to/sort/column">Count</col>
+    </cols>
+    <items>
+      <item href="/server/url/to/matched/resource">
+        <title>A Folder</title>
+        <count>2</count>
+      </item>
+      <item href="/server/url/to/matched/resource">
+        <title>California Condor Observations - 2006</title>
+      </item>
+      <item href="/server/url/to/matched/resource">
+        <title>California Resources</title>
+        <count>N/A</count>
+      </item>
+      <item href="/server/url/to/matched/resource">
+        <title>Some Folder Title</title>
+        <count>N/A</count>
+      </item>
+      <item href="/server/url/to/matched/resource">
+        <title>Another Subfolder</title>
+        <count>49</count>
+      </item>
+    </items>
+  </batch>
+  <menus>
+    <addmenu>
+      <entry href="add.html">Add Page</entry>
+      <entry href="add.html">Add File</entry>
+    </addmenu>
+    <utilitymenu label="By:">
+      <entry href="all.html">All</entry>
+      <entry href="bykeyword.html">Keyword</entry>
+      <entry href="bypurpose.html">Purpose</entry>
+      <entry href="byauthor.html">Person</entry>
+      <entry href="byfolder.html" current="current">Folder</entry>
+    </utilitymenu>
+  </menus>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry>Browse Files &amp; Pages by Folder</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>documents</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+</response>

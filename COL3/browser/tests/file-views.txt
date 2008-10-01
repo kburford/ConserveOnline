@@ -1,0 +1,630 @@
+=================================
+Adding, editing and viewing files
+=================================
+
+First, some preparations:
+
+    >>> import sys, os, os.path, tempfile, shutil
+    >>> import transaction
+    >>> from cStringIO import StringIO
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring as ettostring
+    >>> from lxml.etree import XML, tostring as lxtostring
+    >>> from zope.app.publisher.browser import queryDefaultViewName
+    >>> from zope.component import getMultiAdapter
+    >>> from zope.interface import Interface
+    >>> from plone.app.blob.tests import makeFileUpload
+    >>> from Products.ATContentTypes.tests.utils import FakeRequestSession
+    >>> from Products.COL3.interfaces.workspace import IWorkspace
+    >>> from Products.COL3.browser.tests import __file__ as testdir
+    >>> from Products.COL3.content.label import sortable_title
+    >>> from Products.COL3.tests.xml_validator import XMLValidator
+    >>> from Products.COL3.config import LICENCES_DEFAULT
+    >>> validator = XMLValidator()
+    >>> testdir = os.path.dirname(testdir)
+    >>> testfile = os.path.join(testdir, 'test.pdf')
+    >>> def tostring(elem):
+    ...     return lxtostring(XML(ettostring(elem)), pretty_print=True)
+    >>> def prepWorkspaceAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     workspace = app.plone.workspaces['workspace'].unrestrictedTraverse('++skin++col')
+    ...     return workspace, workspace.REQUEST
+    >>> self.setRoles(['Member','Community Member'])
+
+Now let's create a workspace which holds the documents folder.
+
+    >>> app.plone.workspaces.invokeFactory('Workspace', 'workspace') and None
+    >>> self.login() # aquire the Workspace Manager group and role
+
+This workspace already contains a 'documents' folder by default:
+
+    >>> from Products.COL3.interfaces.workspace import IWorkspaceDocumentsFolder
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> workspace.setLicense(LICENCES_DEFAULT)
+    >>> documents = workspace.documents
+    >>> IWorkspaceDocumentsFolder.providedBy(documents)
+    True
+
+Creating the file
+-----------------
+
+The menu fragment in the browse workspace view has a link to "add-file.html",
+which is a view with the form to create a file:
+
+    >>> xml = documents.restrictedTraverse("@@all.html").getResponse()
+    >>> addFileMenu, = [node for node in xml.findall('menus/addmenu/entry')
+    ...                 if "add-file.html" in node.attrib['href']]
+    >>> print tostring(addFileMenu) # doctest: +XMLDATA
+    <entry href="http://foo/plone/workspaces/workspace/documents/@@add-file.html"
+           >Add File</entry>
+
+The file creation form is a regular form with the following fields:
+
+ * File (file upload field, required)
+
+ * Title (textline, required)
+
+ * Labels (the new labels field/widget)
+
+ * Type (fe-vocabulary selection (check with Paul which vocabulary))
+
+ * is Private?
+
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> addFormPage = workspace.restrictedTraverse('documents/@@add-file.html')
+    >>> addFormPageXML = addFormPage.getResponse()
+
+XML should validate against tnc.rng schema.
+
+    >>> validator.validateString(tostring(addFormPageXML)) # doctest: -REPORT_NDIFF
+
+    >>> print tostring(addFormPageXML.find('view')) # doctest: +XMLDATA
+    <view name="add.html" type="file" title="Add a File" section="workspaces"/>
+    >>> print tostring(addFormPageXML.find('formcontroller'))
+    ... # doctest: +XMLDATA
+    <formcontroller action="http://foo">
+        <field name="form.file" widget="file" required="required">
+            <label>File</label>
+        </field>
+        <field name="form.title" widget="text" required="required">
+            <label>Title</label>
+        </field>
+      <field name="form.description" required="required" widget="textarea">
+        <label>Description</label>
+      </field>
+        <field name="form.labels" widget="labels" required="required">
+            <label>Keywords</label>
+        </field>
+        <field name="form.document_type" widget="checkboxgroup">
+            <label>Purpose</label>
+            <description>Describes the purpose of the document, if applicable.</description>
+            <value vocabulary="documenttypes"/>
+        </field>
+        <field name="form.is_private" widget="radiogroup">
+            <label>Private?</label>
+            <value>
+                <option selected="selected" value="False">No</option>
+                <option value="True">Yes (only workspace members can see the file)</option>
+            </value>
+        </field>
+        <field name="form.license" required="required" widget="selection">
+	        <label>License</label>
+	        <value vocabulary="licenses" xml:space="preserve">a-nc</value>
+        </field>
+        <field name="form.gisdata" widget="file">
+        	<label>GIS Metadata</label>
+        	<description>To add or update GIS specific metadata (e.g., FGDC metadata) to this file, click the browse button to locate the metadata file on your hard drive.</description>
+        </field>
+        <submit name="form.actions.add">Save</submit>
+        <submit name="form.actions.cancel">Cancel</submit>
+    </formcontroller>
+
+The Front-End for the Labels field above uses a <labels> fragment in the xml
+to show a list of label options for the user. Since we don't have any labels
+at first, we don't get any <labels> fragment:
+
+    >>> addFormPageXML.find('labels') is None
+    True
+
+Let's create the file then.
+
+    >>> uploadFile = makeFileUpload(file(testfile, 'rb').read(), testfile)
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> request.form['form.file'] = uploadFile
+    >>> request.form['form.title'] = 'My File Title'
+    >>> request.form['form.description'] = 'My File Description'
+    >>> request.form['form.labels'] = ['Label One', 'Label Two']
+    >>> request.form['form.document_type-empty-marker'] = '1'
+    >>> request.form['form.document_type'] = ['laws', 'reports']
+    >>> request.form['form.is_private'] = "False"
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.add'] = 'Save'
+    >>> addFormPage = workspace['documents'].restrictedTraverse('@@add-file.html')
+    >>> print tostring(addFormPage.getResponse()) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/workspace/documents/my-file-title/@@view.html
+
+Let's rename the object to make the output more predictable:
+
+    >>> fileId = sys.exc_info()[1].args[0].rsplit('/', 2)[-2]
+    >>> _ = transaction.savepoint()
+    >>> workspace['documents'].manage_renameObject(fileId, 'afile')
+
+Since we added some labels to the system in the process of creating the file
+above, those should show up on the <labels> fragment on the creation of further
+files:
+
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> addFormPage = workspace['documents'].restrictedTraverse('@@add-file.html')
+    >>> addFormPageXML = addFormPage.getResponse()
+    >>> print tostring(addFormPageXML.find('keywords')) # doctest: +XMLDATA
+    <keywords>
+        <item>Label One</item>
+        <item>Label Two</item>
+    </keywords>
+
+XML should validate against tnc.rng schema.
+
+    >>> validator.validateString(tostring(addFormPageXML)) # doctest: -REPORT_NDIFF
+
+Also, if we are browsing the workspace through a specific label, the link for
+adding a file should contain the query parameter for creating a file under a
+specific label:
+
+    >>> request['keyword'] = sortable_title('Label One')
+    >>> view = workspace.restrictedTraverse('documents/@@withkeyword-documents.html')
+    >>> xml = view.getResponse()
+    >>> addFileMenu, = [node for node in xml.findall('menus/addmenu/entry')
+    ...                 if "add-file.html" in node.attrib['href']]
+    >>> print tostring(addFileMenu) # doctest: +XMLDATA
+    <entry href="http://foo/plone/workspaces/workspace/documents/@@add-file.html?with_keyword=Label+One"
+           >Add File</entry>
+
+Which means that the add form should include that label by default.
+
+    >>> request['with_label'] = 'Label One'
+    >>> addFormPage = workspace['documents'].restrictedTraverse('@@add-file.html')
+    >>> xml = addFormPage.getResponse()
+
+XML should validate against tnc.rng schema.
+    >>> validator.validateString(tostring(xml)) # doctest: -REPORT_NDIFF
+
+    >>> labelFieldNode, = [node for node in xml.findall('formcontroller/field')
+    ...                    if node.attrib['name'] == 'form.labels']
+    >>> print tostring(labelFieldNode) # doctest: +XMLDATA
+    <field name="form.labels" required="required" widget="labels">
+      <label>Keywords</label>
+      <value xml:space="preserve">
+        <option>Label One</option>
+      </value>
+    </field>
+
+Viewing the file
+----------------
+
+This view is used to render the File on the front-end, including its title,
+body, and available actions, it is linked to from the workspace browsing views:
+
+    >>> file = workspace['documents']['afile']
+    >>> view = file.restrictedTraverse('@@view.html')
+    >>> xml = view.getResponse()
+
+XML should validate against tnc.rng schema.
+    >>> validator.validateString(tostring(xml)) # doctest: -REPORT_NDIFF
+
+It contains a "view" tag that identifies this view for the front-end:
+
+    >>> print tostring(xml.find('view')) # doctest: +XMLDATA
+    <view name="view.html" type="file" title="My File Title"
+          section="workspaces"/>
+
+This "view" tag doesn't actually do anything, since all the information for
+the FE actually comes from the "resource" tag
+
+    >>> print xml.find('resource/title').text
+    My File Title
+
+    >>> print tostring(xml.find('resource/attachments'))
+    ... # doctest: +XMLDATA
+    <attachments>
+        <attachment href="http://foo/plone/workspaces/workspace/documents/afile"
+                    mime="application/pdf"
+                    name="file">test.pdf</attachment>
+    </attachments>
+
+As workspace manager, the current user has permission to edit and delete the
+file:
+
+    >>> print tostring(xml.find('menus/actionmenu')) # doctest: +XMLDATA
+    <actionmenu>
+      <entry href="http://foo/plone/workspaces/workspace/documents/afile/@@edit.html">Edit</entry>
+      <entry href="http://foo/plone/workspaces/workspace/documents/afile/@@add.html">Add to Library</entry>
+      <entry href="http://foo/plone/workspaces/workspace/documents/afile/@@delete.html">Delete</entry>
+    </actionmenu>
+
+An anonymous user doesn't have such rights
+
+    >>> self.logout()
+    >>> file = workspace['documents']['afile']
+    >>> view = file.restrictedTraverse('@@view.html')
+    >>> xml = view.getResponse()
+    >>> xml.find('menus/actionmenu') is None \
+    ... or tostring(xml.find('menus/actionmenu'))
+    True
+
+On the other hand, anonymous users can still see the labels
+
+    >>> from Products.COL3.content.label import Labeller
+    >>> print '\n'.join(Labeller(file).listLabels())
+    Label One
+    Label Two
+
+File Edit
+=========
+
+    >>> self.login()
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> file = workspace.documents['afile']
+    >>> editFormPage = file.restrictedTraverse("@@edit.html")
+    >>> editFormPageXML = editFormPage.getResponse()
+
+XML should validate against tnc.rng schema.
+
+    >>> open('/tmp/asd.xml', 'w').write(tostring(editFormPageXML))
+    >>> validator.validateString(tostring(editFormPageXML)) # doctest: -REPORT_NDIFF
+
+The view element is there to match against the expectec XSLT in the frontend:
+
+    >>> print tostring(editFormPageXML[0]) # doctest: +XMLDATA
+    <view name="edit.html" type="file" title="Edit File: My File Title"
+          section="workspaces"/>
+
+And the formcontroller element shows a form for editing the file.
+
+    >>> print tostring(editFormPageXML[1]) # doctest: +XMLDATA
+    <formcontroller action="http://foo">
+      <field name="form.file" widget="file">
+        <label>File</label>
+        <description>FILE IS STORED - Leave blank unless you want to change the file</description>
+      </field>
+      <field name="form.title" required="required" widget="text">
+        <label>Title</label>
+        <value xml:space="preserve">My File Title</value>
+      </field>
+      <field name="form.description" required="required" widget="textarea">
+        <label>Description</label>
+        <value xml:space="preserve">My File Description</value>
+      </field>
+      <field name="form.labels" required="required" widget="labels">
+        <label>Keywords</label>
+        <value xml:space="preserve">
+          <option>Label One</option>
+          <option>Label Two</option>
+        </value>
+      </field>
+      <field name="form.document_type" widget="checkboxgroup">
+        <label>Purpose</label>
+        <description>Describes the purpose of the document, if applicable.</description>
+        <value vocabulary="documenttypes">
+          <selected id="laws"/>
+          <selected id="reports"/>
+        </value>
+      </field>
+      <field name="form.is_private" widget="radiogroup">
+        <label>Private?</label>
+        <value>
+          <option selected="selected" value="False">No</option>
+          <option value="True">Yes (only workspace members can see the file)</option>
+        </value>
+      </field>
+      <field name="form.license" required="required" widget="selection">
+        <label>License</label>
+        <value vocabulary="licenses" xml:space="preserve">a-nc</value>
+      </field>
+      <field name="form.gisdata" widget="file">
+       	<label>GIS Metadata</label>
+       	<description>To add or update GIS specific metadata (e.g., FGDC metadata) to this file, click the browse button to locate the metadata file on your hard drive.</description>
+      </field>
+      <submit name="form.actions.save">Save</submit>
+      <submit name="form.actions.cancel">Cancel</submit>
+    </formcontroller>
+
+Let's edit the file
+
+    >>> nonFile = makeFileUpload('', '')
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> request.form['form.title'] = 'My New File Title'
+    >>> request.form['form.description'] = 'My New File Description'
+    >>> request.form['form.file'] = nonFile
+    >>> request.form['form.labels'] = ['One Label', 'Two Labels']
+    >>> request.form['form.document_type-empty-marker'] = '1'
+    >>> request.form['form.document_type'] = ['casestudies','datasets']
+    >>> request.form['form.actions.save'] = 'Save'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.gisdata'] = ''
+    >>> workspace.restrictedTraverse('documents/afile/@@edit.html').getResponse()
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/workspace/documents/afile/view.html
+    >>> file = workspace['documents']['afile']
+    >>> print file.Title()
+    My New File Title
+    >>> print "\n".join(sorted(file.getDocument_type()))
+    casestudies
+    datasets
+
+Since we didn't put a proper file above, the old content should be intact:
+
+    >>> uploadFile.seek(0)
+    >>> uploadFile.read() == str(file.getFile())
+    True
+
+We need to try and add this file to the library
+
+    >>> self.login()
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> addToLibraryFormPage = file.restrictedTraverse("documents/afile/@@add.html")
+    >>> addToLibraryFormPageXML = addToLibraryFormPage.getResponse()
+
+XML should validate against tnc.rng schema.
+
+    >>> validator.validateString(tostring(addToLibraryFormPageXML)) # doctest: -REPORT_NDIFF
+
+The view element is there to match against the expectec XSLT in the frontend:
+
+    >>> print tostring(addToLibraryFormPageXML[0]) # doctest: +XMLDATA
+    <view name="addtolibrary-file.html" section="workspaces" title="Add to Library: My New File Title" type="file"/>
+
+And the formcontroller element shows a form for editing the file.
+
+    >>> print tostring(addToLibraryFormPageXML[1]) # doctest: +XMLDATA
+    <formcontroller action="http://foo">
+      <field name="form.title" required="required" widget="text">
+        <label>Title</label>
+        <value xml:space="preserve">My New File Title</value>
+      </field>
+      <field name="form.authors" required="required" widget="authors">
+        <label>Authors</label>
+      </field>
+      <field name="form.document_type" widget="checkboxgroup">
+        <label>Purpose</label>
+        <description>Describes the purpose of the document, if applicable.</description>
+        <value vocabulary="documenttypes">
+          <selected id="casestudies"/>
+          <selected id="datasets"/>
+        </value>
+      </field>
+      <field name="form.description" required="required" widget="textarea">
+        <label>Abstract</label>
+        <description>Up to 1000 characters.</description>
+        <value xml:space="preserve">My New File Description</value>
+      </field>
+      <field name="form.language" required="required" widget="selection">
+        <label>Language</label>
+        <value vocabulary="languages" xml:space="preserve">en</value>
+      </field>
+      <field name="form.dateauthored" required="required" widget="calendar">
+        <label>Date authored</label>
+        <description>Select Year : Month : Day</description>
+      </field>
+      <field name="form.country" required="required" widget="selection">
+        <label>Region/Country</label>
+        <value vocabulary="countries" xml:space="preserve">USA</value>
+      </field>
+      <field name="form.biogeographic_realm" required="required" widget="selection">
+        <label>Biogeographic realm</label>
+        <value vocabulary="biogeographic_realms" xml:space="preserve">nearctic</value>
+      </field>
+      <field name="form.habitat" widget="checkboxgroup">
+        <label>Habitat type</label>
+        <value vocabulary="habitats"/>
+      </field>
+      <field name="form.conservation" widget="checkboxgroup">
+        <label>Conservation action</label>
+        <value vocabulary="conservation"/>
+      </field>
+      <field name="form.directthreat" widget="checkboxgroup">
+        <label>Direct threat</label>
+        <value vocabulary="directthreat"/>
+      </field>
+      <field name="form.organization" widget="text">
+        <label>Organization</label>
+        <description>Examples: The Nature Conservancy, World Wildlife Fund, IUCN.</description>
+      </field>
+      <field name="form.monitoring" widget="checkboxgroup">
+        <label>Monitoring type</label>
+        <description>The methods used to determine whether the conservation actions described in this document are succeeding.</description>
+        <value vocabulary="monitoring"/>
+      </field>
+      <field name="form.keywords" widget="text">
+        <label>Other Search Terms</label>
+        <description>Examples: biodiversity, freshwater, Natural Heritage Programs, panthera leo.</description>
+      </field>
+      <field name="form.license" required="required" widget="selection">
+        <label>License</label>
+        <value vocabulary="licenses" xml:space="preserve">a-nc</value>
+      </field>
+      <field name="form.gisdata" widget="file">
+       	<label>GIS Metadata</label>
+       	<description>To add or update GIS specific metadata (e.g., FGDC metadata) to this file, click the browse button to locate the metadata file on your hard drive.</description>
+      </field>
+      <field name="form.createdoi" required="required" widget="radiogroup">
+        <label>Create DOI?</label>
+        <description>Choose whether a DOI should be created for this file or not.</description>
+        <value>
+          <option selected="selected" value="yes">Yes, do create a DOI</option>
+          <option value="no">No, do NOT create a DOI</option>
+        </value>
+      </field>
+      <submit name="form.actions.add">Save</submit>
+      <submit name="form.actions.cancel">Cancel</submit>
+    </formcontroller>
+
+Now let's add the file to the library. The browser is redirected back to the
+workspace file view.
+
+    >>> self.login()
+    >>> self.setRoles(['Manager', 'Member','Community Member'])
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> request.form['form.title'] = 'My New Library File Title'
+    >>> request.form['form.description'] = 'My new library file description.'
+    >>> request.form['form.dateauthored'] = '2007/12/12'
+    >>> request.form['form.country'] = 'USA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.language'] = 'en'
+    >>> request.form['form.authors'] = ['Smith, Bill',]
+    >>> request.form['form.document_type'] = ['casestudies','datasets']
+    >>> request.form['form.actions.add'] = 'Save'
+    >>> request.form['form.keywords'] = ['One Label', 'Two Labels']
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.createdoi'] = 'no'
+    >>> request.form['form.is_private'] = 'False'
+    >>> response = workspace.restrictedTraverse('documents/afile/@@add.html').getResponse() # doctest: -REPORT_NDIFF
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/workspace/documents/afile/@@view.html
+
+    >>> oid = app.plone.library['my-new-library-file-title'].getOid()
+
+Now we want to update the library file...if we can do this we're home free!
+
+We need to try and add this file to the library
+
+    >>> self.login()
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> file = workspace.documents['afile']
+    >>> updateToLibraryFormPage = file.restrictedTraverse("@@update.html")
+    >>> updateToLibraryFormPageXML = updateToLibraryFormPage.getResponse()
+
+XML should validate against tnc.rng schema.
+    >>> validator.validateString(tostring(updateToLibraryFormPageXML)) # doctest: -REPORT_NDIFF
+
+The view element is there to match against the expectec XSLT in the frontend:
+
+    >>> print tostring(updateToLibraryFormPageXML[0]) # doctest: +XMLDATA
+    <view name="addtolibrary-file.html" section="workspaces" title="Update Library : My New File Title" type="file"/>
+
+And the formcontroller element shows a form for editing the file.
+
+    >>> print tostring(updateToLibraryFormPageXML[1]) # doctest: +XMLDATA
+    <formcontroller action="http://foo">
+      <field name="form.title" required="required" widget="text">
+        <label>Title</label>
+        <value xml:space="preserve">My New File Title</value>
+      </field>
+      <field name="form.authors" required="required" widget="authors">
+        <label>Authors</label>
+        <value xml:space="preserve">
+          <option>Smith, Bill</option>
+        </value>
+      </field>
+      <field name="form.document_type" widget="checkboxgroup">
+        <label>Purpose</label>
+        <description>Describes the purpose of the document, if applicable.</description>
+        <value vocabulary="documenttypes"/>
+      </field>
+      <field name="form.description" required="required" widget="textarea">
+        <label>Abstract</label>
+        <description>Up to 1000 characters.</description>
+        <value xml:space="preserve">My New File Description</value>
+      </field>
+      <field name="form.language" required="required" widget="selection">
+        <label>Language</label>
+        <value vocabulary="languages" xml:space="preserve">en</value>
+      </field>
+      <field name="form.dateauthored" required="required" widget="calendar">
+        <label>Date authored</label>
+        <description>Select Year : Month : Day</description>
+      </field>
+      <field name="form.country" required="required" widget="selection">
+        <label>Region/Country</label>
+        <value vocabulary="countries" xml:space="preserve">USA</value>
+      </field>
+      <field name="form.biogeographic_realm" required="required" widget="selection">
+        <label>Biogeographic realm</label>
+        <value vocabulary="biogeographic_realms" xml:space="preserve">nearctic</value>
+      </field>
+      <field name="form.habitat" widget="checkboxgroup">
+        <label>Habitat type</label>
+        <value vocabulary="habitats"/>
+      </field>
+      <field name="form.conservation" widget="checkboxgroup">
+        <label>Conservation action</label>
+        <value vocabulary="conservation"/>
+      </field>
+      <field name="form.directthreat" widget="checkboxgroup">
+        <label>Direct threat</label>
+        <value vocabulary="directthreat"/>
+      </field>
+      <field name="form.organization" widget="text">
+        <label>Organization</label>
+        <description>Examples: The Nature Conservancy, World Wildlife Fund, IUCN.</description>
+      </field>
+      <field name="form.monitoring" widget="checkboxgroup">
+        <label>Monitoring type</label>
+        <description>The methods used to determine whether the conservation actions described in this document are succeeding.</description>
+        <value vocabulary="monitoring"/>
+      </field>
+      <field name="form.keywords" widget="text">
+        <label>Other Search Terms</label>
+        <description>Examples: biodiversity, freshwater, Natural Heritage Programs, panthera leo.</description>
+      </field>
+      <field name="form.license" required="required" widget="selection">
+        <label>License</label>
+        <value vocabulary="licenses" xml:space="preserve">a-nc</value>
+      </field>
+      <field name="form.gisdata" widget="file">
+        <label>GIS Metadata</label>
+        <description>To add or update GIS specific metadata (e.g., FGDC metadata) to this file, click the browse button to locate the metadata file on your hard drive.</description>
+      </field>
+      <field name="form.createdoi" required="required" widget="radiogroup">
+        <label>Create DOI?</label>
+        <description>Choose whether a DOI should be created for this file or not.</description>
+        <value>
+          <option selected="selected" value="yes">Yes, do create a DOI</option>
+          <option value="no">No, do NOT create a DOI</option>
+        </value>
+      </field>
+      <submit name="form.actions.add">Save</submit>
+      <submit name="form.actions.cancel">Cancel</submit>
+    </formcontroller>
+
+Now let's update the file to the library. The browser is redirected back to the
+workspace file view.
+
+    >>> nonFile = makeFileUpload('', '')
+    >>> self.login()
+    >>> self.setRoles(['Manager', 'Member','Community Member'])
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> file = workspace.documents['afile']
+    >>> request.form['form.title'] = 'My New Library File Title Updated'
+    >>> request.form['form.file'] = nonFile
+    >>> request.form['form.description'] = 'My new library file description updated.'
+    >>> request.form['form.dateauthored'] = '2007/12/15'
+    >>> request.form['form.country'] = 'USA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.language'] = 'en'
+    >>> request.form['form.authors'] = ['Smith, Bill', 'Steve Update']
+    >>> request.form['form.labels'] = ['One Label', 'Two Labels', 'Update Label']
+    >>> request.form['form.document_type'] = ['casestudies','datasets']
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.createdoi'] = 'no'
+    >>> request.form['form.actions.add'] = 'Save'
+    >>> response = workspace.restrictedTraverse('documents/afile/@@update.html').getResponse() # doctest: -REPORT_NDIFF
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/workspace/documents/afile/@@view.html
+
+Now, as long as the oid is update and the updated values are correct we're golden
+
+    >>> updatedfile = app.plone.library['my-new-library-file-title']
+    >>> print updatedfile.Title()
+    My New Library File Title Updated
+    >>> print updatedfile.getCountry()
+    USA
+    >>> print updatedfile.Description()
+    My new library file description updated.
+    >>> oid == updatedfile.getOid()
+    True

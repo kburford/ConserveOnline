@@ -1,0 +1,573 @@
+
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="col3"
+    >
+   <include file="helper.zcml" />
+
+   <include file="discussion.zcml" />
+
+   <include file="calendar.zcml" />
+
+   <include file="exceptions.zcml" />
+
+   <include file="documents.zcml" />
+
+   <include file="library.zcml" />
+
+   <include file="workspace.zcml" />
+
+   <include file="people.zcml" />
+
+<!-- default view for the root -->
+    <browser:defaultView
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="portal-view.xml"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+<!-- root views -->
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".portal.PortalView"
+        name="portal-view.xml"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+<!-- Block the "@@plone" view on the ++skin++col layer -->
+  <browser:page
+      for="*"
+      name="plone"
+      class=".portal.PloneBlocker"
+      permission="zope.Public"
+      layer="..skins.interfaces.ICOL3Skin"
+      allowed_interface="Products.CMFPlone.browser.interfaces.IPlone"
+      />
+
+<!-- view for the about folder -->
+
+    <browser:page
+        for="Products.COL3.browser.portal.IAboutFolder"
+        class=".portal.AboutView"
+        name="aboutcol.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="Products.COL3.browser.portal.IAboutFolder"
+        name="aboutcol.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+<!-- login/logout processing -->
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".login.LoginView"
+        name="login"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".login.Logout"
+        name="signout"
+        attribute='logout'
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".login.LogoutViewPage"
+        name="logout.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".login.LoginViewPage"
+        name="login.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".login.CreateOrUpdateProfileView"
+        name="create-or-update-profile"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+<!-- membership views -->
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".member.MemberPanelView"
+        name="member-panel.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="register.html"
+        class=".user.AddRegistrationPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="register-invite.html"
+        class=".user.InvitationAddRegistrationPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <!--browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".member.UserPreferencesView"
+        name="preferences.html"
+        template="preferences.pt"
+        permission="zope2.View"
+    /-->
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".user.UserEditNameDescView"
+        name="edit-profile.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+	<browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".user.ViewProfilePage"
+        name="view-profile.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".user.ResetPasswordPage"
+        name="resetpassword.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".page.FAQsPage"
+        name="help.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+   />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".page.ScientificJournalsPage"
+        name="scientificjournals.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+   />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".user.ConfirmResetPasswordPage"
+        name="confirmreset-password.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        class=".user.CompleteResetPasswordPage"
+        name="completereset-password.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <adapter factory=".member.SiteMemberAdapter"/>
+
+<!-- workgroups views -->
+
+    <!-- xml view for js consumption, search for a member on workspaces the
+         currently authenticated user is a member or a manager of -->
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceContainer"
+        class=".member.MemberSearchForm"
+        name="member-search.xml"
+        permission="col.AddWorkspaces"
+    />
+
+<!-- workspace creation form -->
+
+ <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceContainer"
+        class=".workgroup.WorkspaceCreationPage"
+        name="add-workspace.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+  <!-- workspace views and adapters -->
+    <adapter factory=".workgroup.WorkspaceMemberManagementAdapter"/>
+
+    <!-- form view that invites users by e-mail to the workspace -->
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workgroup.AddInvitationForm"
+        name="add-invitation.html"
+        permission="col.ManageWorkspace"
+    />
+
+    <!-- form view that lists outstanding invitations for a workspace -->
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workgroup.WorkspaceInvitationListingView"
+        name="workspace-invitations.xml"
+        permission="col.ManageWorkspace"
+    />
+
+    <!-- AJAX form view to cancel workspace invitations -->
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workgroup.CancelInvitationForm"
+        name="cancel-invitations.html"
+        permission="col.ManageWorkspace"
+    />
+
+    <!-- AJAX form view to re-send workspace invitations -->
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workgroup.ReSendInvitationForm"
+        name="resend-invitations.html"
+        permission="col.ManageWorkspace"
+    />
+
+    <!-- AJAX form view to manage workspace membership (promote/demote/remove) -->
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workgroup.WorkspaceMembershipManagementForm"
+        name="manage-workspace-members.html"
+        permission="col.ManageWorkspace"
+    />
+
+   <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceMembers"
+        class=".workspace.MembershipManagementPage"
+        name="workspace-members.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+   <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workspace.WorkspaceJoinView"
+        attribute="rejectRequests"
+        name="rejectRequests"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ManageWorkspace"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workspace.WorkspaceJoinView"
+        attribute="acceptRequests"
+        name="acceptRequests"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ManageWorkspace"
+    />
+
+      <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workspace.OutstandingRequestsPage"
+        name="outstanding-joinrequests.xml"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ManageWorkspace"
+    />
+
+   <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workspace.AddJoinRequestPage"
+        name="add-joinrequest.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <browser:page
+        for="*"
+        class=".user.AcceptInviationView"
+        name="accept-invitation.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <!-- xml member listing for the "copy members from another workgroup
+         option in the Workspace creation wizard -->
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workgroup.AllMembersListView"
+        name="workspace-members.xml"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ListWorkspaceMembers"
+    />
+
+  <!-- newsitem views -->
+    <browser:defaultView
+        for="Products.ATContentTypes.interface.news.IATNewsItem"
+        name="index.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+  <!-- profile views:
+
+  Since there isn't an actually traversable member object, most of these views
+  are traversable, and you traverse them using the userId (currently the
+  login) of the member -->
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".member.ProfileTooltip"
+        attribute="renderXML"
+        name="profile_by_id.xml"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+   <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        class=".workspace.WorkspacePage"
+        name="view-workspace.html"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+	<browser:defaultView
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        name="view-workspace.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="upload-image.html"
+        class=".page.ImageUploadForm"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="list-workspace-links.html"
+        class=".page.LinkBrowserPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="list-workspace-images.html"
+        class=".page.ImageBrowserPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="all.html"
+        class=".wsdocumenttool.WorkspaceDocBrowserPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="all.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="byauthor.html"
+        class=".wsdocumenttool.WorkspaceDocsByAuthPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceImportedDocsFolder"
+        name="byauthor.html"
+        class=".wsdocumenttool.WorkspaceDocsByAuthPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        name="byauthor.html"
+        class=".wsdocumenttool.WorkspaceDocsByAuthPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="withauthor-documents.html"
+        class=".wsdocumenttool.WSDocsMatchingAuthPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="bypurpose.html"
+        class=".wsdocumenttool.WorkspaceDocsByPurposePage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceImportedDocsFolder"
+        name="bypurpose.html"
+        class=".wsdocumenttool.WorkspaceDocsByPurposePage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        name="bypurpose.html"
+        class=".wsdocumenttool.WorkspaceDocsByPurposePage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="withtype-documents.html"
+        class=".wsdocumenttool.WSDocsMatchingPurposePage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="byfolder.html"
+        class=".wsdocumenttool.WSDocsByFolderPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceImportedDocsFolder"
+        name="byfolder.html"
+        class=".wsdocumenttool.WSDocsByFolderPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        name="byfolder.html"
+        class=".wsdocumenttool.WSDocsByFolderPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceImportedDocsFolder"
+        name="withfolder-documents.html"
+        class=".wsdocumenttool.WSImportedFolderPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:defaultView
+        for="Products.COL3.interfaces.workspace.IWorkspaceImportedDocsFolder"
+        name="withfolder-documents.html"
+        layer="..skins.interfaces.ICOL3Skin"
+    />
+
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="bykeyword.html"
+        class=".wsdocumenttool.WSDocsByKeywordPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspace"
+        name="edit-properties.html"
+        class=".workspace.EditWorkspacePropertiesPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.workspace.IWorkspaceDocumentsFolder"
+        name="withkeyword-documents.html"
+        class=".wsdocumenttool.WSDocsMatchingKeywordPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.label.ILabel"
+        name="edit.html"
+        class=".keyword.KeywordEditPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ManageWorkspace"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.label.ILabel"
+        name="delete.html"
+        class=".keyword.KeywordDeletePage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.ManageWorkspace"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.subscription.ISubscriptionFolder"
+        name="subscription.html"
+        class=".user.UserSubscriptionPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.subscription.ISubscriptionFolder"
+        name="unsubscription.html"
+        class=".user.UserUnsubscriptionPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.subscription.ISubscriptionFolder"
+        name="success.html"
+        class=".user.SubscriptionPage"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="col.AddWorkspaces"
+    />
+
+    <browser:page
+        for="Products.COL3.interfaces.subscription.ISubscriptionFolder"
+        name="feed.xml"
+        template="rss.xml"
+        class=".rss.UserSubscription"
+        layer="..skins.interfaces.ICOL3Skin"
+        permission="zope2.View"
+    />
+
+</configure>

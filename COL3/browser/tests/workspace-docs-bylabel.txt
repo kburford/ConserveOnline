@@ -1,0 +1,304 @@
+Test for listing of workspaces by keywords (previously known as labels)
+
+Imports
+
+    >>> import os
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring
+    >>> from plone.app.blob.tests import makeFileUpload
+    >>> from Products.COL3.browser.tests import __file__ as testdir
+    >>> testdir = os.path.dirname(testdir)
+    >>> testfile = os.path.join(testdir, 'test.pdf')
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> from Products.COL3.content.label import sortable_title
+    >>> from Products.COL3.interfaces.workspace import IWorkspace
+    >>> from Products.COL3.interfaces.workspace import IWorkspaceMemberManagement
+    >>> from Products.COL3.browser.wsdocumenttool import WSDocsMatchingKeywordBatchFragment
+    >>> from Products.COL3.browser.wsdocumenttool import WSImportedFolderBatchFragment
+    >>> from Products.ATContentTypes.tests.utils import FakeRequestSession
+    >>> SESSION = FakeRequestSession()
+    >>> def prepWorkspaceContainerAndRequest(app=app, SESSION=SESSION):
+    ...     app = makerequest(app.aq_base).unrestrictedTraverse('++skin++col')
+    ...     request = app.REQUEST
+    ...     request['SESSION'] = SESSION
+    ...     return app.plone.workspaces, request
+
+And some workspaces
+
+    >>> properties = dict(username='user1',
+    ...                   firstname='New',
+    ...                   lastname='User1',
+    ...                   email="user1@example.com",
+    ...                   type_of_organization="Comercial",
+    ...                   organization="Enfold Systems",
+    ...                   country="Brazil",
+    ...                  )
+    >>> registration_tool = getToolByName(app.plone, 'portal_registration')
+    >>> registration_tool.addMember('user1',
+    ...                             'somepasswd',
+    ...                              properties=properties.copy()
+    ...                             ) and None
+    >>> app.plone.manage_setLocalRoles('user1', ['Community Member'])
+    >>> self.login('user1')
+    >>> w = app.unrestrictedTraverse("++skin++col/plone/workspaces")
+    >>> w.invokeFactory("Workspace", "ws1") and None
+    >>> w['ws1'].update(title="Workspace 1")
+
+Add some content to the workspaces
+
+    >>> w['ws1'].invokeFactory('COLPage', 'COL File At Root')
+    'COL File At Root'
+    >>> rootfolder = w['ws1'].invokeFactory('Folder', 'COL Folder At Root')
+    >>> w['ws1'].invokeFactory('COLPage', 'COLPage1 At Root')
+    'COLPage1 At Root'
+    >>> w['ws1'].invokeFactory('COLPage', 'COLPage2XX At Root')
+    'COLPage2XX At Root'
+    >>> w['ws1'].invokeFactory('COLPage', 'COLPage13 At Root')
+    'COLPage13 At Root'
+    >>> rootfolder1 = w['ws1'][rootfolder].invokeFactory('Folder', 'Folder1InRoot')
+    >>> rootfolder2 = w['ws1'][rootfolder].invokeFactory('Folder', 'Folder2InRoot')
+    >>> rootfolder = w['ws1'][rootfolder]
+    >>> rootfolder.invokeFactory('Folder', 'Folder3InRoot')
+    'Folder3InRoot'
+    >>> rootfolder[rootfolder1].invokeFactory('COLPage', 'COLPage1InRootFolder')
+    'COLPage1InRootFolder'
+    >>> rootfolder[rootfolder1].invokeFactory('COLPage', 'COLPage2InRootFolder')
+    'COLPage2InRootFolder'
+    >>> rootfolder[rootfolder2].invokeFactory('COLPage', 'COLPage1InRoot2Folder')
+    'COLPage1InRoot2Folder'
+    >>> rootfolder[rootfolder2].invokeFactory('COLPage', 'COLPage2InRoot2Folder')
+    'COLPage2InRoot2Folder'
+
+Testing the Workspace by Folder fragment
+
+    >>> byfolderfrag = WSImportedFolderBatchFragment(rootfolder[rootfolder2], app.REQUEST)
+    >>> byfolderelem = byfolderfrag.asElement()
+    >>> for element in byfolderelem.findall('items/item/date'):
+    ...     element.text = ''
+    >>> print tostring(byfolderelem) #doctest: +XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+        <col dir="desc" href="http://nohost?start:int=0&amp;sort_on=title&amp;sort_order=desc" id="title">Title</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=mimetype&amp;sort_order=asc"
+            id="mimetype">Format</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=size&amp;sort_order=asc" id="size"
+            >Size</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=date&amp;sort_order=asc" id="date"
+            >Date</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://nohost?start:int=0&amp;sort_on=title">1</page>
+    </pages>
+    <pagesize>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+        <size current="current" href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item
+            href="http://nohost/plone/workspaces/ws1/COL%20Folder%20At%20Root/Folder2InRoot/COLPage1InRoot2Folder/view.html">
+            <title/>
+            <mimetype>text</mimetype>
+            <date/>
+            <size>0</size>
+        </item>
+        <item
+            href="http://nohost/plone/workspaces/ws1/COL%20Folder%20At%20Root/Folder2InRoot/COLPage2InRoot2Folder/view.html">
+            <title/>
+            <mimetype>text</mimetype>
+            <date/>
+            <size>0</size>
+        </item>
+    </items>
+    </batch>
+
+Submitting the correct information results in the creation of the workspace and
+a redirect.
+
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'My Workspace'
+    >>> request.form['form.id'] = 'publicworkspace'
+    >>> request.form['form.description'] = 'My Workspace Description'
+    >>> request.form['form.country'] = 'BRA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'education'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.authors'] = 'Magoo, Mister'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/publicworkspace/wsmembers/workspace-members.html
+
+Let's check the workspace was created correctly.
+
+    >>> workspace = context['publicworkspace']
+    >>> IWorkspace.providedBy(workspace)
+    True
+
+Now, to create some documents and do some label browsing
+
+    >>> documents = workspace.documents
+    >>> documents.invokeFactory('COLPage', 'apage') and None
+    >>> page = documents['apage']
+    >>> page.update(labels=['My Label', 'My Other Label'])
+    >>> page.setTitle('ZZZZ')
+    >>> documents.invokeFactory('COLPage', 'anotherpage') and None
+    >>> page2 = documents['anotherpage']
+    >>> page2.update(labels=['My Label', 'My New Label'])
+    >>> page2.setTitle('BBBB')
+    >>> from Products.COL3.content.label import Labeller
+    >>> mylabeller = Labeller(workspace)
+    >>> for r in mylabeller.listLabels():
+    ...     print r
+    My Label
+    My New Label
+    My Other Label
+    >>> sortable_title('My Other Label')
+    'my other label'
+    >>> label = mylabeller.getLabelRecordBySortableTitle(sortable_title('My Other Label'))
+    >>> print label.id
+	my-other-label
+	>>> print label.Title
+	My Other Label
+
+Check that the 'getWorkspaceKeywords' method returns keywords only if
+inside the workspace:
+
+    >>> workspace.update(keywords=['Some Keyword', 'Another Keyword'])
+
+    >>> workspace.getWorkspaceKeywords()
+    ('Some Keyword', 'Another Keyword')
+
+    >>> workspace.getLibraryKeywords()
+    ()
+
+Submitting the correct information results in the creation of the workspace and
+a redirect.
+
+    >>> context, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.title'] = 'My Private Workspace'
+    >>> request.form['form.id'] = 'privateworkspace'
+    >>> request.form['form.description'] = 'My Private Workspace Description'
+    >>> request.form['form.country'] = 'BRA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'education'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.is_private'] = 'True'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.create'] = 'Create'
+    >>> view = context.unrestrictedTraverse("@@add-workspace.html")
+    >>> print tostring(view.getResponse()[1])
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/privateworkspace/wsmembers/workspace-members.html
+
+Let's check the workspace was created correctly.
+
+    >>> privateworkspace = context['privateworkspace']
+    >>> IWorkspace.providedBy(workspace)
+    True
+    >>> privateworkspace.getIs_private()
+    True
+
+Now, to create some documents and do some label browsing
+
+    >>> documents = privateworkspace.documents
+    >>> documents.invokeFactory('COLPage', 'privateapage') and None
+    >>> page = documents['privateapage']
+    >>> page.update(labels=['My Private Label', 'My Private Other Label'])
+    >>> page.setTitle('ZZZZ')
+    >>> documents.invokeFactory('COLPage', 'privateanotherpage') and None
+    >>> page2 = documents['privateanotherpage']
+    >>> page2.update(labels=['My Private Label', 'My Private New Label'])
+    >>> page2.setTitle('BBBB')
+    >>> from Products.COL3.content.label import Labeller
+    >>> mylabeller = Labeller(privateworkspace)
+    >>> for r in mylabeller.listLabels():
+    ...     print r
+    My Private Label
+    My Private New Label
+    My Private Other Label
+    >>> sortable_title('My Private Other Label')
+    'my private other label'
+    >>> privlabel = mylabeller.getLabelRecordBySortableTitle(sortable_title('My Private Other Label'))
+    >>> print privlabel.id
+	my-private-other-label
+	>>> print privlabel.Title
+	My Private Other Label
+
+Let's create the file then.
+
+    >>> uploadFile = makeFileUpload(file(testfile, 'rb').read(), testfile)
+    >>> workspace, request = prepWorkspaceContainerAndRequest()
+    >>> request.form['form.file'] = uploadFile
+    >>> request.form['form.title'] = 'My File Title'
+    >>> request.form['form.description'] = 'My File Description'
+    >>> request.form['form.labels'] = ['Priv Label One', 'Priv Label Two']
+    >>> request.form['form.document_type-empty-marker'] = '1'
+    >>> request.form['form.document_type'] = ['laws', 'reports']
+    >>> request.form['form.is_private'] = "True"
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.add'] = 'Add'
+    >>> addFormPage = workspace.privateworkspace['documents'].restrictedTraverse('@@add-file.html')
+    >>> print tostring(addFormPage.getResponse()) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/privateworkspace/documents/my-file-title/@@view.html
+
+    >>> privlabel = mylabeller.getLabelRecordBySortableTitle(sortable_title('Priv Label Two'))
+    >>> print privlabel.id
+    priv-label-two
+    >>> print privlabel.Title
+    Priv Label Two
+
+    >>> app.REQUEST['sort_on'] = 'title'
+    >>> docs_with_label_batch = WSDocsMatchingKeywordBatchFragment(privateworkspace['documents'], app.REQUEST)
+    >>> app.REQUEST['label'] = sortable_title('Priv Label Two')
+    >>> dwl_batchelem = docs_with_label_batch.asElement()
+    >>> for element in dwl_batchelem.findall('items/item/date'):
+    ...     element.text = ''
+    >>> print tostring(dwl_batchelem) #doctest:+XMLDATA
+    <batch end="2" start="1" total="2">
+    <cols>
+        <col dir="desc" href="http://nohost?start:int=0&amp;sort_on=title&amp;sort_order=desc" id="title"
+            >Title</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=mimetype&amp;sort_order=asc" id="mimetype"
+            >Format</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=size&amp;sort_order=asc" id="size">Size</col>
+        <col href="http://nohost?start:int=0&amp;sort_on=date&amp;sort_order=asc" id="date">Date</col>
+    </cols>
+    <pages>
+        <page current="current" href="http://nohost?start:int=0&amp;sort_on=title">1</page>
+    </pages>
+    <pagesize>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=10">10</size>
+        <size current="current" href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=20">20</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=50">50</size>
+        <size href="http://nohost?start:int=0&amp;sort_on=title&amp;sze=100">100</size>
+    </pagesize>
+    <items>
+        <item href="http://foo/plone/workspaces/privateworkspace/documents/privateanotherpage/view.html">
+            <title>BBBB</title>
+            <mimetype>text</mimetype>
+            <date/>
+            <size>0</size>
+        </item>
+        <item href="http://foo/plone/workspaces/privateworkspace/documents/privateapage/view.html">
+            <title>ZZZZ</title>
+            <mimetype>text</mimetype>
+            <date/>
+            <size>0</size>
+        </item>
+    </items>
+    </batch>

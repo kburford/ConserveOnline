@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="view.html" type="event" title="Upcoming Meeting" section="workspaces"/>
+  <resource href="/complete/path" uuid="643524525235">
+    <id>some-id</id>
+    <title>Some Event</title>
+    <type title="File">COLFile</type>
+    <author>Paul Everitt</author>
+    <startDate>2007-03-02T13:10:00+00:00</startDate>
+    <endDate>2007-03-02T13:10:00+00:00</endDate>
+    <location>Some place</location>
+    <text>
+      <div xmlns="http://www.w3.org/1999/xhtml">
+        <h4>This is <em>Some Text</em>.</h4>
+        <p>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat,
+          vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio
+          dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla
+          facilisi.</p>
+        <p>This is <em>Some Text</em>.</p>
+        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod
+          tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
+          quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo
+          consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie
+          consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto
+          odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait
+          nulla facilisi. Sed ut perspiciatis, unde omnis iste natus error sit voluptatem
+          accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore
+          veritatis et quasi architecto beatae vitae dicta sunt, explicabo. nemo enim ipsam
+          voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni
+          dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem
+          ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi
+          tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. ut enim ad minima
+          veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex
+          ea commodi consequatur? quis autem vel eum iure reprehenderit, qui in ea voluptate velit
+          esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas
+          nulla pariatur?</p>
+        <p>This is <em>Some Text</em>.</p>
+        <p>Another paragraph.</p>
+        <p>This is <em>Some Text</em>.</p>
+        <p>Another paragraph.</p>
+      </div>
+    </text>
+    <attendees>
+      <item>Everyone at TNC</item>
+      <item>Shelley Hambalek</item>
+      <item>Another person</item>
+    </attendees>
+    <contactName> Some Person </contactName>
+    <contactEmail> some@place.org </contactEmail>
+  </resource>
+  <menus>
+    <actionmenu>
+      <entry href="edit.html">Edit</entry>
+      <entry href="delete.html">Delete</entry>
+    </actionmenu>
+  </menus>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry href="/workspaces/california-birds/documents/">Calendar</entry>
+    <entry>View Event</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>calendar</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+</response>

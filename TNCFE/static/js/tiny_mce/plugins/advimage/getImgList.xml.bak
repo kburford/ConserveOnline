@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results>
+      <imgRec>
+         <imgthumb>images/1.thumb.gif</imgthumb>
+         <imglink>http://www.blueradargun.com/Backgrounds/thumbnails/SMALL_00235_thebluemarble_1920x1200.jpg</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/2.thumb.gif</imgthumb>
+         <imglink>images/2.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/3.thumb.gif</imgthumb>
+         <imglink>images/3.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/4.thumb.gif</imgthumb>
+         <imglink>images/4.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/5.thumb.gif</imgthumb>
+         <imglink>images/5.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/5.thumb.gif</imgthumb>
+         <imglink>images/5.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/6.thumb.gif</imgthumb>
+         <imglink>images/6.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/7.thumb.gif</imgthumb>
+         <imglink>images/7.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/8.thumb.gif</imgthumb>
+         <imglink>images/8.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/9.thumb.gif</imgthumb>
+         <imglink>images/9.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      <imgRec>
+         <imgthumb>images/10.thumb.gif</imgthumb>
+         <imglink>images/10.gif</imglink>
+         <descr>A description</descr>
+      </imgRec>
+      
+</results>      

@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="view.html" type="topics" title="Discussions" section="workspaces"/>
+  <menus>
+    <addmenu>
+      <entry href="topic.html">Add Topic</entry>
+    </addmenu>
+  </menus>
+  <discussion>
+    <mostpopular>
+      <topic href="/url/to/discussion/topic">
+        <title>Some Topic in the Discussion Tool</title>
+        <author href="/people/runyaga">Alan Runyan</author>
+        <replies>5</replies>
+        <lastcomment>
+          <created>2007-03-02T13:10:00+00:00</created>
+          <author href="/people/kathy">Kathy Adams</author>
+        </lastcomment>
+      </topic>
+      <topic href="/url/to/discussion/topic">
+        <title>Since 2000, in a patchwork of closely fought and inconclusive decisions, the Supreme Court has been wrestling with the question of how much discretion the Constitution permits judges to exercise in criminal sentencing.</title>
+        <author href="/people/runyaga">Alan Runyan</author>
+        <replies>5</replies>
+        <lastcomment>
+          <created>2007-03-02T13:10:00+00:00</created>
+          <author href="/people/kathy">Kathy Adams</author>
+        </lastcomment>
+      </topic>
+      <topic href="/url/to/discussion/topic">
+        <title>Some Topic in the Discussion Tool</title>
+        <author href="/people/runyaga">Alan Runyan</author>
+        <replies>5</replies>
+        <lastcomment>
+          <created>2007-03-02T13:10:00+00:00</created>
+          <author href="/people/kathy">Kathy Adams</author>
+        </lastcomment>
+      </topic>
+      <topic href="/url/to/discussion/topic">
+        <title>Some Topic in the Discussion Tool</title>
+        <author href="/people/runyaga">Alan Runyan</author>
+        <replies>5</replies>
+        <lastcomment>
+          <created>2007-03-02T13:10:00+00:00</created>
+          <author href="/people/kathy">Kathy Adams</author>
+        </lastcomment>
+      </topic>
+      <topic href="/url/to/discussion/topic">
+        <title>Some Topic in the Discussion Tool</title>
+        <author href="/people/runyaga">Alan Runyan</author>
+        <replies>5</replies>
+        <lastcomment>
+          <created>2007-03-02T13:10:00+00:00</created>
+          <author href="/people/kathy">Kathy Adams</author>
+        </lastcomment>
+      </topic>
+    </mostpopular>
+    <batch total="929" start="21" end="40">
+      <pages>
+        <page current="current" href="#">1</page>
+        <page href="#">2</page>
+        <page href="#">3</page>
+      </pages>
+      <items>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+        <item href="/url/to/discussion/topic">
+          <title>Some Topic in the Discussion Tool</title>
+          <author href="/people/runyaga">Alan Runyan</author>
+          <replies>5</replies>
+          <lastcomment>
+            <created>2007-03-02T13:10:00+00:00</created>
+            <author href="/people/kathy">Kathy Adams</author>
+          </lastcomment>
+        </item>
+      </items>
+    </batch>
+  </discussion>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry>Discussions</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>discussions</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+  </user>
+</response>

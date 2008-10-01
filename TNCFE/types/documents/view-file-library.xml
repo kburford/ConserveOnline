@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="view.html" type="file" title="My PDF Thoughts" section="workspaces"/>
+    <currentlabels>
+        <item href="http://urltolabel">Chair</item>
+        <item href="http://urltolabel">Conservation</item>
+        <item href="http://urltolabel">Coffeee</item>
+    </currentlabels>
+    <resource href="/complete/path" uuid="643524525235">
+        <abstract> Abstract or description of the document, such as the abstract that might appear
+            at the beginning of a journal article, goes here. This allows people to see what the
+            document is about before they download it. </abstract>
+        <id>some-id</id>
+        <type title="File">COLFile</type>
+        <inlibrary>false</inlibrary>
+        <attachments>
+            <attachment href="http://foo/plone/workspaces/workspace/documents/afile/dl/test.pdf"
+                mime="application/pdf" name="file">test.pdf</attachment>
+        </attachments>
+        <title>File Title Goes Here</title>
+        <is_private>false</is_private>
+        <creation_date>2007-09-20T08:38:30</creation_date>
+        <modification_date>2007-09-20T08:38:30</modification_date>
+        <mimetype id="pdf">PDF</mimetype>
+        <size>122</size>
+        <language>fr</language>
+        <dateauthored>2006-11-08T08:38:30</dateauthored>
+        <country>USA</country>
+        <authors>
+            <item>Runyan, Alan</item>
+            <item>Adams, Kathy</item>
+        </authors>
+        <document_type>
+            <item>ecoregionalplans</item>
+            <item>datasets</item>
+            <item>casestudies</item>
+            <item>casestudies</item>
+            <item>casestudies</item>
+            <item>casestudies</item>
+            <item>casestudies</item>
+        </document_type>
+        <biogeographic_realm>oceania</biogeographic_realm>
+        <habitat>
+            <item>desert</item>
+            <item>forest</item>
+        </habitat>
+        <conservation>
+            <item>landwatermanagement</item>
+        </conservation>
+        <directthreat>
+            <item>residcommdev</item>
+        </directthreat>
+        <organization>Enfold Systems</organization>
+        <monitoring>
+            <item>preposttestobs</item>
+        </monitoring>
+        <keywords>
+            <item>biodiversity</item>
+            <item>freshwater</item>
+        </keywords>
+        <license>a-nc</license>
+        <author href="http://path.com/">Paul Everitt</author>
+        <libraryreference>10.3411/col.2007.1105.1310</libraryreference>
+        <gisdata href="http://foo/plone/workspaces/workspace/documents/afile/dl/test.txt"
+            mime="text/xml" name="xml">test.txt </gisdata>
+    </resource>
+    <menus>
+        <actionmenu>
+            <entry href="edit.html">Edit</entry>
+            <entry href="add.html">Update Library</entry>
+            <entry href="delete.html">Delete</entry>
+        </actionmenu>
+    </menus>
+    <breadcrumbs>
+        <entry href="http://conserveoneline.com">Home</entry>
+        <entry href="http://conserveoneline.com/workspaces/">Workspaces</entry>
+        <entry href="http://conserveoneline.com/workspaces/california-birds/">California Birds</entry>
+        <entry href="http://conserveoneline.com/workspaces/california-birds/documents/">Files
+            &amp; Pages</entry>
+        <entry>My PDF Thoughts</entry>
+    </breadcrumbs>
+    <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+        <title>Work Space 1</title>
+        <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+        <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+        <private>false</private>
+        <section>documents</section>
+    </workspace>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>true</isadmin>
+    </user>
+</response>

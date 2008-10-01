@@ -1,0 +1,255 @@
+=========================================
+Adding, editing and viewing library files
+=========================================
+
+First, some preparations:
+
+    >>> import sys, tempfile, os, os.path
+    >>> import transaction
+    >>> from StringIO import StringIO
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring as ettostring
+    >>> from lxml.etree import XML, tostring as lxtostring
+    >>> from zope.app.publisher.browser import queryDefaultViewName
+    >>> from zope.component import getMultiAdapter
+    >>> from zope.interface import Interface
+    >>> from plone.app.blob.tests import makeFileUpload
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> from Products.ATContentTypes.tests.utils import FakeRequestSession
+    >>> from Products.COL3.interfaces.workspace import IWorkspace
+    >>> from Products.COL3.browser.tests import __file__ as testdir
+    >>> from Products.COL3.tests.xml_validator import XMLValidator
+    >>> validator = XMLValidator()
+    >>> testdir = os.path.dirname(testdir)
+    >>> testfile = os.path.join(testdir, 'test.pdf')
+    >>> def tostring(elem):
+    ...     return lxtostring(XML(ettostring(elem)), pretty_print=True)
+    >>> def prepPortalAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     portal = app.plone.unrestrictedTraverse('++skin++col')
+    ...     return portal, portal.REQUEST
+    >>> def prepWorkspaceAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     workspace = app.plone.workspaces['workspace'].unrestrictedTraverse('++skin++col')
+    ...     return workspace, workspace.REQUEST
+    >>> def copyToTempFile(filename):
+    ...     tempno, tempname = tempfile.mkstemp()
+    ...     os.close(tempno)
+    ...     shutil.copyfile(filename, tempname)
+    ...     return file(tempname, 'rb')
+    >>> portal, request = prepPortalAndRequest()
+    >>> self.loginAsPortalOwner()
+
+On portal setup. a 'library' folder is created by default.
+
+    >>> from Products.COL3.interfaces.library import IDocumentLibrary
+    >>> library = portal.library
+    >>> IDocumentLibrary.providedBy(library)
+    True
+
+Creating the file
+-----------------
+
+The library file creation form is a regular form with a large amount of fields,
+most of which are part of the "Taxonomy":
+
+    >>> addFormPage = library.restrictedTraverse('add-libraryfile.html')
+    >>> addFormPageXML = addFormPage.getResponse()
+
+XML should validate against tnc.rng schema.
+    >>> validator.validateString(tostring(addFormPageXML)) # doctest: -REPORT_NDIFF
+
+    >>> print tostring(addFormPageXML.find('view')) # doctest: +XMLDATA
+    <view name="add.html" type="libraryfile" title="Add Library File" section="library"/>
+    >>> print tostring(addFormPageXML.find('formcontroller'))
+    ... # doctest: +XMLDATA
+    <formcontroller action="http://foo">
+        <field name="form.file" widget="file" required="required">
+            <label>File</label>
+        </field>
+        <field name="form.title" widget="text" required="required">
+            <label>Title</label>
+        </field>
+        <field name="form.authors" widget="authors" required="required">
+            <label>Authors</label>
+        </field>
+        <field name="form.document_type" widget="checkboxgroup">
+            <label>Purpose</label>
+            <description>Describes the purpose of the document, if applicable.</description>
+            <value vocabulary="documenttypes"/>
+        </field>
+        <field name="form.description" widget="textarea" required="required">
+            <label>Abstract</label>
+            <description>Up to 1000 characters.</description>
+        </field>
+        <field name="form.language" widget="selection" required="required">
+            <label>Language</label>
+            <value vocabulary="languages" xml:space="preserve">en</value>
+        </field>
+        <field name="form.dateauthored" widget="calendar" required="required">
+            <label>Date authored</label>
+            <description>Select Year : Month : Day</description>
+        </field>
+        <field name="form.country" widget="selection" required="required">
+            <label>Region/Country</label>
+            <value vocabulary="countries" xml:space="preserve">USA</value>
+        </field>
+        <field name="form.biogeographic_realm" widget="selection" required="required">
+            <label>Biogeographic realm</label>
+            <value vocabulary="biogeographic_realms" xml:space="preserve">nearctic</value>
+        </field>
+        <field name="form.habitat" widget="checkboxgroup">
+            <label>Habitat type</label>
+            <value vocabulary="habitats"/>
+        </field>
+        <field name="form.conservation" widget="checkboxgroup">
+            <label>Conservation action</label>
+            <value vocabulary="conservation"/>
+        </field>
+        <field name="form.directthreat" widget="checkboxgroup">
+            <label>Direct threat</label>
+            <value vocabulary="directthreat"/>
+        </field>
+        <field name="form.organization" widget="text">
+            <label>Organization</label>
+            <description>Examples: The Nature Conservancy, World Wildlife Fund, IUCN.</description>
+        </field>
+        <field name="form.monitoring" widget="checkboxgroup">
+            <label>Monitoring type</label>
+            <description>The methods used to determine whether the conservation actions described in this document are succeeding.</description>
+            <value vocabulary="monitoring"/>
+        </field>
+        <field name="form.keywords" widget="text">
+            <label>Other Search Terms</label>
+            <description>Examples: biodiversity, freshwater, Natural Heritage Programs, panthera leo.</description>
+        </field>
+        <field name="form.license" required="required" widget="selection">
+            <label>License</label>
+            <value vocabulary="licenses" xml:space="preserve">a-nc</value>
+        </field>
+        <field name="form.gisdata" widget="file">
+        	<label>GIS Metadata</label>
+        	<description>To add or update GIS specific metadata (e.g., FGDC metadata) to this file, click the browse button to locate the metadata file on your hard drive.</description>
+        </field>
+        <field name="form.createdoi" required="required" widget="radiogroup">
+            <label>Create DOI?</label>
+            <description>Choose whether a DOI should be created for this file or not.</description>
+            <value>
+                <option selected="selected" value="yes">Yes, do create a DOI</option>
+                <option value="no">No, do NOT create a DOI</option>
+            </value>
+        </field>
+        <submit name="form.actions.add">Save</submit>
+        <submit name="form.actions.cancel">Cancel</submit>
+    </formcontroller>
+
+Let's create the library file then.
+
+    >>> uploadFile = makeFileUpload(file(testfile, 'rb').read(), testfile)
+    >>> portal, request = prepPortalAndRequest()
+    >>> request.form['form.file'] = uploadFile
+    >>> request.form['form.title'] = 'My Library File Title'
+    >>> request.form['form.authors'] = 'Almeida, Leonardo'
+    >>> request.form['form.document_type'] = ['laws', 'reports']
+    >>> request.form['form.description'] = 'My Library File Abstract'
+    >>> request.form['form.language'] = 'en'
+    >>> request.form['form.dateauthored'] = '2007-01-01 00:00'
+    >>> request.form['form.country'] = 'USA'
+    >>> request.form['form.biogeographic_realm'] = 'indomalay'
+    >>> request.form['form.habitat'] = 'caves'
+    >>> request.form['form.conservation'] = 'external'
+    >>> request.form['form.directthreat'] = 'biological'
+    >>> request.form['form.organization'] = 'Not Much'
+    >>> request.form['form.monitoring'] = 'none'
+    >>> request.form['form.keywords'] = ''
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.createdoi'] = 'no'
+    >>> request.form['form.actions.add'] = 'Save'
+    >>> addFormPage = portal.library.restrictedTraverse('@@add-libraryfile.html')
+    >>> print tostring(addFormPage.getResponse()) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/library/my-library-file-title/@@view.html
+
+Viewing the library file
+------------------------
+
+This view is used to render the Page on the front-end, including its title,
+body, and available actions, it is linked to from the workspace browsing views:
+REMOVED - validator.validateString(tostring(xml)) # doctest: -REPORT_NDIFF (after xml=view.getResponse())
+    >>> portal, request = prepPortalAndRequest()
+    >>> view = portal.restrictedTraverse('library/my-library-file-title/@@view.html')
+    >>> xml = view.getResponse()
+
+XML should validate against tnc.rng schema.
+    >>> validator.validateString(tostring(xml)) # doctest: -REPORT_NDIFF
+
+It contains a "view" tag that identifies this view for the front-end:
+
+    >>> print tostring(xml.find('view')) # doctest: +XMLDATA
+    <view name="view.html" type="libraryfile"
+          title="My Library File Title" section="library"/>
+
+
+This "view" tag doesn't actually do anything, since all the information for
+the FE actually comes from the "resource" tag
+
+    >>> print xml.find('resource/title').text
+    My Library File Title
+
+    >>> print tostring(xml.find('resource/attachments'))
+    ... # doctest: +XMLDATA
+    <attachments>
+        <attachment href="http://foo/plone/library/my-library-file-title"
+                    mime="application/pdf"
+                    name="file">test.pdf</attachment>
+    </attachments>
+
+    >>> print tostring(xml.find('ratings')) # doctest: +XMLDATA
+    <ratings>
+        <count>0</count>
+        <score>00</score>
+    </ratings>
+
+Adding a workspace file to library
+----------------------------------
+
+Let's create a non-manager user and with it a workspace to put files in:
+
+    >>> portal, request = prepPortalAndRequest()
+    >>> properties = dict(username='user1',
+    ...                   fistname='New',
+    ...                   lastname='User1',
+    ...                   email="user1@example.com",
+    ...                   type_of_organization="Comercial",
+    ...                   organization="Enfold Systems",
+    ...                   country="Brazil",
+    ...                  )
+    >>> registration_tool = getToolByName(portal, 'portal_registration')
+    >>> registration_tool.addMember('user1',
+    ...                             'somepasswd',
+    ...                             properties=properties.copy()
+    ...                            ) and None
+    >>> portal.manage_setLocalRoles('user1', ['Community Member'])
+    >>> self.login('user1')
+    >>> portal.workspaces.invokeFactory('Workspace', 'workspace') and None
+
+Let's log in again to get the newly created workspace credentials and create
+a file:
+
+    >>> self.login('user1')
+    >>> uploadFile = makeFileUpload(file(testfile, 'rb').read(), testfile)
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> request.form['form.file'] = uploadFile
+    >>> request.form['form.title'] = 'My Workspace File Title'
+    >>> request.form['form.description'] = 'My Workspace File Description'
+    >>> request.form['form.labels'] = 'label-one'
+    >>> request.form['form.document_type'] = 'ecoregionalplans'
+    >>> request.form['form.is_private'] = 'False'
+    >>> request.form['form.license'] = 'a-nc'
+    >>> request.form['form.actions.add'] = 'Save'
+    >>> addFormPage = workspace['documents'].restrictedTraverse('@@add-file.html')
+    >>> print tostring(addFormPage.getResponse()) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SafeRedirect: http://foo/plone/workspaces/workspace/documents/my-workspace-file-title/@@view.html

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<response>
+    <view name="help.html" section="site" title="Help and Frequently Asked Questions" type="site"/>
+    <user href="http://conserveonline.org/view-profile.html?userid=admin">
+        <username>admin</username>
+        <title>Jonathan Adams</title>
+        <email>jadams@example.com</email>
+        <emailsuffix>example.com</emailsuffix>
+        <lastlogin>2008-08-20T18:23:17+00:00</lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry>Help and Frequently Asked Questions</entry>
+    </breadcrumbs>
+</response>

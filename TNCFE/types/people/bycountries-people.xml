@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="bycountries-people.html" type="people" title="Browse People By Countries" section="people"/>
+    <batch total="929" start="21" end="40">
+        <pages>
+            <page current="current" href="#">1</page>
+            <page href="#">2</page>
+            <page href="#">3</page>
+        </pages>
+        <cols>
+            <col id="country" href="/server/url/to/sort/column" dir="asc">Country</col>
+            <col id="count" href="/server/url/to/sort/column">Count</col>
+        </cols>
+        <items>
+            <item href="/server/url/to/matched/resource">
+                <country>Brazil</country>
+                <count>2</count>
+            </item>
+            <item href="/server/url/to/matched/resource">                
+                <country>Italy</country>
+                <count>20</count>
+            </item> 
+            <item href="/server/url/to/matched/resource">
+                <country>Lebanon</country>
+                <count>5</count>
+            </item>  
+            <item href="/server/url/to/matched/resource">
+                <country>USA</country>
+                <count>12</count>
+            </item>  
+        </items>
+    </batch>
+    <menus>
+        <utilitymenu label="By:">
+            <entry href="byall.html">All</entry>
+            <entry href="bykeywords.html" current="current">Countries</entry>
+            <entry href="byauthors.html">Organizations</entry>            
+        </utilitymenu>
+    </menus>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/library">People</entry>
+        <entry>Browse People By Countries</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+</response>

@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="all-people.html" type="people" title="Browse All People" section="people"/>
+    <batch total="929" start="21" end="40">
+        <pages>
+            <page current="current" href="#">1</page>
+            <page href="#">2</page>
+            <page href="#">3</page>
+        </pages>
+        <cols>
+            <col id="lastname" href="/server/url/to/sort/column" dir="asc">Last Name</col>
+            <col id="firstname" href="/server/url/to/sort/column">First Name</col>
+            <col id="organization" href="/server/url/to/sort/column">Organization</col>
+            <col id="country" href="/server/url/to/sort/column">Country</col>
+        </cols>
+        <items>
+            <item href="/server/url/to/matched/resource">
+                <lastname>Everitt</lastname>
+                <firstname>Paul</firstname>
+                <organization>Enfold</organization>
+                <country>USA</country>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <lastname>Minor</lastname>
+                <firstname>Brit</firstname>
+                <organization>TNC</organization>
+                <country>USA</country>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <lastname>Runyan</lastname>
+                <firstname>Alan</firstname>
+                <organization>Enfold</organization>
+                <country>USA</country>
+            </item>            
+        </items>
+        <letters>
+            <letter href="/all?fl=a&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">A</letter>
+            <letter href="/all?fl=b&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">B</letter>
+            <letter href="/all?fl=c&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">C</letter>
+            <letter href="/all?fl=d&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">D</letter>
+            <letter href="/all?fl=e&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">E</letter>
+            <letter href="/all?fl=f&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">F</letter>
+            <letter href="/all?fl=g&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40" current="current">G</letter>
+            <letter href="/all?fl=h&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">H</letter>
+            <letter href="/all?fl=i&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">I</letter>
+            <letter href="/all?fl=j&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">J</letter>
+            <letter href="/all?fl=a&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">K</letter>
+            <letter href="/all?fl=b&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">L</letter>
+            <letter href="/all?fl=c&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">M</letter>
+            <letter href="/all?fl=d&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">N</letter>
+            <letter href="/all?fl=e&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">O</letter>
+            <letter href="/all?fl=f&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">P</letter>
+            <letter href="/all?fl=a&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">Q</letter>
+            <letter href="/all?fl=b&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">R</letter>
+            <letter href="/all?fl=c&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">S</letter>
+            <letter href="/all?fl=d&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">T</letter>
+            <letter href="/all?fl=e&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">U</letter>
+            <letter href="/all?fl=f&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">V</letter>
+            <letter href="/all?fl=a&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">W</letter>
+            <letter href="/all?fl=b&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">X</letter>
+            <letter href="/all?fl=c&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">Y</letter>
+            <letter href="/all?fl=d&amp;col=date&amp;dir=asc&amp;start=21&amp;end=40">Z</letter>
+        </letters>
+    </batch>
+    <menus>
+        <utilitymenu label="By:">
+            <entry href="byall.html" current="current">All</entry>
+            <entry href="bykeywords.html">Countries</entry>
+            <entry href="byauthors.html">Organizations</entry>            
+        </utilitymenu>
+    </menus>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/library">People</entry>
+        <entry>Browse All People</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+</response>

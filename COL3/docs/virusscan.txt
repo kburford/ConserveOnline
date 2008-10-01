@@ -1,0 +1,44 @@
+==================
+Virus scan support
+==================
+
+COL3 provides support for virus scanning through the script at
+"COL3/Extensions/virusscan.py". It can be invoked in 2 ways.
+
+Scan preparation
+================
+
+If you call it like::
+
+ bin/instance1 run src/Products/COL3/Extensions/virusscan.py ConserveOnline prepare [scandir]
+
+It will generate a structure for virus scaning on "scandir" if provided. If not
+provided, "scandir" defaults to a directory on the temporary directory location
+configured for Zope, with a name corresponding to the date of the scan. In any
+case the directory name will be reported back by the script.
+
+This directory structure will contain a "MANIFEST" file on the top-level, and
+a directory structure mirroring the content structure of the site, with files
+at the ends of these structures.
+
+A virus scan is supposed to run through this structure and *remove* all files
+it deems to be infected.
+
+Notice that "scandir" MUST be in the same partition as the blob storage is
+configured. This is the default if "scandir" is not provided, as configured by
+default by buildout.
+
+Scan reporting
+==============
+
+If you call the script like
+
+ bin/instance1 run src/Products/COL3/Extensions/virusscan.py ConserveOnline report <scandir>
+
+The script will analise the manifest file and report whether the content has
+been modified since the scan preparation, or whether it was deemed infected
+by the virus scan. This latter situation is detected by the absence of the
+equivalent file from the scan structure.
+
+The report will be placed at the top-level of the scan structure, in a file
+called "report.txt".

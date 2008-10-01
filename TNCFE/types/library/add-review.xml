@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="addreview.html" type="libraryfile" title="Add A Review: Drupal" section="libraryfile"/>
+    <formcontroller action=".">
+        <field name="form.ratings" widget="selection" required="required">
+            <label>How Do You Rate This Item?</label>
+            <value vocabulary="ratings" />
+        </field>
+        <field name="form.title" widget="text">
+            <label>Title Of Your Review</label>
+        </field>
+        <field name="form.comments" widget="textarea">
+            <label>Your Comments</label>
+            <description>255 character limit</description>
+        </field>
+        <submit name="submit">Save</submit>
+        <submit name="cancel">Cancel</submit>
+    </formcontroller>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/library/">Library</entry>
+        <entry href="/library/somefile/">Drupal</entry>
+        <entry>Add A Review: Drupal</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>0</isadmin>
+    </user>
+</response>

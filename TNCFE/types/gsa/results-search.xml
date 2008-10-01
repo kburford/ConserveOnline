@@ -1,0 +1,257 @@
+<?xml version='1.0' encoding='utf-8'?>
+<response>
+  <portlets>
+    <portlet type="googlecomresults" title="Google Search">
+      <result no="1">
+        <url>http://www.abikestore.com/</url>
+        <size>33</size>
+        <title>Economic Benefits of &lt;b&gt;Conservation&lt;/b&gt;. by Michael
+          Froelic</title>
+        <context>Online bicycle store featuring beach cruisers, mountain <b>bikes</b>, comfort
+            <b>bikes</b>, Honda BMX bicycles, Montague folding <b>bikes</b>, Biria, Jeep
+          <b>bikes</b>, and bicycle <b>...</b></context>
+      </result>
+      <result no="2">
+        <url>http://www.trekbikes.com/</url>
+        <size>7</size>
+        <title>Economic Benefits of &lt;b&gt;Conservation&lt;/b&gt;. by Michael
+          Froelic</title>
+        <context>Official site featuring a complete <b>bike</b> catalog, online bicycle accessories
+          store, Lance Armstrong coaching log, training and maintenance tips, <b>...</b></context>
+      </result>
+      <result no="3">
+        <url>http://www.trekbikes.com/us/en/</url>
+        <size>12</size>
+        <title>Economic Benefits of &lt;b&gt;Conservation&lt;/b&gt;. by Michael
+          Froelic</title>
+        <context><b>Bikes</b> &amp;middot; Trek Life &amp;middot; Equipment &amp;middot;
+          Company &amp;middot; Support &amp;middot; Find a Dealer &amp;middot; Road
+          &amp;middot; Triathlon &amp;middot; Mountain Hardtail &amp;middot; Mountain
+          Full-Suspension &amp;middot; Urban &amp;middot; <b>Bike</b> Path
+        <b>...</b></context>
+      </result>
+      <result no="4">
+        <url>http://www.qbike.com/</url>
+        <size>45</size>
+        <title>Economic Benefits of &lt;b&gt;Conservation&lt;/b&gt;. by Michael
+          Froelic</title>
+        <context>Find low prices on road <b>bikes</b>, mountain <b>bikes</b> and <b>bike</b> parts.
+          Search for the best <b>bike</b> prices on bicycles.</context>
+      </result>
+      <result no="5">
+        <url>http://www.beyondbikes.com/</url>
+        <size>175</size>
+        <title>Economic Benefits of &lt;b&gt;Conservation&lt;/b&gt;. by Michael
+          Froelic</title>
+        <context>Bicycle Part at Beyond <b>Bikes</b>. Your source for bicycle parts, mountain
+            <b>bike</b> parts, bicycle accesories and <b>bike</b> accessories.</context>
+      </result>
+    </portlet>
+  </portlets>
+  <view name="gsa.html" section="library" title="GSA Search Results" type="gsa"/>
+  <GSP VER="3.2">
+    <TM>0.028987</TM>
+    <Q>conservation</Q>
+    <PARAM name="filter" original_value="1" value="1"/>
+    <PARAM name="access" original_value="p" value="p"/>
+    <PARAM name="entqr" original_value="0" value="0"/>
+    <PARAM name="start" original_value="0" value="0"/>
+    <PARAM name="output" original_value="xml" value="xml"/>
+    <PARAM name="sort" original_value="date%3AD%3AL%3Ad1" value="date:D:L:d1"/>
+    <PARAM name="site" original_value="ConserveOnline" value="ConserveOnline"/>
+    <PARAM name="ie" original_value="UTF-8" value="UTF-8"/>
+    <PARAM name="client" original_value="default_frontend" value="default_frontend"/>
+    <PARAM name="q" original_value="conservation" value="conservation"/>
+    <PARAM name="ip" original_value="10.10.69.102" value="10.10.69.102"/>
+    <RES EN="10" SN="1">
+
+      <M>1000</M>
+      <FI/>
+      <NB>
+        <NU>/search?q=conservation&amp;site=ConserveOnline&amp;hl=en&amp;lr=&amp;ie=UTF-8&amp;output=xml&amp;client=default_frontend&amp;access=p&amp;sort=date:D:L:d1&amp;start=10&amp;sa=N</NU>
+      </NB>
+
+      <R N="1">
+        <U>http://conserveonline.org/Members/conservationscience/index_html</U>
+        <UE>http://conserveonline.org/Members/conservationscience/index_html</UE>
+        <T>Economic Benefits of &lt;b&gt;Conservation&lt;/b&gt; &#151;</T>
+        <RK>10</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; Economic Benefits of
+          &lt;b&gt;Conservation&lt;/b&gt;. by Michael Froelic &#151; last
+          modified Feb. 20, 06&lt;br&gt; 10:26 PM. This page will outline the economic
+          rationale behind &lt;b&gt;conservation&lt;/b&gt;.
+          &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="XPZ03DrU4PEJ" ENC="UTF-8" SZ="51k"/>
+        </HAS>
+      </R>
+
+      <R N="2">
+        <U>http://conserveonline.org/portal_teams/rmcr.science.gis/ts_team_list_view</U>
+        <UE>http://conserveonline.org/portal_teams/rmcr.science.gis/ts_team_list_view</UE>
+        <T>Rocky Mountain &lt;b&gt;Conservation&lt;/b&gt; Region Science and GIS
+          team &#151;</T>
+        <RK>7</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; Rocky Mountain
+          &lt;b&gt;Conservation&lt;/b&gt; Region Science and GIS team team roster.
+          Member ID,&lt;br&gt; Membership, Full name, User name. tguthrie, details, Ty
+          Guthrie. tguthrie. &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="brbJc5aaxLwJ" ENC="ISO-8859-1" SZ="19k"/>
+        </HAS>
+      </R>
+
+      <R MIME="application/vnd.ms-powerpoint" N="3">
+        <U>http://conserveonline.org/workspaces/ecoregional_status_measures/ersm/threat_status/AU%20threats%20presentation%20compressed.ppt</U>
+        <UE>http://conserveonline.org/workspaces/ecoregional_status_measures/ersm/threat_status/AU%2520threats%2520presentation%2520compressed.ppt</UE>
+        <T>Slide 1</T>
+        <RK>5</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; Portfolio of critical sites for biodiversity
+          &lt;b&gt;conservation&lt;/b&gt;. How TNC assesses threats.
+          &lt;b&gt;...&lt;/b&gt;&lt;br&gt; Effective
+          &lt;b&gt;conservation&lt;/b&gt;: Measuring the status of effective
+          &lt;b&gt;conservation&lt;/b&gt;. &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="SSth6G5paM8J" ENC="UTF-8" SZ=""/>
+        </HAS>
+      </R>
+
+      <R N="4">
+        <U>http://conserveonline.org/coldocs/2003/08</U>
+        <UE>http://conserveonline.org/coldocs/2003/08</UE>
+        <T>08 &#151;</T>
+        <RK>5</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; Document Actions. Print this page. 08. Up one
+          level &lt;b&gt;Conservation&lt;/b&gt; Plan for the
+          Barton&lt;br&gt; Creek Habitat Preserve Plan by Jonathan Adams &#151; last
+          modified Jul. &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="kRLjZwnVPrcJ" ENC="ISO-8859-1" SZ="50k"/>
+        </HAS>
+      </R>
+
+      <R L="2" N="5">
+        <U>http://conserveonline.org/coldocs/2003/07</U>
+        <UE>http://conserveonline.org/coldocs/2003/07</UE>
+        <T>07 &#151;</T>
+        <RK>4</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; Document Actions. Print this page. 07. Up one
+          level &lt;b&gt;Conservation&lt;/b&gt; Area Plan for Mad&lt;br&gt;
+          Island Marsh-Oyster Lake by Jonathan Adams &#151; last modified Jul.
+          &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="RloawZfBtfsJ" ENC="UTF-8" SZ="58k"/>
+        </HAS>
+        <HN U="conserveonline.org/coldocs/2003">conserveonline.org/coldocs/2003</HN>
+      </R>
+
+      <R N="6">
+        <U>http://conserveonline.org/coldocs/2004/04</U>
+        <UE>http://conserveonline.org/coldocs/2004/04</UE>
+        <T>04 &#151;</T>
+        <RK>5</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; 21, 05 04:13 PM &#183; Download Document
+          &#183; View Document Data Sheet An Ecological Analysis&lt;br&gt; of
+          &lt;b&gt;Conservation&lt;/b&gt; Priorities in the Apache Highlands
+          Ecoregion by &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="cXhPJGFxatIJ" ENC="ISO-8859-1" SZ="46k"/>
+        </HAS>
+      </R>
+
+      <R L="2" N="7">
+        <U>http://conserveonline.org/coldocs/2004/12</U>
+        <UE>http://conserveonline.org/coldocs/2004/12</UE>
+        <T>12 &#151;</T>
+        <RK>4</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; 21, 05 04:14 PM &#183; Download Document
+          &#183; View Document Data Sheet &lt;b&gt;Conservation&lt;/b&gt;
+          Across&lt;br&gt; the Water&amp;#39;s Edge and Beyond by Jonathan Adams
+          &#151; last modified Jul. &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="bQXH_7jlvA8J" ENC="ISO-8859-1" SZ="39k"/>
+        </HAS>
+        <HN U="conserveonline.org/coldocs/2004">conserveonline.org/coldocs/2004</HN>
+      </R>
+
+      <R N="8">
+        <U>http://conserveonline.org/recently_published?b_start:int=60</U>
+        <UE>http://conserveonline.org/recently_published%3Fb_start:int%3D60</UE>
+        <T>ConserveOnline &#151;</T>
+        <RK>4</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; Form) | Scientific Journals | Partners | Privacy
+          Statement | Disclaimer ConserveOnline&lt;br&gt; is sharing 1788 documents and is
+          part of the &lt;b&gt;Conservation&lt;/b&gt; Commons.
+          &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="emJCT6ImylYJ" ENC="UTF-8" SZ="32k"/>
+        </HAS>
+      </R>
+
+      <R N="9">
+        <U>http://conserveonline.org/coldocs/2005/10</U>
+        <UE>http://conserveonline.org/coldocs/2005/10</UE>
+        <T>10 &#151;</T>
+        <RK>3</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; Print this page. 10. Up one level
+          Tennessee&amp;#39;s Comprehensive Wildlife
+          &lt;b&gt;Conservation&lt;/b&gt;&lt;br&gt; Strategy (CWCS) 2005 -
+          Main Document by Joseph Wisby &#151; last modified Oct.
+          &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="WKAXRMboUFcJ" ENC="UTF-8" SZ="50k"/>
+        </HAS>
+      </R>
+
+      <R N="10">
+        <U>http://conserveonline.org/ratings_listing?document_id=de65955e49d6e293eec0de123847ffbf</U>
+        <UE>http://conserveonline.org/ratings_listing%3Fdocument_id%3Dde65955e49d6e293eec0de123847ffbf</UE>
+        <T>ConserveOnline &#151;</T>
+        <RK>3</RK>
+        <FS NAME="date" VALUE=""/>
+        <S>&lt;b&gt;...&lt;/b&gt; Beginning in 1994, two RJKOSE supported workshops
+          assisted Conservancy and State&lt;br&gt; Heritage staff in site
+          &lt;b&gt;conservation&lt;/b&gt; planning in these complex systems.
+          &lt;b&gt;...&lt;/b&gt; </S>
+        <LANG>en</LANG>
+        <HAS>
+          <L/>
+          <C CID="jGHqPceSVdIJ" ENC="ISO-8859-1" SZ="16k"/>
+        </HAS>
+      </R>
+
+    </RES>
+  </GSP>
+  <loginbox action="http://dev.tnc.enfoldsystems.com:84/login" username="Username"/>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+  </breadcrumbs>
+  <resource/>
+</response>

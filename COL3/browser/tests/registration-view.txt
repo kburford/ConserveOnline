@@ -1,0 +1,225 @@
+Registration view tests
+~~~~~~~~~~~~~~~~~~~~~~~
+
+These tests ensure expected functionality for the view class used by the 
+COL3 member registration form.
+
+  >>> portal = self.portal
+  >>> initial_users = self.portal.acl_users.searchUsers()
+
+Create the browser object we'll be using.
+
+  >>> from Products.Five.testbrowser import Browser
+  >>> browser = Browser()
+  >>> browser.handleErrors = False
+
+Defining some convenience functions
+
+  >>> def fillIn(field, value):
+  ...     browser.getControl(field).value = value
+
+  >>> def fillInByName(field, value):
+  ...     browser.getControl(name='form.%s' % field).value = value
+
+  >>> def select(field):
+  ...     browser.getControl(field).selected = True
+
+  >>> def click(field):
+  ...     browser.getControl(field).click()
+
+  >>> def getCaptchaSolution(portal, hash):
+  ...     from Products.qPloneCaptchas.utils import decrypt
+  ...     from Products.qPloneCaptchas.utils import getWord
+  ...     from Products.qPloneCaptchas.utils import parseKey
+  ...     captcha_key = portal.captcha_key
+  ...     return getWord(int(parseKey(decrypt(captcha_key, hash))['key']))
+ 
+First off, set up a request with missing form data. No users will be added.
+
+  >>> browser.open('http://localhost/++skin++col/plone/register.html')
+  >>> click('Add')
+  >>> browser.url
+  'http://localhost/++skin++col/plone/register.html'
+  >>> 'Required input is missing.' in browser.contents
+  True
+  >>> len(initial_users) == len(self.portal.acl_users.searchUsers())
+  True
+
+Now we provide values, but mistype the Captcha.
+
+  >>> browser.open('http://localhost/++skin++col/plone/register.html')
+  >>> hash = browser.getControl(name='form.keyhash', index=1).value
+  >>> solution = getCaptchaSolution(portal, hash)
+  >>> fillIn('User Name', 'newuser')
+  >>> fillIn('Full Name', 'New User')
+  >>> fillIn('E-mail', 'newuser@example.com')
+  >>> fillIn('Password', 'supersecret')
+  >>> fillIn('Confirm password', 'supersecret')
+  >>> fillInByName('type_of_organization', ['Government'])
+  >>> fillInByName('organization', 'My Organization')
+  >>> fillIn('Country', ['Albania'])
+  >>> select('I agree to these terms and conditions')
+  >>> fillInByName('key', 'wrong solution')
+  >>> click('Add')
+  >>> browser.url
+  'http://localhost/plone/register.html'
+  >>> 'Required input is missing.' in browser.contents
+  False
+  >>> len(initial_users) == len(self.portal.acl_users.searchUsers())
+  True
+
+If you do not agree to the terms and conditions you cannot join.
+
+  >>> browser.open('http://localhost/plone/register.html')
+  >>> hash = browser.getControl(name='form.keyhash', index=1).value
+  >>> solution = getCaptchaSolution(portal, hash)
+  >>> fillIn('User Name', 'newuser')
+  >>> fillIn('Full Name', 'New User')
+  >>> fillIn('E-mail', 'newuser@example.com')
+  >>> fillIn('Password', 'supersecret')
+  >>> fillIn('Confirm password', 'supersecret')
+  >>> fillInByName('type_of_organization', ['Government'])
+  >>> fillInByName('organization', 'My Organization')
+  >>> fillIn('Country', ['Albania'])
+  >>> fillInByName('key', solution)
+  >>> click('Add')
+  >>> browser.url
+  'http://localhost/plone/register.html'
+  >>> 'Required input is missing.' in browser.contents
+  False
+  >>> 'You must agree to the ConserveOnline notices' in browser.contents
+  True
+  >>> len(initial_users) == len(self.portal.acl_users.searchUsers())
+  True
+
+
+If your password is too short you cannot join.
+
+  >>> browser.open('http://localhost/plone/register.html')
+  >>> hash = browser.getControl(name='form.keyhash', index=1).value
+  >>> solution = getCaptchaSolution(portal, hash)
+  >>> fillIn('User Name', 'newuser')
+  >>> fillIn('Full Name', 'New User')
+  >>> fillIn('E-mail', 'newuser@example.com')
+  >>> fillIn('Password', 'secret')
+  >>> fillIn('Confirm password', 'secret')
+  >>> fillInByName('type_of_organization', ['Government'])
+  >>> fillInByName('organization', 'My Organization')
+  >>> fillIn('Country', ['Albania'])
+  >>> select('I agree to these terms and conditions')
+  >>> fillInByName('key', solution)
+  >>> click('Add')
+  >>> browser.url
+  'http://localhost/plone/register.html'
+  >>> 'Required input is missing.' in browser.contents
+  False
+  >>> 'Please use a password that is at least 8 characters' in browser.contents
+  True
+  >>> len(initial_users) == len(self.portal.acl_users.searchUsers())
+  True
+
+
+If your password is too short you cannot join.
+
+  >>> browser.open('http://localhost/plone/register.html')
+  >>> hash = browser.getControl(name='form.keyhash', index=1).value
+  >>> solution = getCaptchaSolution(portal, hash)
+  >>> fillIn('User Name', 'newuser')
+  >>> fillIn('Full Name', 'New User')
+  >>> fillIn('E-mail', 'newuser@example.com')
+  >>> fillIn('Password', 'supersecret')
+  >>> fillIn('Confirm password', 'super_secret')
+  >>> fillInByName('type_of_organization', ['Government'])
+  >>> fillInByName('organization', 'My Organization')
+  >>> fillIn('Country', ['Albania'])
+  >>> select('I agree to these terms and conditions')
+  >>> fillInByName('key', solution)
+  >>> click('Add')
+  >>> browser.url
+  'http://localhost/plone/register.html'
+  >>> 'Required input is missing.' in browser.contents
+  False
+  >>> len(initial_users) == len(self.portal.acl_users.searchUsers())
+  True
+
+
+If your chosen password is the same as your login you cannot join.
+
+  >>> browser.open('http://localhost/plone/register.html')
+  >>> hash = browser.getControl(name='form.keyhash', index=1).value
+  >>> solution = getCaptchaSolution(portal, hash)
+  >>> fillIn('User Name', 'supersecret')
+  >>> fillIn('Full Name', 'New User')
+  >>> fillIn('E-mail', 'newuser@example.com')
+  >>> fillIn('Password', 'supersecret')
+  >>> fillIn('Confirm password', 'supersecret')
+  >>> fillInByName('type_of_organization', ['Government'])
+  >>> fillInByName('organization', 'My Organization')
+  >>> fillIn('Country', ['Albania'])
+  >>> select('I agree to these terms and conditions')
+  >>> fillInByName('key', solution)
+  >>> click('Add')
+  >>> browser.url
+  'http://localhost/plone/register.html'
+  >>> 'Required input is missing.' in browser.contents
+  False
+  >>> len(initial_users) == len(self.portal.acl_users.searchUsers())
+  True
+
+
+If the login you want is already in use you cannot join.
+
+  >>> browser.open('http://localhost/plone/register.html')
+  >>> hash = browser.getControl(name='form.keyhash', index=1).value
+  >>> solution = getCaptchaSolution(portal, hash)
+  >>> fillIn('User Name', 'test_user_1_')
+  >>> fillIn('Full Name', 'New User')
+  >>> fillIn('E-mail', 'newuser@example.com')
+  >>> fillIn('Password', 'supersecret')
+  >>> fillIn('Confirm password', 'supersecret')
+  >>> fillInByName('type_of_organization', ['Government'])
+  >>> fillInByName('organization', 'My Organization')
+  >>> fillIn('Country', ['Albania'])
+  >>> select('I agree to these terms and conditions')
+  >>> fillInByName('key', solution)
+  >>> click('Add')
+  >>> browser.url
+  'http://localhost/plone/register.html'
+  >>> 'Required input is missing.' in browser.contents
+  False
+  >>> 'This login already exists, please choose another' in browser.contents
+  True
+  >>> len(initial_users) == len(self.portal.acl_users.searchUsers())
+  True
+
+
+This time all values are correct and we get a new user.
+
+  >>> browser.open('http://localhost/plone/register.html')
+  >>> hash = browser.getControl(name='form.keyhash', index=1).value
+  >>> solution = getCaptchaSolution(portal, hash)
+  >>> fillIn('User Name', 'newuser')
+  >>> fillIn('Full Name', 'New User')
+  >>> fillIn('E-mail', 'newuser@example.com')
+  >>> fillIn('Password', 'supersecret')
+  >>> fillIn('Confirm password', 'supersecret')
+  >>> fillInByName('type_of_organization', ['Government'])
+  >>> fillInByName('organization', 'My Organization')
+  >>> fillIn('Country', ['Albania'])
+  >>> select('I agree to these terms and conditions')
+  >>> fillInByName('key', solution)
+  >>> click('Add')
+  >>> 'Required input is missing.' in browser.contents
+  False
+  >>> browser.url
+  'http://localhost/plone'
+  >>> portal.acl_users.getUserById('newuser')
+  <COL3User 'newuser'>
+  >>> m = portal.portal_membership.getMemberById('newuser')
+  >>> m
+  <MemberData at /plone/portal_memberdata/newuser used for /plone/acl_users>
+
+And this user is a community member
+
+  >>> sorted(list(m.getRolesInContext(portal)))
+  ['Authenticated', 'Community Member', 'Member']

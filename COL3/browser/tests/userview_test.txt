@@ -1,0 +1,170 @@
+==================
+Profile View Tests
+==================
+
+This is the test for the user profile view, first we add a member
+
+ >>> from Products.CMFCore.utils import getToolByName
+ >>> from elementtree.ElementTree import tostring
+ >>> pmem = getToolByName(self.portal, 'portal_membership')
+ >>> pmem.addMember('bjstest', '12345', ['Manager'], [])
+ >>> me = pmem.getMemberById('bjstest')
+ >>> self.login(me.id)
+ >>> newprops = {'description':'I have a long history of freaking out!!!',
+ ...             'fullname': 'Jumpin Jehosophat',
+ ...             'organization':'Enfold Systems',
+ ...             'email':'jjehosophat@foo.com',
+ ...             'country':'United States Of America',
+ ...             'firstname':'Jumpin',
+ ...             'lastname':'Jehosophat',
+ ...             'type_of_organization':'Import/Export',}
+
+ >>> me.setMemberProperties(newprops)
+ 
+Spot Checking some of the new properties set above
+ 
+ >>> me.getProperty('description')
+ 'I have a long history of freaking out!!!'
+ >>> me.getProperty('fullname')
+ 'Jumpin Jehosophat'
+ >>> me.getProperty('country')
+ 'United States Of America'
+ >>> me.getProperty('email')
+ 'jjehosophat@foo.com'
+ >>> me.getProperty('firstname')
+ 'Jumpin'
+ >>> me.reindexObject()
+ >>> self.login(me.id)
+
+Need to add a workspace to invite the member above to
+
+ >>> portal = self.portal
+ >>> self.setRoles(['Member','Community Member'])
+ >>> portal.workspaces.invokeFactory("Workspace", "bjsws1") and None
+ >>> ws1 = portal.workspaces['bjsws1']
+ >>> ws1.id
+ 'bjsws1'
+ >>> ws1.reindexObject()
+ 
+ >>> portal.workspaces.invokeFactory("Workspace", "bjsws2") and None
+ >>> ws2 = portal.workspaces['bjsws2']
+ >>> ws2.id
+ 'bjsws2'
+ >>> ws2.reindexObject()
+ 
+Now get the invitation add tool and invite the person above
+
+ >>> invtool = getToolByName(app.plone, 'workspace_invitations')
+ >>> invids = invtool.inviteToWorkspace(ws1, (me.getProperty('email'),))
+ >>> invites = invtool.getInvitationsForEmail(me.getProperty('email'))
+ >>> len([r for r in invites])
+ 1
+
+Now add the member to the second workspace created
+
+ >>> from Products.COL3.interfaces.workspace import IWorkspaceMemberManagement
+ >>> from Products.COL3.browser.member import MemberWorkspacesMixin
+ >>> wm = IWorkspaceMemberManagement(ws2)
+ >>> wm.addMember(me)
+ >>> pg = getToolByName(self.portal, 'portal_groups')
+ >>> groupIds = pg.getGroupsForPrincipal(me)
+ >>> [r for r in groupIds]
+ ['bjsws1members', 'bjsws1admins', 'bjsws2members', 'bjsws2admins']
+
+ >>> ctx = self.portal.unrestrictedTraverse("++skin++col")
+ >>> from Products.COL3.browser.user import ViewProfileFragment
+ >>> app.REQUEST['userid'] = 'bjstest'
+ >>> profilefrag = ViewProfileFragment(self.portal, app.REQUEST)
+ >>> tostring(profilefrag.asElement()) #doctest:+XMLDATA +ELLIPSIS
+ <profile>
+    <firstname>Jumpin</firstname>
+    <lastname>Jehosophat</lastname>
+    <portrait href="images/defaultUser.gif"/>
+    <about href="edit-bio.html">
+        <email>jjehosophat@foo.com</email>
+        <country>United States Of America</country>
+        <background>I have a long history of freaking out!!!</background>
+        <organization>Enfold Systems</organization>
+        <password>********</password>
+        <joined>...</joined>
+    </about>
+    <bio href="edit-settings">
+        <html:div xmlns:html="http://www.w3.org/1999/xhtml">\nI have a long history of freaking
+            out!!!\n</html:div>
+    </bio>
+ </profile>
+
+Testing the userworkspace porlet fragment which contains all the workspaces a user
+is a member of
+
+ >>> from Products.COL3.browser.user import UserWorkspacesPortletFragment
+ >>> workspacesfrag = UserWorkspacesPortletFragment(ctx, app.REQUEST)
+ >>> tostring(workspacesfrag.asElement()) #doctest:+XMLDATA +ELLIPSIS
+ <portlet title="My Workspace" type="workspaces">
+     <resource href="http://nohost/plone/workspaces/bjsws1">
+       <title>bjsws1</title>
+       <status>Manager</status>
+       <created>...</created>
+     </resource>
+     <resource href="http://nohost/plone/workspaces/bjsws2">
+       <title>bjsws2</title>
+       <status>Manager</status>
+       <created>...</created>
+     </resource>
+     <resource href="http://nohost/plone/portal_catalog">
+       <title>bjsws1</title>
+       <status>Member</status>
+       <created>...</created>
+       </resource>
+     <resource href="http://nohost/plone/portal_catalog">
+       <title>bjsws2</title>
+       <status>Member</status>
+       <created>...</created>
+     </resource>
+  </portlet>
+  
+ >>> from Products.COL3.browser.user import UserInvitationPortletFragment
+ >>> invitesfrag = UserInvitationPortletFragment(ctx, app.REQUEST)
+ >>> tostring(invitesfrag.asElement()) #doctest:+XMLDATA +ELLIPSIS
+ <portlet title="My Invitations" type="invitations">
+   <resource href="...">
+      <title>...</title>
+      <manager>bjstest</manager>
+      <created>...</created>
+   </resource>
+ </portlet>
+ 
+ >>> from Products.COL3.browser.user import ViewProfilePortletFragment
+ >>> portalsfrag = ViewProfilePortletFragment(ctx, app.REQUEST)
+ >>> tostring(portalsfrag.asElement()) #doctest:+XMLDATA +ELLIPSIS
+ <portlets>
+	 <portlet title="My Invitations" type="invitaions">
+		 <resource href="http://nohost/plone/workspace_invitations/2007-08-29_17-23-30.418000-WHQ6WU">
+		     <title>2007-08-29_17-23-30.418000-WHQ6WU</title>
+		     <manager>bjstest</manager>
+		     <created>2007/08/29 17:23:30.418 GMT-5</created>
+		 </resource>
+	 </portlet>
+	 <portlet title="My Workspace" type="workspaces">
+		 <resource href="http://nohost/plone/workspaces/bjsws1">
+			 <title>bjsws1</title>
+			 <status>Manager</status>
+			 <created>2007/08/29 17:23:27.457 GMT-5</created>
+		 </resource>
+		 <resource href="http://nohost/plone/workspaces/bjsws2">
+			 <title>bjsws2</title>
+			 <status>Manager</status>
+			 <created>2007/08/29 17:23:29.031 GMT-5</created>
+		 </resource>
+		 <resource href="http://nohost/plone/portal_catalog">
+			 <title>bjsws1</title>
+			 <status>Member</status>
+			 <created>2007/08/29 17:23:27.457 GMT-5</created>
+		 </resource>
+	 	<resource href="http://nohost/plone/portal_catalog">
+		 	<title>bjsws2</title>
+		 	<status>Member</status>
+		 	<created>2007/08/29 17:23:29.031 GMT-5</created>
+	 	</resource>
+	</portlet>
+  </portlets>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="login.html" type="site" title="Sign In" section="people" />
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry>Sign In</entry>
+  </breadcrumbs>
+</response>

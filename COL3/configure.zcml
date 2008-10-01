@@ -1,0 +1,66 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="col3">
+
+  <permission
+    id="col.AddWorkspaces"
+    title="Add workspaces"
+    />
+
+  <permission
+    id="col.ViewMemberProfile"
+    title="COL: View Community Member Profile"
+    />
+
+  <permission
+    id="col.ManageMemberProfile"
+    title="COL: Manage Community Member Profile"
+    />
+
+  <permission
+    id="col.ListWorkspaceMembers"
+    title="COL: List Workspace Members"
+    />
+
+  <permission
+    id="col.ManageWorkspace"
+    title="COL: Manage Workspace"
+    />
+
+  <permission
+    id="Ploneboard.AddForum"
+    title="Ploneboard: Add Forum"
+    />
+
+  <permission
+    id="Ploneboard.AddConversation"
+    title="Ploneboard: Add Conversation"
+    />
+
+  <permission
+    id="Ploneboard.ManageConversation"
+    title="Ploneboard: Manage Conversation"
+    />
+
+  <permission
+    id="Ploneboard.AddComment"
+    title="Ploneboard: Add Comment"
+    />
+
+  <include package=".skins"/>
+
+  <include package=".browser"/>
+
+  <include package=".content"/>
+
+  <include package=".formlib"/>
+
+  <include package=".interfaces"/>
+
+  <include package=".search"/>
+
+  <include package=".tools"/>
+
+  <include package=".rating"/>
+
+</configure>

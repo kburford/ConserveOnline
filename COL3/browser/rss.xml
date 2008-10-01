@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<rdf:RDF
+  xmlns="http://purl.org/rss/1.0/"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:tal="http://xml.zope.org/namespaces/tal">
+
+<tal:block
+    define="results view/results;
+            header python:request.RESPONSE.setHeader('Content-Type', 'text/xml;;charset=utf-8')">
+
+<channel rdf:about="" tal:attributes="rdf:about request/URL">
+
+    <title tal:content="context/pretty_title_or_id">The title</title>
+    <link tal:content="context/portal_url">http://url.to.portal</link>
+
+    <description tal:content="context/Description">
+        Default rss description goes here
+    </description>
+
+    <image
+      rdf:resource=""
+      tal:attributes="rdf:resource string:${context/portal_url}/${context/base_properties/logoName}" />
+
+    <items>
+        <rdf:Seq>
+            <tal:block repeat="item results">
+            <rdf:li rdf:resource=""
+                    tal:attributes="rdf:resource item/getURL" />
+            </tal:block>
+        </rdf:Seq>
+    </items>
+
+</channel>
+
+<tal:items repeat="item results">
+<item rdf:about=""
+      tal:attributes="rdf:about item/getURL">
+    <title tal:content="item/Title">Title</title>
+    <link tal:content="item/getURL">Identifier</link>
+    <description tal:content="item/Description">Description</description>
+    <dc:creator tal:content="item/Creator">Creator</dc:creator>
+    <tal:block tal:repeat="subject item/Subject">
+        <dc:subject tal:content="subject">Subject</dc:subject>
+    </tal:block>
+    <dc:date tal:content="item/created/HTML4">Creation date</dc:date>
+    <dc:type tal:content="item/Type">Type</dc:type>
+</item>
+</tal:items>
+
+</tal:block>
+
+</rdf:RDF>

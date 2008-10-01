@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <colhome>
+    <sideimage href="http://www.conserveonline.org/about/page1">
+      <img title="Alt text comes from ATImage title" href="../static/images/boxLeftImage1.gif"/>
+    </sideimage>
+    <sideimage href="http://www.conserveonline.org/about/page2">
+      <img title="Alt text comes from ATImage title" href="../static/images/boxLeftImage2.gif"/>
+    </sideimage>
+    <sideimage href="http://www.conserveonline.org/about/page3">
+      <img title="Alt text comes from ATImage title" href="../static/images/boxLeftImage3.gif"/>
+    </sideimage>
+    <feature href="http://www.conserveonline.org/workspaces/ws1">
+      <img title="Alt text comes from ATImage title" href="../static/images/imgFeature.gif"/>
+      <text>
+        <div xmlns="http://www.w3.org/1999/xhtml">
+          <div>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Integer mauris leo, pretium
+            ac, ullamcorper sit amet, porta vitae, odio. Morbi suscipit nunc sed justo tincidunt
+            malesuada.</div>
+        </div>
+      </text>
+    </feature>
+  </colhome>
+  <view name="view.html" type="colhome" title="ConserveOnline Home Page" section="home"/>
+  <portlets>
+    <!--<portlet type="workspaceregions" title="Current Workspaces"></portlet>-->
+    <portlet type="newworkspaces" title="New Workspaces">
+      <resource href="/foo">
+        <title>Workspace One</title>
+        <created>2007-09-02</created>
+      </resource>
+      <resource href="/foo">
+        <title>Another Workspace</title>
+        <created>2007-08-02</created>
+      </resource>
+      <resource href="/foo">
+        <title>Workspace 3</title>
+        <created>2007-07-12</created>
+      </resource>
+      <resource href="/foo">
+        <title>Again A Workspace</title>
+        <created>2007-06-17</created>
+      </resource>
+      <resource href="/foo">
+        <title>Holiday Workspace</title>
+        <created>2007-03-02</created>
+      </resource>
+    </portlet>
+    <portlet type="recentlypublished" title="Recently Published Documents">
+      <resource href="/foo">
+        <title>Library Document One</title>
+      </resource>
+      <resource href="/foo">
+        <title>Another Library Document</title>
+      </resource>
+      <resource href="/foo">
+        <title>Library Document With a Long Title</title>
+      </resource>
+      <resource href="/foo">
+        <title>Library Document Four</title>
+      </resource>
+      <resource href="/foo">
+        <title>Library Document Five</title>
+      </resource>
+    </portlet>
+    <portlet type="mostworkspaces" title="Most Workspaces">
+      <resource href="/foo">
+        <title>Global</title>
+        <count>131</count>
+      </resource>
+      <resource href="/foo">
+        <title>United States of America</title>
+        <count>128</count>
+      </resource>
+      <resource href="/foo">
+        <title>Brazil</title>
+        <count>83</count>
+      </resource>
+      <resource href="/foo">
+        <title>Canada</title>
+        <count>76</count>
+      </resource>
+      <resource href="/foo">
+        <title>Ireland</title>
+        <count>55</count>
+      </resource>
+      <resource href="/foo">
+        <title>Mexico</title>
+        <count>32</count>
+      </resource>
+      <resource href="/foo">
+        <title>China</title>
+        <count>16</count>
+      </resource>
+    </portlet>
+  </portlets>
+  <breadcrumbs>
+    <entry>Home</entry>
+  </breadcrumbs>
+
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <email>kyle@example.com</email>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+</response>

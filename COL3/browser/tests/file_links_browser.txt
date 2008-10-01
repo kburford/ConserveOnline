@@ -1,0 +1,538 @@
+We'll test some of those views here. But first, some useful imports and
+definitions:
+
+    >>> from elementtree.ElementTree import tostring
+    >>> from Products.COL3.browser.workspace import WorkspaceDocBrowserViewFragment
+    >>> from Products.COL3.browser.workspace import WorkspaceDocBrowserMenuFragment
+    >>> from Products.COL3.browser.workspace import WorkspaceDocBrowserBatchFragment
+    >>> from Products.COL3.browser.workspace import WorkspaceDocsByAuthBatchFragment
+    >>> from Products.COL3.browser.page import LinkBrowserFragment
+    >>> from Products.COL3.browser.page import ImageUploadForm
+    >>> from Products.COL3.browser.page import ImageBrowserBatchFragment
+    >>> from Products.CMFCore.utils import getToolByName
+    >>> pm = getToolByName(app.plone, 'portal_membership')
+
+And some workspaces as user0
+
+    >>> self.login()
+    >>> self.setRoles(['Member','Community Member'])
+    >>> w = app.unrestrictedTraverse("++skin++col/plone/workspaces")
+    >>> w.invokeFactory("Workspace", "ws1") and None
+    >>> w['ws1'].update(title="Workspace 1")
+
+Need to add some images to the workspace and get the image batch, adding over 20 to make
+sure batching links are generated correctly
+
+    >>> docfolder = w['ws1']['documents']
+    >>> for i in range(23):
+    ...     docfolder.invokeFactory('Image', 'ImageFile'+str(i))
+    ...     image = docfolder['ImageFile'+str(i)]
+    ...     image.setDescription('Description')
+    ...     image.indexObject()
+    'ImageFile0'
+    'ImageFile1'
+    'ImageFile2'
+    'ImageFile3'
+    'ImageFile4'
+    'ImageFile5'
+    'ImageFile6'
+    'ImageFile7'
+    'ImageFile8'
+    'ImageFile9'
+    'ImageFile10'
+    'ImageFile11'
+    'ImageFile12'
+    'ImageFile13'
+    'ImageFile14'
+    'ImageFile15'
+    'ImageFile16'
+    'ImageFile17'
+    'ImageFile18'
+    'ImageFile19'
+    'ImageFile20'
+    'ImageFile21'
+    'ImageFile22'
+
+    >>> imageFragment = ImageBrowserBatchFragment(docfolder, app.REQUEST)
+    >>> tostring(imageFragment.asElement()) #doctest: +XMLDATA
+    <batch end="20" start="1" total="23">
+    <pages>
+        <page current="current" href="?start:int=0">1</page>
+        <page href="?start:int=20">2</page>
+    </pages>
+    <navigation>
+        <next href="?start:int=20">Next</next>
+    </navigation>
+    <items>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile0</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile0/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile1</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile1/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile10</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile10/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile11</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile11/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile12</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile12/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile13</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile13/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile14</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile14/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile15</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile15/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile16</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile16/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile17</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile17/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile18</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile18/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile19</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile19/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile2</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile2/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile20</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile20/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile21</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile21/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile22</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile22/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile3</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile3/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile4</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile4/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile5</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile5/image_thumb</imgthumb>
+        </item>
+        <item>
+            <description>Description</description>
+            <imglink>http://nohost/plone/workspaces/ws1/documents/ImageFile6</imglink>
+            <imgthumb>http://nohost/plone/workspaces/ws1/documents/ImageFile6/image_thumb</imgthumb>
+        </item>
+    </items>
+    </batch>
+
+Adding some documents to make sure the link browser returns all the documents
+
+    >>> for i in range(5):
+    ...     docname = 'DocFile'+str(i)
+    ...     docfolder.invokeFactory('Document', docname)
+    ...     doc = docfolder[docname]
+    ...     doc.setDescription('This is a great doc!')
+    ...     doc.indexObject()
+	'DocFile0'
+    'DocFile1'
+    'DocFile2'
+    'DocFile3'
+    'DocFile4'
+
+    >>> eventsfolder = w['ws1']['calendar'] #w was defined way at the top 
+    >>> for i in range(5):
+    ...     eventname = 'EventFile'+str(i)
+    ...     eventsfolder.invokeFactory('Event', eventname)
+    ...     event = eventsfolder[eventname]
+    ...     event.setDescription('This is a great event!')
+    ...     event.indexObject()
+    'EventFile0'
+    'EventFile1'
+    'EventFile2'
+    'EventFile3'
+    'EventFile4'
+
+    >>> linkFragment = LinkBrowserFragment(docfolder, app.REQUEST)
+    >>> tostring(linkFragment.asElement()) #doctest: +XMLDATA
+    <results>
+    <links>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/calendar/EventFile0</httpLink>
+            <descr>This is a great event!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/calendar/EventFile1</httpLink>
+            <descr>This is a great event!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/calendar/EventFile2</httpLink>
+            <descr>This is a great event!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/calendar/EventFile3</httpLink>
+            <descr>This is a great event!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/calendar/EventFile4</httpLink>
+            <descr>This is a great event!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/DocFile0</httpLink>
+            <descr>This is a great doc!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/DocFile1</httpLink>
+            <descr>This is a great doc!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/DocFile2</httpLink>
+            <descr>This is a great doc!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/DocFile3</httpLink>
+            <descr>This is a great doc!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/DocFile4</httpLink>
+            <descr>This is a great doc!</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile0</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile1</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile10</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile11</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile12</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile13</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile14</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile15</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile16</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile17</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile18</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile19</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile2</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile20</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile21</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile22</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile3</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile4</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile5</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile6</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile7</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile8</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+        <linkRec>
+            <httpLink>http://nohost/plone/workspaces/ws1/documents/ImageFile9</httpLink>
+            <descr>Description</descr>
+        </linkRec>
+    </links>
+    </results>
+
+    >>> docsFragment = WorkspaceDocBrowserBatchFragment(docfolder, app.REQUEST)
+    >>> tostring(docsFragment.asElement()) #doctest: +XMLDATA
+    <batch end="20" start="1" total="28">
+	    <cols>
+	        <col dir="asc" href="?start:int=0&amp;sort_order=asc&amp;sort_on=Title" id="title"
+	            >Title</col>
+	        <col dir="asc" href="?start:int=0&amp;sort_order=asc&amp;sort_on=Format" id="format"
+	            >Format</col>
+	        <col dir="asc" href="?start:int=0&amp;sort_order=asc&amp;sort_on=Size" id="size"
+	            >Size</col>
+	        <col dir="asc" href="?start:int=0&amp;sort_order=asc&amp;sort_on=Date" id="date"
+	            >Date Added</col>
+	    </cols>
+	    <pages>
+	        <page current="current" href="?start:int=0">1</page>
+	        <page href="?start:int=20">2</page>
+	    </pages>
+	    <letters>
+	        <letter href="?start:int=0&amp;title=A">A</letter>
+	        <letter href="?start:int=0&amp;title=B">B</letter>
+	        <letter href="?start:int=0&amp;title=C">C</letter>
+	        <letter href="?start:int=0&amp;title=D">D</letter>
+	        <letter href="?start:int=0&amp;title=E">E</letter>
+	        <letter href="?start:int=0&amp;title=F">F</letter>
+	        <letter href="?start:int=0&amp;title=G">G</letter>
+	        <letter href="?start:int=0&amp;title=H">H</letter>
+	        <letter href="?start:int=0&amp;title=I">I</letter>
+	        <letter href="?start:int=0&amp;title=J">J</letter>
+	        <letter href="?start:int=0&amp;title=K">K</letter>
+	        <letter href="?start:int=0&amp;title=L">L</letter>
+	        <letter href="?start:int=0&amp;title=M">M</letter>
+	        <letter href="?start:int=0&amp;title=N">N</letter>
+	        <letter href="?start:int=0&amp;title=O">O</letter>
+	        <letter href="?start:int=0&amp;title=P">P</letter>
+	        <letter href="?start:int=0&amp;title=Q">Q</letter>
+	        <letter href="?start:int=0&amp;title=R">R</letter>
+	        <letter href="?start:int=0&amp;title=S">S</letter>
+	        <letter href="?start:int=0&amp;title=T">T</letter>
+	        <letter href="?start:int=0&amp;title=U">U</letter>
+	        <letter href="?start:int=0&amp;title=V">V</letter>
+	        <letter href="?start:int=0&amp;title=W">W</letter>
+	        <letter href="?start:int=0&amp;title=X">X</letter>
+	        <letter href="?start:int=0&amp;title=Y">Y</letter>
+	        <letter href="?start:int=0&amp;title=Z">Z</letter>
+	    </letters>
+	    <navigation>
+	        <next href="?start:int=20">Next</next>
+	    </navigation>
+	    <items>
+	        <item>
+	            <title>ImageFile0</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:34-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile1</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:34-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile2</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:34-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile3</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:34-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile4</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:34-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile5</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:35-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile6</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:35-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile7</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:35-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile8</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:35-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile9</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:35-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile10</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:36-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile11</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:37-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile12</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:37-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile13</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:37-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile14</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:37-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile15</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:37-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile16</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:38-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile17</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:38-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile18</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:38-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	        <item>
+	            <title>ImageFile19</title>
+	            <mimetype>image/png</mimetype>
+	            <date>2007-10-09T18:03:38-05:00</date>
+	            <size>0 kB</size>
+	        </item>
+	    </items>
+    </batch>
+
+Now to check the workspace doc browser view fragment
+
+    >>> docsViewFragment = WorkspaceDocBrowserViewFragment(docfolder, app.REQUEST)
+    >>> tostring(docsViewFragment.asElement()) #doctest: +XMLDATA
+    <view name="all.html" section="workspaces" title="Index of Documents" type="documents" />
+
+And the doc browser menu fragment....
+
+    >>> docsMenuFragment = WorkspaceDocBrowserMenuFragment(docfolder, app.REQUEST)
+    >>> tostring(docsMenuFragment.asElement()) #doctest: +XMLDATA
+    <menus>
+	    <addmenu>
+	        <entry href="add-page.html">Add Page</entry>
+	        <entry href="add-file.html">Add File</entry>
+	    </addmenu>
+	    <utilitymenu>
+	        <entry href="bylabel.html">Label</entry>
+	        <entry href="bypurpose.html">Type</entry>
+	        <entry href="byauthor.html">Person</entry>
+	        <entry href="byfolder.html">Folder</entry>
+	        <entry href="all.html">All</entry>
+	    </utilitymenu>
+    </menus>
+    
+    >>> docsByAuthMenuFragment = WorkspaceDocsByAuthBatchFragment(docfolder, app.REQUEST)
+    >>> f = open('docsauth.xml', 'w')
+    >>> f.write(tostring(docsByAuthMenuFragment.asElement()))
+    >>> f.close()
+    >>> tostring(docsByAuthMenuFragment.asElement()) #doctest: +XMLDATA
+    <bogus></bogus>
+

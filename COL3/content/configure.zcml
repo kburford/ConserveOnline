@@ -1,0 +1,84 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <!-- IBlobbable adapters -->
+  <adapter factory=".file.BlobbableStandardFile" />
+  <adapter factory=".file.BlobbableBlobWrapper" />
+
+  <!-- Google Search Appliance (GSA) Index Adapters -->
+
+  <adapter factory=".indexer.EventIndexer"
+           provides=".interfaces.IIndexable"
+           for="Products.ATContentTypes.content.event.ATEvent" />
+
+  <adapter factory=".indexer.PBConversationIndexer"
+           provides=".interfaces.IIndexable"
+           for="Products.Ploneboard.content.PloneboardConversation.PloneboardConversation" />
+
+  # PloneboardComment uses default indexer
+  <adapter factory=".indexer.Indexer"
+           provides=".interfaces.IIndexable"
+           for="Products.Ploneboard.content.PloneboardComment.PloneboardComment" />
+
+  <adapter factory=".indexer.ProfileIndexer"
+           provides=".interfaces.IIndexable"
+           for="Products.PlonePAS.tools.memberdata.MemberData" />
+
+  <adapter factory=".indexer.WorkspaceIndexer"
+           provides=".interfaces.IIndexable"
+           for=".workspace.Workspace" />
+
+  <adapter factory=".indexer.KeywordIndexer"
+           provides=".interfaces.IIndexable"
+           for=".label.Label" />
+
+  <adapter factory=".indexer.FileIndexer"
+           provides=".interfaces.IIndexable"
+           for=".file.COLFile" />
+
+  <!-- This will probably change -->
+  <adapter factory=".indexer.FileIndexer"
+           provides=".interfaces.IIndexable"
+           for=".library.LibraryFile" />
+
+  <!--  Just being explicit -->
+  <adapter factory=".indexer.Indexer"
+           provides=".interfaces.IIndexable"
+           for=".page.COLPage" />
+
+  <!-- Default registration -->
+  <adapter factory=".indexer.Indexer" 
+           provides=".interfaces.IIndexable"
+           for="*" />
+
+  <!-- mark workspace as needing setup -->
+  <subscriber
+      for="Products.COL3.interfaces.workspace.IWorkspace
+           zope.app.container.interfaces.IObjectAddedEvent"
+      handler=".workspace.markWorkspaceNeedsSetup"
+      />
+
+  <!-- finish setup of workspace -->
+  <subscriber
+      for="Products.COL3.interfaces.workspace.IWorkspaceNeedsSetup
+           Products.DCWorkflow.interfaces.IAfterTransitionEvent"
+      handler=".workspace.finishWorkspaceSetup"
+      />
+
+  <!-- tear down workspace set-up so as not to leave droppings 
+       e.g. in the portal groups  -->
+  <subscriber
+      for="Products.COL3.interfaces.workspace.IWorkspace
+           OFS.interfaces.IObjectWillBeRemovedEvent"
+      handler=".workspace.tearDownWorkspaceSetup"
+      />
+
+  <!-- event debugging help
+  <subscriber
+      for="Products.COL3.interfaces.workspace.IWorkspace
+           zope.interface.Interface"
+      handler=".workspace.workspaceEventPrinter"
+      />
+  -->
+
+</configure>

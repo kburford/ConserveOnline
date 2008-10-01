@@ -1,0 +1,99 @@
+<dtml-var manage_page_header>
+<dtml-var manage_tabs>
+
+<br/>
+
+<table width="100%" cellspacing="0" cellpadding="2" border="0">
+<tr class="section-bar">
+  <td colspan="2" align="left">
+    <div class="form-label">
+      Execute Crossref Update
+    </div>
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <p class="form-help">
+      Update the Crossref system with Library File DOI's.  If the box on the right is checked, ALL files in the system, not just the queued files, will be sent over.
+    </p>
+  </td>
+  <td align="right" valign="top">
+    <form action="&dtml-URL1;">
+      <span class="form-label">Check To Push ALL Files</span> <input type="checkbox" name="from_queue"<br/>
+      <span class="form-label">Area (test/live)</span> <input type="text" name="area" value="<dtml-var area missing="test">">
+      <input class="form-element"
+             type="submit"
+             name="processLibraryFiles:method"
+             value=" Update Crossref">
+    </form>
+  </td>
+</tr>
+<tr class="section-bar">
+  <td colspan="2" align="left">
+    <div class="form-label">
+      Queue Library File
+    </div>
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <p class="form-help">
+      Enter a file id in the box to the right to requeue a library file for submission to CrossRef.
+    </p>
+  </td>
+  <td align="right" valign="top">
+    <form action="&dtml-URL1;">
+      <span class="form-label">Library File Id: </span><input type="text" name="id"><br/>
+      <input class="form-element"
+             type="submit"
+             name="requeueLibraryFile:method"
+             value="Requeue File">
+    </form>
+  </td>
+</tr>
+<tr class="section-bar">
+  <td colspan="2" align="left">
+    <div class="form-label">
+      Process CrossRef Email Responses
+    </div>
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <p class="form-help">
+      Click here to process email responses from CrossRef Submissions.
+    </p>
+  </td>
+  <td align="right" valign="top">
+    <form action="&dtml-URL1;">
+      <input class="form-element"
+             type="submit"
+             name="processEmailReports:method"
+             value="Process Emails">
+    </form>
+  </td>
+</tr>
+<tr class="section-bar">
+  <td colspan="2" align="left">
+    <div class="form-label">
+      List Queued CrossReference Files
+    </div>
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <p class="form-help">
+      Click here to list the files currently queued up to be submitted to CrossRef
+    </p>
+  </td>
+  <td align="right" valign="top">
+    <form action="&dtml-URL1;">
+      <input class="form-element"
+             type="submit"
+             name="listQueuedFiles:method"
+             value="List Queued Files">
+    </form>
+  </td>
+</tr>
+</table>
+<dtml-var manage_page_footer>

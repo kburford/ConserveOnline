@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+    <view name="bysearchterms.html" type="library" title="Browse Library By Search Terms" section="library"/>
+    <batch total="929" start="21" end="40">
+        <pages>
+            <page current="current" href="#">1</page>
+            <page href="#">2</page>
+            <page href="#">3</page>
+        </pages>
+        <cols>
+            <col id="keyword" href="/server/url/to/sort/column" dir="asc">Search Term</col>
+            <col id="count" href="/server/url/to/sort/column">Count</col>
+        </cols>
+        <items>
+            <item href="/server/url/to/matched/resource">
+                <keyword>Another Keyword</keyword>
+                <count>49</count>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <keyword>Some Keyword</keyword>
+                <count>3</count>
+            </item>
+            <item href="/server/url/to/matched/resource">
+                <keyword>Unreviewed Content</keyword>
+                <count>39</count>
+            </item>
+        </items>
+        <pagesize>
+            <size href="/all?sze=10">10</size>
+            <size href="/all?sze=25">25</size>
+            <size href="/all?sze=50">50</size>
+            <size href="/all?sze=100">100</size>
+            <size href="/all" current="current">All</size>
+        </pagesize>
+    </batch>
+    <menus>
+        <addmenu>
+            <entry href="add.html">Add File</entry>
+        </addmenu>
+        <utilitymenu label="By:">
+            <entry href="bysearchterms.html" current="current">Search Terms</entry>
+            <entry href="byauthors.html">Authors</entry>
+            <entry href="recentadded.html">Recent Added</entry>
+            <entry href="byall.html">All</entry>
+        </utilitymenu>
+    </menus>
+    <breadcrumbs>
+        <entry href="/">Home</entry>
+        <entry href="/library">Library</entry>
+        <entry>Browse Library By Search Terms</entry>
+    </breadcrumbs>
+    <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+        <username>test_1</username>
+        <title>John Test</title>
+        <lastlogin>2006-11-08T08:38:30</lastlogin>
+        <isadmin>false</isadmin>
+    </user>
+</response>

@@ -1,0 +1,116 @@
+==============
+Workspace Page
+==============
+
+The Workspace Page is an ATDocument derived content
+
+First, some preparations:
+
+    >>> import sys
+    >>> from Testing.makerequest import makerequest
+    >>> from elementtree.ElementTree import tostring as ettostring
+    >>> from lxml.etree import XML, tostring as lxtostring
+    >>> from Products.ATContentTypes.tests.utils import FakeRequestSession
+    >>> from Products.COL3.interfaces.workspace import IWorkspace
+    >>> from Products.COL3.content.label import Labeller
+    >>> def tostring(elem):
+    ...     return lxtostring(XML(ettostring(elem)), pretty_print=True)
+    >>> def prepWorkspaceAndRequest(app=app):
+    ...     app = makerequest(app.aq_base)
+    ...     workspace = app.plone.workspaces['workspace'].unrestrictedTraverse('++skin++col') 
+    ...     return workspace, workspace.REQUEST
+    >>> self.setRoles(['Member','Community Member'])
+
+Now let's create a workspace which holds the documents folder.
+
+    >>> app.plone.workspaces.invokeFactory('Workspace', 'workspace') and None
+    >>> self.login() # aquire the Workspace Manager group and role
+
+This workspace already contains a 'documents' folder by default:
+
+    >>> from Products.COL3.interfaces.workspace import IWorkspaceDocumentsFolder
+    >>> workspace, request = prepWorkspaceAndRequest()
+    >>> documents = workspace.documents
+    >>> IWorkspaceDocumentsFolder.providedBy(documents)
+    True
+
+is_private Field
+================
+
+The is_private field is a schema field that maps to the workflow state of the
+object, which is a simple workflow containing only the states "public" and
+"private"
+
+    >>> documents.invokeFactory('COLPage', 'apage') and None
+    >>> page = documents['apage']
+
+The initial state of a 'page' is "published" and the initial setting of it's
+is_private field is False:
+
+    >>> portal.portal_workflow.getCatalogVariablesFor(page)
+    {'review_state': 'published'}
+    >>> page.getIs_private()
+    False
+
+Changing the setting of "is_private" also sets its workflow state:
+
+    >>> page.update(is_private=True)
+    >>> portal.portal_workflow.getCatalogVariablesFor(page)
+    {'review_state': 'private'}
+    >>> page.getIs_private()
+    True
+    >>> page.update(is_private=False)
+    >>> portal.portal_workflow.getCatalogVariablesFor(page)
+    {'review_state': 'published'}
+    >>> page.getIs_private()
+    False
+
+And changing the workflow state also changes the field value:
+
+    >>> portal.portal_workflow.doActionFor(page, 'hide')
+    >>> page.getIs_private()
+    True
+    >>> portal.portal_workflow.doActionFor(page, 'publish')
+    >>> page.getIs_private()
+    False
+
+Page Labels
+===========
+
+Pages have labels attached to them. When you add a Label to a page, it creates
+a "Label" object in the system, unless one already exists with the same title.
+
+    >>> labeller = Labeller(page)
+    >>> list(labeller.listLabels())
+    []
+    >>> page.update(labels=['My Label', 'My Other Label'])
+    >>> print '\n'.join(labeller.listLabels())
+    My Label
+    My Other Label
+    >>> set(labeller.listLabels()) == set(page.getLabels()) or page.getLabels()
+    True
+
+Labels are represented by actual content objects on the system.
+
+    >>> print "\n".join(sorted(rec.getPath() for 
+    ...                        rec in labeller.getLabelRecords()))
+    /plone/workspaces/workspace/documents/my-label
+    /plone/workspaces/workspace/documents/my-other-label
+
+If I remove the labels from the page, the label objects still exist
+
+    >>> page.update(labels=[])
+    >>> print '\n'.join(labeller.listLabels())
+    My Label
+    My Other Label
+
+And if I add new labels, only those different than existing labels are created:
+
+    >>> page.update(labels=['My label 2', 'my other label'])
+    >>> print '\n'.join(labeller.listLabels())
+    My Label
+    My label 2
+    My Other Label
+
+And the sort in a case-insensitive manner, as seen above.
+

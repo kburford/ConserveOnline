@@ -1,0 +1,618 @@
+===============
+COL3 XML Fields
+===============
+
+Our XML forms require some XML ready fields, which basically means, XML
+xml widgets to go with them.
+
+First, some imports and other things we'll use:
+
+    >>> from Testing.makerequest import makerequest
+    >>> from zope.app.component.hooks import setSite
+    >>> from five.localsitemanager.registry import PersistentComponents
+    >>> from OFS.ObjectManager import ObjectManager
+    >>> from Products.qPloneCaptchas.utils import getCaptchasCount, formKey, encrypt
+    >>> from Products.qPloneCaptchas.CaptchaTool import CaptchaTool
+    >>> from Products.COL3 import config
+    >>> from Products.COL3.formlib import schema as colschema
+    >>> from Products.COL3.interfaces.formlib import IXMLWidget
+    >>> import zope.schema, zope.component
+    >>> from StringIO import StringIO
+    >>> from elementtree.ElementTree import fromstring
+    >>> def prepRequest(app):
+    ...     app = makerequest(app.aq_base).unrestrictedTraverse('++skin++col')
+    ...     request = app.REQUEST
+    ...     return app, request
+    >>> class DummyContext:
+    ...     def _getOb(self, id, default):
+    ...         if id=='foo':
+    ...             return 'bar' # pretend 'foo' is a subobject
+    ...         return default
+    >>> class DummySite(ObjectManager):
+    ...     captcha_key = '71925614'
+    ...     def __init__(self):
+    ...         self.setSiteManager(PersistentComponents())
+    ...         self.portal_captchas = CaptchaTool()
+    ...     def getCaptcha(self):
+    ...         key = formKey(55)
+    ...         return encrypt(self.captcha_key, key)
+    ...     def absolute_url(self):
+    ...         return 'http://portal_url'
+    >>> setSite(DummySite())
+
+
+Simple Fields
+=============
+
+Most of the fields are simple replacements for regular HTML fields.
+
+-------------
+XMLTextWidget
+-------------
+
+A widget for TextLine fields
+
+    >>> app, request = prepRequest(app)
+    >>> field = zope.schema.TextLine(__name__ = "title").bind(DummyContext())
+    >>> widget = zope.component.getMultiAdapter((field, request,), IXMLWidget)
+    >>> IXMLWidget.providedBy(widget)
+    True
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLTextWidget text
+
+Its rendering just puts the desired value inside <value></value> tags if there
+is one.
+
+    >>> widget.xmltype
+    'text'
+    >>> widget.asElement()
+
+Let's get some text into it to see how it looks like.
+
+    >>> request.form['field.title'] = u"Some text with linebreaks and < special > chars & reserved html symbols;"
+    >>> widget = zope.component.getMultiAdapter((field, request,), IXMLWidget)
+    >>> print widget()
+    <value xml:space="preserve">Some text with linebreaks and &lt; special &gt; chars &amp; reserved html symbols;</value>
+
+The xml:space attribute is there to preserve the whitespace
+inside the value, which must not be prettified or compressed by any xml
+processing in the pipeline.
+
+-----------------
+XMLTextAreaWidget
+-----------------
+
+A widget for Text fields, which can contain multiple lines.
+
+    >>> app, request = prepRequest(app)
+    >>> field = zope.schema.Text(__name__ = "description").bind(DummyContext())
+    >>> widget = zope.component.getMultiAdapter((field, request,), IXMLWidget)
+    >>> IXMLWidget.providedBy(widget)
+    True
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLTextAreaWidget textarea
+    >>> widget.asElement()
+
+No output above because there was no value. Let's add some text with special
+chars:
+
+    >>> request.form['field.description'] = """Some Large Text
+    ... With linebreaks and < special > chars & reserved html symbols;"""
+    >>> widget = zope.component.getMultiAdapter((field, request,), IXMLWidget)
+    >>> print widget()
+    <value xml:space="preserve">Some Large Text
+    With linebreaks and &lt; special &gt; chars &amp; reserved html symbols;</value>
+
+---------------
+XMLEditorWidget
+---------------
+
+Some forms might require a wysiwyg like editor. Internally, this is nothing
+but a Text field, so we created simple subclass of schema.Text just to bind
+a different widget to it:
+
+    >>> app, request = prepRequest(app)
+    >>> field = colschema.RichText(__name__ = "body",
+    ...                            required=False).bind(DummyContext())
+    >>> widget = zope.component.getMultiAdapter((field, request,), IXMLWidget)
+    >>> IXMLWidget.providedBy(widget)
+    True
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLEditorWidget editor
+
+This widget is a direct subclass of the XMLTextArea widget above, but handles
+the case where the only input was a single empty '<div>' tag pair as missing
+value:
+
+    >>> request.form['field.body'] = u"""   <div></div>   """
+    >>> widget = zope.component.getMultiAdapter((field, request,), IXMLWidget)
+    >>> widget.getInputValue()
+
+-------------------
+XMLLinesTupleWidget
+-------------------
+
+This is the XMLLinesWidget is the XML widget for the rendering and decoding of a textarea
+as a tuple of values.
+
+Currently a single field is directly mapped to it which is the TextLinesTuple field.
+Other Tuple fields could be also associated, as long as they define their value_type
+to something that can take a string value (ASCIILine, BytesLine, EmailLine, etc.).
+
+    >>> app, request = prepRequest(app)
+    >>> field = colschema.TextLinesTuple(__name__ = "lines").bind(DummyContext())
+    >>> widget = zope.component.getMultiAdapter((field, request,), IXMLWidget)
+    >>> IXMLWidget.providedBy(widget)
+    True
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLLinesTupleWidget textarea
+    >>> widget.asElement()
+
+Values are returned as a tuple.
+
+    >>> request.form['field.lines'] = """Some Text
+    ... With linebreaks"""
+    >>> widget = zope.component.getMultiAdapter((field, request,), IXMLWidget)
+    >>> print widget()
+    <value xml:space="preserve">Some Text
+    With linebreaks</value>
+    >>> widget.getInputValue()
+    (u'Some Text', u'With linebreaks')
+
+--------------
+XMLRadioWidget
+--------------
+
+A radio buttons group widget, for single-selection choices.
+
+For now, XMLRadioWidget is associated by default with Choice fields. We can change this later in the project if needed:
+
+    >>> f = zope.schema.Choice(__name__="choice",
+    ...                        vocabulary=config.WORKGROUP_ISPRIVATE_OPTIONS).bind(DummyContext())
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLRadioWidget radiogroup
+    >>> print widget() #doctest:+XMLDATA
+    <value>
+        <option value="False">Public, everyone can see content not made private.</option>
+        <option value="True">Private, only workspace members can see content.</option>
+    </value>
+    >>> request.form['field.choice'] = "False"
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget() # doctest:+XMLDATA
+    <value>
+        <option selected="selected" value="False">Public, everyone can see content not made private.</option>
+        <option value="True">Private, only workspace members can see content.</option>
+    </value>
+
+--------------------------------------
+XMLCheckboxWidget and Condition fields
+--------------------------------------
+
+A simple xml widget for the Bool schema field. It also works for Condition
+fields:
+
+    >>> f = colschema.LicenseAgreementCondition(__name__="tac").bind(DummyContext())
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLCheckBoxWidget checkbox
+    >>> widget.asElement()
+
+If there is no value, the widget actually returns 'None'. Notice that in the
+case of the LicenseAgreement field, a False value is actually not valid:
+
+    >>> request.form['field.tac.used'] = ""
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.asElement()
+    >>> widget.hasValidInput()
+    False
+    >>> print widget.error()
+    You must agree to the ConserveOnline notices and disclaimers.
+
+    >>> request.form['field.tac'] = u"on"
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget() # doctest:+XMLDATA
+    <value>on</value>
+    >>> widget.hasValidInput()
+    True
+
+-------------------------------------------
+CaptchaCondition Field and XMLCaptchaWidget
+-------------------------------------------
+
+The Captcha field is another condition field:
+
+    >>> f = colschema.CaptchaCondition(__name__="captcha").bind(DummyContext())
+    >>> f.validate(False)
+    Traceback (most recent call last):
+    ...
+    ConditionNotSatisfiedError: Incorrect verification code. Please re-enter.
+
+By default, it's bound to the XMLCaptchaWidget, which renders enough information
+for the FE to render an hidden with the hash key and the captcha image, plus
+the input for the captcha entry.
+
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLCaptchaWidget captcha
+    >>> rendered = widget()
+    >>> print rendered
+    <value><captcha
+              hashkey="..."
+              href="http://portal_url/getCaptchaImage/..."
+    /></value>
+    >>> widget.hasInput()
+    False
+
+This widget requires the presence of both the hash key and the attempted
+solution in the request.
+
+    >>> hashkey = fromstring(rendered)[0].attrib['hashkey']
+    >>> request.form['field.captcha.hashkey'] = unicode(hashkey)
+    >>> request.form['field.captcha'] = u''
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.hasValidInput()
+    False
+    >>> request.form['field.captcha'] = u'bright'
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.hasValidInput()
+    True
+
+Notice that captcha challenges expire once they have been used:
+
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.hasValidInput()
+    False
+
+---------------
+XMLSelectWidget
+---------------
+
+For a single selection in a long list of options, it doesn't make much
+sense for the backend to send all the options in the vocabulary to the
+front-end. Instead we could just send the identification named vocabulary
+and the front-end would bother rendering the value for us.
+
+Since the vocabulary must be named, we have devised a special field,
+VocabularyChoice, which is a choice that expects only vocabularies, which
+must have an 'id' attribute that is sent to the front-end instead of the
+options themselves.
+
+    >>> f = colschema.VocabularyChoice(__name__="myselection",
+    ...                                vocabulary=config.NATIONS,
+    ...                                required=False).bind(DummyContext())
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLSelectWidget selection
+    >>> print widget() #doctest:+XMLDATA
+    <value xml:space="preserve" vocabulary="countries" />
+
+If a value is present, it's the content of the tag.
+
+    >>> request.form['field.myselection'] = u"USA"
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget() # doctest:+XMLDATA
+    <value xml:space="preserve" vocabulary="countries">USA</value>
+
+-------------------
+XMLFileUploadWidget
+-------------------
+
+    >>> f = colschema.File(__name__="myupload",
+    ...                    required=False).bind(DummyContext())
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLFileUploadWidget file
+    >>> widget.asElement() is None
+    True
+
+As we can see above, the File Upload widget doesn't actually have any
+representation.
+
+    >>> ufile = StringIO('some data')
+    >>> ufile.filename = 'somefile.txt'
+    >>> request.form['field.myupload'] = ufile
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.hasValidInput()
+    True
+    >>> widget.getInputValue().read()
+    'some data'
+
+If the file has an empty 'filename' (e.g. from a form that didn't actually upload
+anything) we'd get the missing value for this field (None):
+
+    >>> ufile.seek(0)
+    >>> ufile.filename = ''
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.getInputValue() is None
+    True
+
+Complex Widgets
+===============
+
+These widgets were created for some complex (or just different) data types we
+have in some forms.
+
+-----------------------
+Labels field and widget
+-----------------------
+
+The Labels field is a Tuples of TextLines field, directly descending from
+TextLinesTuple field.
+
+    >>> f = colschema.Labels(__name__="mylabels",
+    ...                      required=False).bind(DummyContext())
+    >>> f.validate((u'Some', u'Values'))
+    >>> f.validate(())
+
+If it's required, it doesn't validate when only a single value is provided
+
+    >>> f = colschema.Labels(__name__="mylabels",
+    ...                      required=True).bind(DummyContext())
+    >>> f.validate(())
+    Traceback (most recent call last):
+    ...
+    ConditionNotSatisfiedError: Please, enter at least one label
+
+The labels widget is complex, but most of this complexity is in the front-end.
+
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype  
+    XMLLabelsWidget labels
+
+In the backend, we don't show anything if no values are selected...
+
+    >>> widget.asElement()
+
+And we just need to provide a list of the selected labels so far.
+
+    >>> request.form['field.mylabels'] = [u'Some ', u'', u' Other', u' ',
+    ...                                   u'Values  with spaces']
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.getInputValue()
+    (u'Some', u'Other', u'Values with spaces')
+    >>> print widget() # doctest: +XMLDATA
+    <value xml:space="preserve">
+        <option>Some</option>
+        <option>Other</option>
+        <option>Values with spaces</option>
+    </value>
+
+You can see above that it does some sanitation on the values, like cleaning up
+whitespace between, before and after words on the labels.
+
+------------------------
+Authors field and widget
+------------------------
+
+The Authors field is a Tuples of TextLines field, directly descending from
+TextLinesTuple field.
+
+    >>> f = colschema.Authors(__name__="myauthors",
+    ...                       required=False).bind(DummyContext())
+    >>> f.validate((u'Some', u'Values'))
+    >>> f.validate(())
+
+If it's required, it doesn't validate when only a single value is provided
+
+    >>> f = colschema.Authors(__name__="myauthors",
+    ...                       required=True).bind(DummyContext())
+    >>> f.validate(())
+    Traceback (most recent call last):
+    ...
+    ConditionNotSatisfiedError: Please, enter at least one author
+
+The authors widget looks a lot like the labels widget, and again, most of its
+complexity is not on the backend
+
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype  
+    XMLAuthorsWidget authors
+
+In the backend, we don't show anything if no values are selected...
+
+    >>> widget.asElement()
+
+And we just need to provide a list of the selected authors so far.
+
+    >>> request.form['field.myauthors'] = [u'Some ', u'', u' Other', u' ',
+    ...                                   u'Values  with spaces']
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.getInputValue()
+    (u'Some', u'Other', u'Values with spaces')
+    >>> print widget() # doctest: +XMLDATA
+    <value xml:space="preserve">
+        <option>Some</option>
+        <option>Other</option>
+        <option>Values with spaces</option>
+    </value>
+
+You can see above that it does some sanitation on the values, like cleaning up
+whitespace between, before and after words on each entry.
+
+-------------------------
+Keywords field and widget
+-------------------------
+
+The Keywords field is yet another a Tuples of TextLines field, directly
+descending from TextLinesTuple field.
+
+    >>> f = colschema.Keywords(__name__="mykeywords",
+    ...                       required=False).bind(DummyContext())
+    >>> f.validate((u'Some', u'Values'))
+    >>> f.validate(())
+
+If it's required, it doesn't validate when only a single value is provided
+
+    >>> f = colschema.Keywords(__name__="mykeywords",
+    ...                       required=True).bind(DummyContext())
+    >>> f.validate(())
+    Traceback (most recent call last):
+    ...
+    ConditionNotSatisfiedError: Please, enter at least one keyword
+
+It doesn't look AT ALL like the Authors and Labels field. Rather, from the
+front-end point of view, it looks like a single input field:
+
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype  
+    XMLKeywordsWidget text
+    >>> widget.asElement()
+
+Values are returned as a tuple.
+
+    >>> request.form['field.mykeywords'] = "Some Text, , separated by  commas"
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget()
+    <value xml:space="preserve">Some Text, separated by commas</value>
+    >>> widget.getInputValue()
+    (u'Some Text', u'separated by commas')
+
+Notice that some cleanup is done on the values: multiple spaces are collapsed
+and empty entries are removed.
+
+-------------------------------------------
+ChoiceSet field and XMLMultiCheckboxWidget
+-------------------------------------------
+
+ChoiceSet is a set of choices. It only accepts sets of values present within
+the provided vocabulary. We also use named vocabularies here so we don't have
+to send all options to the front-end.
+
+    >>> f = colschema.ChoiceSet(__name__='choiceset',
+    ...                         vocabulary=config.NATIONS).bind(DummyContext())
+    >>> from sets import Set
+    >>> f.validate(Set(['BRA', 'USA']))
+    >>> f.validate(Set(['incorrect value'])) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    WrongContainedType: ...
+
+We automatically bind an XMLMultiCheckboxWidget to it:
+
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLMultiCheckBoxWidget checkboxgroup
+
+It's a widget that renders the vocabulary id as the "ref" attribute of a
+vocabulary tag and the tokens for the selected values as the "token" atribute
+of <selected> tags. The vocabulary reference is taken from the "id" attribute
+of the field vocabulary:
+
+    >>> print widget()
+    <value vocabulary="countries" />
+
+Values from the widget are, obviously, Sets.
+
+    >>> request.form['field.choiceset-empty-marker'] = '1'
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.getInputValue()
+    Set([])
+    >>> request.form['field.choiceset'] = u'USA'
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.getInputValue()
+    Set(['USA'])
+    >>> del request.other['field.choiceset']
+    >>> request.form['field.choiceset'] = [u'USA', u'BRA']
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.getInputValue()
+    Set(['BRA', 'USA'])
+
+Rendering the widget with values shows the selected values in a list of
+<selected> tags
+
+    >>> print widget() # doctest: +XMLDATA
+    <value vocabulary="countries">
+        <selected id="BRA" />
+        <selected id="USA" />
+    </value>
+
+-----------------------------------
+Workgroup Creation Form: Subdomain
+-----------------------------------
+
+This is a simple "BytesLine" specialization for subdomains. It's value must start with digits or letters,
+and can contain dots and dashes after that. It must also be lowercase:
+
+    >>> f = colschema.SubdomainField(__name__='subdomain').bind(DummyContext())
+    >>> f.validate("a")
+    >>> f.validate("a.-b")
+    >>> f.validate("") # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SubdomainError
+    >>> f.validate(".a") # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SubdomainError
+    >>> f.validate("-a") # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SubdomainError
+    >>> f.validate("A") # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    SubdomainError
+
+Besides doing syntatic checks on the subdomain, it also checks an object with the same name as the
+domain doesn't already exist on the object.
+
+    >>> f.validate("bar")
+    >>> f.validate("foo")
+    Traceback (most recent call last):
+    ...
+    AlreadyExistsError
+
+On the xml side, it'll be a very simple widget that just renders it's value inside a couple of
+"<value></value>" tags. In fact, from the front-end POV, it's just a text widget.
+
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> print widget.__class__.__name__, widget.xmltype
+    XMLSubdomainWidget text
+    >>> widget.asElement()
+    >>> request.form['field.subdomain'] = 'MyDomain'
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.getInputValue()
+    Traceback (most recent call last):
+    ...
+    WidgetInputError: ('subdomain', u'', )
+    >>> print widget.error()
+    The domain must be all lowercase,
+    start with a letter or digit and may contain dots or dashes.
+    >>> del request.other['field.subdomain']
+    >>> request.form['field.subdomain'] = 'mydomain'
+    >>> widget = zope.component.getMultiAdapter((f, request,), IXMLWidget)
+    >>> widget.getInputValue()
+    'mydomain'
+    >>> print widget()
+    <value xml:space="preserve">mydomain</value>
+
+---------------------------------------
+User Registration: The Condition Fields
+---------------------------------------
+
+During user registration there are a couple of fields that must be filled with
+correct values by the user: the license agreement field and the captcha field.
+
+The license agreement field is displayed as a long text the user must read and
+declare it's agreement by selecting a checkbox beneath it, whereas the captcha
+field presents an image which obfuscated characters must be typed by the
+users. In both cases what we really want to know is if those fields were
+filled according to expectations, so we can claim that they are in fact
+boolean fields which value must always be true, all other considerations being
+the responsability of the respective widget.
+
+So first of all we have a "Condition" field, which is a Boolean field that is
+always required to be true. To create it you pass in the message that is
+"raised" when the condition is not met:
+
+    >>> message = u'Condition was not met'
+    >>> f = colschema.Condition(__name__="condition",
+    ...                         failure=message).bind(DummyContext())
+    >>> f.validate(True)
+    >>> f.validate(False)
+    Traceback (most recent call last):
+    ...
+    ConditionNotSatisfiedError: Condition was not met
+
+(Finish the other boolean types)

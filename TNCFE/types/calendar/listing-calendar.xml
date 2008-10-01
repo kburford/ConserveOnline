@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<?oxygen RNGSchema="../../schemas/tnc.rng" type="xml"?>
+<response>
+  <view name="listing.html" type="calendar" title="July 2007" section="workspaces"/>
+  <menus>
+    <addmenu>
+      <entry href="event.html">Add Event</entry>
+    </addmenu>
+    <utilitymenu>
+      <entry href="monthly.html">Monthly</entry>
+      <entry href="listing.html" current="current">Listing</entry>
+    </utilitymenu>
+  </menus>
+  <calendar current="2007-07-02">
+    <navigation>
+      <next href="/workspaces/birds/calendar/monthly.html?ym=200704">2007-08-01</next>
+      <previous href="/workspaces/birds/calendar/monthly.html?ym=200702">2007-06-01</previous>
+    </navigation>
+    <events>
+      <event href="/url/to/event">
+        <title>Some Event</title>
+        <startDate>2007-03-02T13:10:00+00:00</startDate>
+        <endDate>2007-03-05T15:00:00+00:00</endDate>
+      </event>
+      <event href="/url/to/event">
+        <title>Another Event</title>
+        <startDate>2007-03-04T13:10:00+00:00</startDate>
+        <endDate>2007-03-07T15:00:00+00:00</endDate>
+      </event>
+    </events>
+  </calendar>
+  <breadcrumbs>
+    <entry href="/">Home</entry>
+    <entry href="/workspaces/">Workspaces</entry>
+    <entry href="/workspaces/california-birds/">California Birds</entry>
+    <entry href="/workspaces/california-birds/documents/">Calendar</entry>
+    <entry>July 2007</entry>
+  </breadcrumbs>
+  <workspace href="http://full.url.com/to/instance/" hasfolders="hasfolders">
+    <title>Work Space 1</title>
+    <logo src="../static/images/logo1.jpg">Title for the Image</logo>
+    <icon src="../static/images/icon1.jpg">Title for the Icon</icon>
+    <private>false</private>
+    <section>calendar</section>
+  </workspace>
+  <user href="http://tnc30-30.client.enfoldsystems.com/portal_memberdata/test_2">
+    <username>test_1</username>
+    <title>John Test</title>
+    <lastlogin>2006-11-08T08:38:30</lastlogin>
+    <isadmin>false</isadmin>
+  </user>
+</response>
